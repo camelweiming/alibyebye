@@ -9,7 +9,7 @@
             <value>org.sqlite.JDBC</value>
         </property>
         <property name="jdbcUrl">
-            <value>jdbc:sqlite:/Users/haimingzier/data/abb.db</value>
+            <value>${jdbc.url}</value>
         </property>
         <property name="minPoolSize" value="2"/>
         <property name="maxPoolSize" value="10"/>

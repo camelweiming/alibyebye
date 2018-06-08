@@ -9,10 +9,10 @@
 	</appender>
 
 	<appender name="APPENDER_TRACE" class="ch.qos.logback.core.rolling.RollingFileAppender">
-		<file>/Users/haimingzier/data/logs/trace.log</file>
+		<file>${log.root}/trace.log</file>
 		<append>true</append>
 		<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-			<fileNamePattern>/Users/haimingzier/data/logs/trace.log.%d{yyyy-MM-dd}
+			<fileNamePattern>${log.root}/trace.log.%d{yyyy-MM-dd}
 			</fileNamePattern>
 			<maxHistory>7</maxHistory>
 		</rollingPolicy>

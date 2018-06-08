@@ -11,11 +11,5 @@
         <module name="bye-web" />
       </profile>
     </annotationProcessing>
-    <bytecodeTargetLevel>
-      <module name="bye" target="1.8" />
-      <module name="bye-biz" target="1.8" />
-      <module name="bye-client" target="1.8" />
-      <module name="bye-web" target="1.8" />
-    </bytecodeTargetLevel>
   </component>
 </project>
