@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="CompilerConfiguration">
+    <annotationProcessing>
+      <profile name="Maven default annotation processors profile" enabled="true">
+        <sourceOutputDir name="target/generated-sources/annotations" />
+        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
+        <outputRelativeToContentRoot value="true" />
+        <module name="bye-biz" />
+        <module name="bye-client" />
+        <module name="bye-web" />
+      </profile>
+    </annotationProcessing>
+    <bytecodeTargetLevel>
+      <module name="bye" target="1.8" />
+      <module name="bye-biz" target="1.8" />
+      <module name="bye-client" target="1.8" />
+      <module name="bye-web" target="1.8" />
+    </bytecodeTargetLevel>
+  </component>
+</project>

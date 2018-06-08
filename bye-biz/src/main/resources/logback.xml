@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration scan="true">
+
+	<appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+		<encoder>
+			<pattern>%d{HH:mm:ss.SSS} | [%thread] %-5level %logger{36} - %msg%n
+			</pattern>
+		</encoder>
+	</appender>
+
+	<appender name="APPENDER_TRACE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+		<file>${log.root}/trace.log</file>
+		<append>true</append>
+		<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+			<fileNamePattern>${log.root}/trace.log.%d{yyyy-MM-dd}
+			</fileNamePattern>
+			<maxHistory>7</maxHistory>
+		</rollingPolicy>
+		<encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+			<charset>UTF-8</charset>
+			<pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} | %m%n</pattern>
+		</encoder>
+	</appender>
+
+	<logger level="INFO" name="CODE_TRACE" additivity="false">
+		<appender-ref ref="APPENDER_TRACE" />
+	</logger>
+
+	<root>
+		<level value="INFO"/>
+		<appender-ref ref="APPENDER_TRACE"/>
+		<appender-ref ref="STDOUT"/>
+	</root>
+</configuration>
