@@ -21,23 +21,23 @@
         <client.version>1.0.0-SNAPSHOT</client.version>
         <main.basedir>${project.basedir}</main.basedir>
     </properties>
-    <!--<profiles>-->
-        <!--<profile>-->
-            <!--<id>dev</id>-->
-            <!--<activation>-->
-                <!--<activeByDefault>true</activeByDefault>-->
-            <!--</activation>-->
-            <!--<properties>-->
-                <!--<dev.name>dev</dev.name>-->
-            <!--</properties>-->
-        <!--</profile>-->
-        <!--<profile>-->
-            <!--<id>pre</id>-->
-            <!--<properties>-->
-                <!--<dev.name>online</dev.name>-->
-            <!--</properties>-->
-        <!--</profile>-->
-    <!--</profiles>-->
+    <profiles>
+        <profile>
+            <id>default</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+            <properties>
+                <dev.name>dev</dev.name>
+            </properties>
+        </profile>
+        <profile>
+            <id>pre</id>
+            <properties>
+                <dev.name>online</dev.name>
+            </properties>
+        </profile>
+    </profiles>
     <build>
         <filters>
             <filter>../filter/dev.properties</filter>
@@ -60,19 +60,6 @@
                     <fork>true</fork>
                 </configuration>
             </plugin>
-            <!--<plugin>-->
-                <!--<groupId>org.apache.maven.plugins</groupId>-->
-                <!--<artifactId>maven-resources-plugin</artifactId>-->
-                <!--<version>2.6</version>-->
-                <!--<executions>-->
-                    <!--<execution>-->
-                        <!--<phase>compile</phase>-->
-                        <!--<goals>-->
-                            <!--<goal>resources</goal>-->
-                        <!--</goals>-->
-                    <!--</execution>-->
-                <!--</executions>-->
-            <!--</plugin>-->
         </plugins>
     </build>
 
