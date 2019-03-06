@@ -167,7 +167,7 @@ public class AppController {
             siteDO.setCategories(categories);
             try {
                 if (id == null) {
-                    SiteDO old = siteService.getBySiteKey(siteKey);
+                    SiteDO old = siteService.getBySiteKeyFromDB(siteKey);
                     if (old != null) {
                         model.addAttribute("errorMsg", siteKey + "已存在");
                         return new ModelAndView(vm);

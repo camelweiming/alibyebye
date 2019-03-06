@@ -19,6 +19,7 @@ CREATE TABLE `site` (
   `categories` varchar(32) DEFAULT NULL COMMENT '分类多个，分割',
   PRIMARY KEY (`id`),
   UNIQUE KEY `uk_site_key` (`site_key`)
+  UNIQUE KEY `uk_site` (`site`),
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4 COMMENT='支持应用'
 ;
 

@@ -35,11 +35,6 @@ public class SiteServiceImpl implements SiteService, InitializingBean {
     }
 
     @Override
-    public List<SiteDO> list() {
-        return SiteMapping.list();
-    }
-
-    @Override
     public List<SiteDO> listFromDB() {
         return siteMapper.list();
     }
@@ -64,18 +59,18 @@ public class SiteServiceImpl implements SiteService, InitializingBean {
     }
 
     @Override
-    public SiteDO get(long id) {
-        return SiteMapping.getById(id);
-    }
-
-    @Override
     public SiteDO getFromDB(long id) {
         return siteMapper.get(id);
     }
 
     @Override
-    public SiteDO getBySiteKey(String appKey) {
+    public SiteDO getBySiteKeyFromDB(String appKey) {
         return siteMapper.getBySiteKey(appKey);
+    }
+
+    @Override
+    public SiteDO getBySiteFromDB(int site) {
+        return siteMapper.getBySite(site);
     }
 
     @Override

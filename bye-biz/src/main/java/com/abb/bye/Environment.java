@@ -24,11 +24,14 @@ public class Environment {
         throw new IllegalStateException("Cant get local env");
     }
 
-    public Env current() {
+    public static Env current() {
+        if (env == null) {
+            throw new IllegalStateException("Environment not init");
+        }
         return env;
     }
 
-    public boolean isDaily() {
-        return env == Env.DAILY;
+    public static boolean isDaily() {
+        return current() == Env.DAILY;
     }
 }

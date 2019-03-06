@@ -13,20 +13,6 @@ public interface SiteService {
     /**
      * 查询
      *
-     * @return
-     */
-    List<SiteDO> list();
-
-    /**
-     * db加载
-     *
-     * @return
-     */
-    List<SiteDO> listFromDB();
-
-    /**
-     * 查询
-     *
      * @param tags
      * @param list
      * @param status
@@ -35,12 +21,11 @@ public interface SiteService {
     List<SiteDO> filter(List<SiteDO> list, List<SiteTag> tags, Byte status);
 
     /**
-     * 通过ID获取
+     * db加载
      *
-     * @param id
      * @return
      */
-    SiteDO get(long id);
+    List<SiteDO> listFromDB();
 
     /**
      * 通过ID获取
@@ -56,7 +41,15 @@ public interface SiteService {
      * @param appKey
      * @return
      */
-    SiteDO getBySiteKey(String appKey);
+    SiteDO getBySiteKeyFromDB(String appKey);
+
+    /**
+     * 通过siteId查找
+     *
+     * @param site
+     * @return
+     */
+    SiteDO getBySiteFromDB(int site);
 
     /**
      * 插入
