@@ -1,0 +1,58 @@
+<h3>${app.name}</h3>
+
+<div class="table-responsive">
+
+    <form action="site_configs.htm" class="form-horizontal" method="get">
+        <input type="hidden" name="site" value="${site}"/>
+        <div class="form-group">
+            <label>状态</label>
+            <select class="form-control form-control-sm" name="status" required>
+                <option value="1" #if(1==$status) selected #end>有效</option>
+                <option value="0" #if(0==$status) selected #end>无效</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label>环境</label>
+            <select class="form-control form-control-sm" name="env" required>
+                <option value="all" #if("all"==$env) selected #end>所有</option>
+                <option value="pre" #if("pre"==$env) selected #end>预发</option>
+                <option value="online" #if("online"==$env) selected #end>线上</option>
+                <option value="daily" #if("daily"==$env) selected #end>日常</option>
+            </select>
+        </div>
+        <button class="btn btn-danger btn-sm" type="submit">保存</button>
+    </form>
+
+    <a href="add_site_configs.htm?site=${site}">添加配置</a>
+    <table class="table table-striped table-sm">
+        <thead>
+        <tr>
+            <th>ID</th>
+            <th>站点</th>
+            <th>平台</th>
+            <th>名称</th>
+            <th>配置key</th>
+            <th>环境</th>
+            <th>域名</th>
+            <th>状态</th>
+        </tr>
+        </thead>
+        <tbody>
+            #foreach($site in $list)
+            <tr>
+                <td><a href="edit_site_configs.htm?id=$!{site.id}">$!{site.id}</a></td>
+                <td>$!{site.site}</td>
+                <td>$!{site.platform}</td>
+                <td>$!{site.name}</td>
+                <td>$!{site.configKey}</td>
+                <td>$!{site.env}</td>
+                <td>$!{site.domains}</td>
+                <td>
+                    #if($!{site.status}==1)有效#{else}删除#end
+                </td>
+            </tr>
+            #end
+        </tbody>
+    </table>
+</div>
+

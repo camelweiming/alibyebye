@@ -1,0 +1,59 @@
+#if($!errorMsg)
+<div class="alert alert-danger" role="alert">$!{errorMsg}</div>
+#end
+
+<form action="add_site_configs.htm" class="form-horizontal" method="post">
+    $!csrfToken.hiddenField
+    <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
+    <input type="hidden" name="act" value="1"/>
+    <input type="hidden" name="id" value="$!{id}"/>
+
+    <div class="form-group">
+        <label>站点</label><input class="form-control form-control-sm" name="site" value="$!{site}" readonly>
+    </div>
+    <div class="form-group">
+        <label>站点名称</label><input class="form-control form-control-sm" value="$!{app.name}" readonly>
+    </div>
+    <div class="form-group">
+        <label>配置key</label><input class="form-control form-control-sm" name="configKey" value="$!{configKey}" required>
+    </div>
+    <div class="form-group">
+        <label>名称</label><input class="form-control form-control-sm" name="name" value="$!{name}">
+    </div>
+    <div class="form-group">
+        <label>域名</label><input class="form-control form-control-sm" name="domains" value="$!{domains}">
+    </div>
+    <div class="form-group">
+        <label>环境</label>
+        <select class="form-control form-control-sm" name="env" required>
+            <option value="pre" #if("pre"==$env) selected #end>预发</option>
+            <option value="online" #if("online"==$env) selected #end>线上</option>
+            <option value="daily" #if("daily"==$env) selected #end>日常</option>
+        </select>
+    </div>
+    <div class="form-group">
+        #foreach($t in $allPlatforms)
+            <div class="form-check form-check-inline">
+                <input class="form-check-input" id="inlineCheckbox_${t}" type="checkbox" aria-label="platform" name="platform" value="${t}"
+                       #foreach($tt in $platforms)
+                           #if($tt==$t)
+                                checked
+                           #end
+                       #end
+                >
+                <label class="form-check-label" for="inlineCheckbox_${t}">${t}</label>
+            </div>
+        #end
+    </div>
+    <div class="form-group">
+        <textarea class="form-control" name="content" id="exampleFormControlTextarea1" rows="9" required>$!{content}</textarea>
+    </div>
+    <div class="form-group">
+        <label>状态</label>
+        <select class="form-control form-control-sm" name="status" required>
+            <option value="1" #if(1==$status) selected #end>有效</option>
+            <option value="0" #if(0==$status) selected #end>删除</option>
+        </select>
+    </div>
+    <button class="btn btn-danger btn-sm" type="submit">保存</button>
+</form>

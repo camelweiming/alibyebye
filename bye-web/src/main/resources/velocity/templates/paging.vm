@@ -1,0 +1,29 @@
+#if($paging)
+    #set($prev=$paging.currentPage - 1)
+    #set($next=$paging.currentPage + 1)
+<nav aria-label="...">
+    <ul class="pagination">
+        <li class="page-item"><a class="page-link" href="#" onClick="doPaging(1)" title="回到第一页">总页数：$!paging.totalPage</a></li>
+
+        <li class="page-item #if(!$paging.previous)disabled#end">
+            <a class="page-link" href="#" tabindex="-1" onclick="doPaging($prev)">Previous</a>
+        </li>
+        #foreach($p in $paging.pages)
+            #set($isCurrent=($p==$paging.currentPage))
+            <li class="page-item #if($isCurrent) active #end" #if(!$isCurrent)onClick="doPaging('$p')" #end>
+                <a class="page-link" href="#">$p</a>
+            </li>
+        #end
+        <li class="page-item">
+            <a class="page-link" href="#" #if(!$paging.next)disabled#end onclick="doPaging($next)">Next</a>
+        </li>
+    </ul>
+</nav>
+#end
+
+<script type="text/javascript">
+    function doPaging(page) {
+        $("#paging-form").append("<input type='hidden' name='page' value='"+page+"'>");
+        $("#paging-form").submit();
+    };
+</script>

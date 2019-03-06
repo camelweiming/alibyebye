@@ -1,0 +1,184 @@
+package com.abb.bye.spider;
+
+import com.abb.bye.client.domain.PersonDO;
+import com.abb.bye.client.domain.ProgrammeSourceDO;
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
+import com.google.common.base.Joiner;
+import org.apache.commons.lang3.StringUtils;
+import org.jsoup.nodes.Document;
+import org.jsoup.select.Elements;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import us.codecraft.webmagic.Page;
+import us.codecraft.webmagic.processor.PageProcessor;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+/**
+ * @author cenpeng.lwm
+ * @since 2019/3/6
+ */
+public class DouBanProcessor extends AbstractProcessor implements PageProcessor {
+    private static final Logger logger = LoggerFactory.getLogger(DouBanProcessor.class);
+    private static String[] TAGS = new String[] {"电影", "电视剧", "综艺", "动漫", "纪录片"};
+    private static int PAGE_STEP = 20;
+    private static int MAX_PAGE = 1;
+    private static Pattern pattern = Pattern.compile("douban.com/subject/(\\d+)");
+    private static Pattern personPattern = Pattern.compile("/celebrity/(\\d+)");
+
+    @Override
+    public void process(Page page) {
+        String id = getId(page);
+        if (id == null) {
+            processList(page);
+        } else {
+            processDetail(id, page);
+        }
+    }
+
+    public void processDetail(String sourceId, Page page) {
+        ProgrammeSourceDO programme = new ProgrammeSourceDO();
+        programme.setSourceId(sourceId);
+        programme.setSite(1);
+        programme.setUrl(page.getUrl().get());
+        Document doc = page.getHtml().getDocument();
+        Elements content = doc.select("div#content");
+        programme.setTitle(content.select("h1 span[property=v:itemreviewed]").text());
+        String year = content.select("h1 span.year").text();
+        if (year == null) {
+            logger.warn("no-release-year:" + programme.getUrl());
+            page.setSkip(true);
+            return;
+        }
+        programme.setReleaseYear(Integer.valueOf(year));
+        programme.setImg(content.select("div#mainpic").select("img").attr("src"));
+
+        /**
+         * 导演
+         */
+        List<PersonDO> directors = new ArrayList<>();
+        content.select("#info").select("a[rel=v:directedBy]").forEach(link -> {
+            String id = getPersonId(link.attr("href"));
+            PersonDO director = new PersonDO();
+            director.setId(id);
+            director.setName(link.text());
+            directors.add(director);
+        });
+        programme.setDirectors(JSON.toJSONString(directors));
+        /**
+         * 演员
+         */
+        List<PersonDO> performers = new ArrayList<>();
+        content.select("#info").select("a[rel=v:starring]").forEach(link -> {
+            String id = getPersonId(link.attr("href"));
+            PersonDO director = new PersonDO();
+            director.setId(id);
+            director.setName(link.text());
+            performers.add(director);
+        });
+        programme.setPerformers(JSON.toJSONString(performers));
+        /**
+         * 季数
+         */
+        String season = content.select("select#season").select("option[selected]").text();
+        if (StringUtils.isNotBlank(season)) {
+            programme.setSeason(Integer.valueOf(season));
+        }
+
+        Elements info = content.select("#info").select("span");
+        /**
+         * 类型
+         */
+        List<String> tags = new ArrayList<>();
+        info.select("[property=v:genre]").forEach(tag -> {
+                tags.add(tag.text());
+            }
+        );
+        programme.setTypes(Joiner.on(",").join(tags));
+        Map<String, Object> attributes = new HashMap<>();
+        /**
+         * 上映日期
+         */
+        List<String> releaseDate = new ArrayList<>();
+        info.select("[property=v:initialReleaseDate]").forEach(tag -> releaseDate.add(tag.text()));
+        attributes.put("initialReleaseDate", Joiner.on(",").join(releaseDate));
+        /**
+         * 属性
+         */
+        Elements elements = content.select("#info").select("*");
+        Map<String, String> properties = toProperties(elements);
+        programme.setLanguages(Joiner.on(",").join(toMultiValue(properties.get("语言"))));
+        programme.setAlias(Joiner.on(",").join(toMultiValue(properties.get("又名"))));
+        String totalEpisode = properties.get("集数");
+        if (StringUtils.isNotBlank(totalEpisode)) {
+            programme.setTotalEpisode(Integer.valueOf(totalEpisode));
+        }
+        /**
+         * 时长
+         */
+        String min = info.select("[property=v:runtime]").attr("content");
+        if (StringUtils.isNotBlank(min)) {
+            programme.setSeconds(Integer.parseInt(min) * 60);
+        } else {
+            min = properties.get("单集片长");
+            if (StringUtils.isNotBlank(min)) {
+                if (min.endsWith("分钟")) {
+                    min = min.replace("分钟", "");
+                    programme.setSeconds(Integer.parseInt(min) * 60);
+                }
+            }
+        }
+        programme.setImdb(properties.get("IMDb链接"));
+        String score = doc.select("div.rating_self").select("strong.rating_num").text();
+        if (StringUtils.isNotBlank(score)) {
+            programme.setScore(Double.parseDouble(score));
+        }
+        programme.setSummary(doc.select("div.related-info").select("[property=v:summary]").text());
+        programme.setAttributes(JSON.toJSONString(attributes));
+        page.putField("programme", programme);
+        if (logger.isDebugEnabled()) {
+            logger.debug("process:" + programme);
+        }
+    }
+
+    public void processList(Page page) {
+        JSONObject json = JSON.parseObject(page.getRawText());
+        JSONArray jsonArray = json.getJSONArray("data");
+        JSONObject obj;
+        List<String> links = new ArrayList<>(jsonArray.size());
+        for (int i = 0; i < jsonArray.size(); i++) {
+            obj = jsonArray.getJSONObject(i);
+            links.add(obj.getString("url"));
+        }
+        page.addTargetRequests(links);
+        page.setSkip(true);
+    }
+
+    private String getId(Page page) {
+        Matcher matcher = pattern.matcher(page.getUrl().get());
+        boolean isDetail = matcher.find();
+        if (isDetail) {
+            return matcher.group(1);
+        }
+        return null;
+    }
+
+    private String getPersonId(String url) {
+        if (StringUtils.isBlank(url)) {
+            return null;
+        }
+        Matcher matcher = personPattern.matcher(url);
+        boolean isDetail = matcher.find();
+        if (isDetail) {
+            return matcher.group(1);
+        }
+        return null;
+    }
+}

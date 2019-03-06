@@ -1,0 +1,21 @@
+<div class="table-responsive">
+    <table class="table table-striped table-sm">
+        <thead>
+        <tr>
+            <th>ID</th>
+            <th>名称</th>
+            <th>排序</th>
+        </tr>
+        </thead>
+        <tbody>
+            #foreach($category in $list)
+            <tr>
+                <td><a href="edit_category.htm?id=$!{category.id}">$!{category.id}</a></td>
+                <td>$!{category.name}</td>
+                <td>$!{category.sort}</td>
+            </tr>
+            #end
+        </tbody>
+    </table>
+</div>
+

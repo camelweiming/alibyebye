@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.abb.bye.mapper.ProgrammeSourceMapper">
+
+    <insert id="insert" parameterType="com.abb.bye.client.domain.ProgrammeSourceDO" useGeneratedKeys="true" keyProperty="id">
+        insert into
+        programme_source(gmt_create,gmt_modified,programme_id,site,source_id,url,title,release_year,img,types,directors,performers,languages,alias,seconds,score,imdb,summary,areas,show_status,season,total_episode,status,attributes)
+        values
+        (now(),now(),#{programmeId},#{site},#{sourceId},#{url},#{title},#{releaseYear},#{img},#{types},#{directors},#{performers},#{languages},#{alias},#{seconds},#{score},#{imdb},#{summary},#{areas},#{showStatus},#{season},#{totalEpisode},#{status},#{attributes})
+    </insert>
+
+    <sql id="queryColumns">
+        gmt_create
+        ,gmt_modified
+        ,programme_id
+        ,site
+        ,source_id
+        ,url
+        ,title
+        ,release_year
+        ,img
+        ,types
+        ,directors
+        ,performers
+        ,languages
+        ,alias
+        ,seconds
+        ,score
+        ,imdb
+        ,summary
+        ,areas
+        ,show_status
+        ,season
+        ,total_episode
+        ,status
+        ,attributes
+    </sql>
+
+    <select id="get" parameterType="long" resultType="com.abb.bye.client.domain.ProgrammeSourceDO">
+        select
+        <include refid="queryColumns"/>
+        from programme_source where id=#{id}
+    </select>
+</mapper>

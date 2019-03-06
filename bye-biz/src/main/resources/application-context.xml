@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="GBK"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans"
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xmlns:context="http://www.springframework.org/schema/context"
@@ -16,7 +16,7 @@
     <!--<cache:annotation-driven/>-->
     <import resource="classpath:beans/*.xml"/>
 
-    <context:component-scan base-package="com.abb.bye"/>
+    <context:component-scan base-package="com.abb.bye.service"/>
     <aop:aspectj-autoproxy/>
 
 </beans>

@@ -1,0 +1,65 @@
+#if($!errorMsg)
+<div class="alert alert-danger" role="alert">$!{errorMsg}</div>
+#end
+
+<form action="add_site.htm" class="form-horizontal" method="post">
+    $!csrfToken.hiddenField
+    <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
+    <input type="hidden" name="act" value="1"/>
+    <input type="hidden" name="id" value="$!{id}"/>
+
+    <div class="form-group">
+        <label>SITE_KEY</label>
+        <input class="form-control form-control-sm" name="siteKey" value="$!{siteKey}" required>
+    </div>
+    <div class="form-group">
+        <label>名称</label><input class="form-control form-control-sm" name="name" value="$!{name}">
+    </div>
+    <div class="form-group">
+        <label>图标</label><input class="form-control form-control-sm" name="logo" value="$!{logo}">
+    </div>
+    <div class="form-group">
+        <label>站点ID</label><input class="form-control form-control-sm" name="site" value="$!{site}">
+    </div>
+    <div class="form-group">
+        <label>H5</label><input class="form-control form-control-sm" name="h5Url" value="$!{h5Url}">
+    </div>
+    <div class="form-group">
+        <label>IOS地址</label><input class="form-control form-control-sm" name="iosUrl" value="$!{iosUrl}">
+    </div>
+    <div class="form-group">
+        <label>ANDROID地址</label><input class="form-control form-control-sm" name="androidUrl" value="$!{androidUrl}">
+    </div>
+    <div class="form-group">
+        <label>附加属性</label>
+        <textarea class="form-control" name="attributes" id="exampleFormControlTextarea1" rows="9">$!{attributes}</textarea>
+    </div>
+    <div class="form-group">
+        <label>权重</label>
+        <input class="form-control form-control-sm" name="priority" value="$!{priority}" required>
+    </div>
+    <div class="form-group">
+        <label>类目（
+            #foreach($c in $categoryList)
+                ${c.id}:${c.name}
+            #end
+            ）</label>
+        <input class="form-control form-control-sm" name="categories" value="$!{categories}">
+    </div>
+    <div class="form-group">
+        <label>状态</label>
+        <select class="form-control form-control-sm" name="status" required>
+            <option value="1" #if($status==1) selected #end>可用</option>
+            <option value="0" #if($status==0) selected #end>删除</option>
+        </select>
+    </div>
+    <div class="form-group">
+        #foreach($t in $tagsValues)
+        <div class="form-check form-check-inline">
+            <input class="form-check-input" id="inlineCheckbox_${t.value}" type="checkbox" aria-label="tag" name="tags" value="${t.value}" #if($common.bitSet($tags,$t.value)) checked #end>
+            <label class="form-check-label" for="inlineCheckbox_${t.name}">${t}</label>
+        </div>
+        #end
+        </div>
+    <button class="btn btn-danger btn-sm" type="submit">保存</button>
+</form>

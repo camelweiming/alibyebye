@@ -1,0 +1,71 @@
+<form action="app.htm" class="form-horizontal" method="get">
+    <div class="form-group">
+        <label>状态</label>
+        <select class="form-control form-control-sm" name="status" required>
+            <option value="1" #if($status==1) selected #end>可用</option>
+            <option value="0" #if($status==0) selected #end>删除</option>
+        </select>
+    </div>
+    <div class="form-group">
+        #foreach($t in $tagsValues)
+            <div class="form-check form-check-inline">
+                <input class="form-check-input" id="inlineCheckbox_${t.value}" type="checkbox" aria-label="tag" name="tags" value="${t.value}" #if($common.bitSet($tags,$t.value)) checked #end>
+                <label class="form-check-label" for="inlineCheckbox_${t.name}">${t}</label>
+            </div>
+        #end
+    </div>
+    <button class="btn btn-secondary btn-sm" type="submit">查询</button>
+</form>
+<p>
+    <a href="export.htm">导出</a>
+</p>
+
+<div class="table-responsive">
+    <table class="table table-striped table-sm">
+        <thead>
+        <tr>
+            <th>APP_KEY</th>
+            <th>名称</th>
+            <th>LOGO</th>
+            <th>SITE</th>
+            <th>状态</th>
+            <th width="100">TAGS</th>
+##            <th>类型</th>
+            <th>分类</th>
+            <th>权重</th>
+            <th>配置</th>
+        </tr>
+        </thead>
+        <tbody>
+            #foreach($app in $list)
+            <tr>
+                <td><a href="edit_site.htm?id=$!{app.id}">$!{app.siteKey}</a></td>
+                <td>$!{app.name}</td>
+                <td>#if($app.logo)<img src="${app.logo}" width="40" height="40" alt="..." class="img-thumbnail">#end</td>
+                <td>$!{app.site}</td>
+                <td>#if(${app.status}==0)删除#{else}有效#end</td>
+                <td>
+                    #foreach($t in $tagsValues)
+                        #if($app.bitSet($t))
+                            <button type="button" class="btn btn-light btn-sm">${t}</button>
+                        #end
+                    #end
+                </td>
+##                <td>
+##                    #foreach($c in $cids)
+##                        #if($c.cid==$app.cid)
+##                        ${c.name}
+##                    #end
+##                    #end
+##                </td>
+                <td>
+                    $!{app.categoryNames}
+                </td>
+                <td>$!{app.priority}</td>
+                <td><a href="site_configs.htm?site=${app.site}">配置</a></td>
+            </tr>
+            #end
+        </tbody>
+    </table>
+</div>
+
