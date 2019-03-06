@@ -21,8 +21,6 @@ import java.util.Map;
 public class SiteMapping {
     private static Tracer tracer = new Tracer("SITE_MAPPING");
     private static Map<Integer, SiteDO> localSiteMapping = new HashMap<>();
-    private static Map<String, SiteDO> domainMapping = new HashMap<>();
-    private static Map<Long, SiteDO> appMapping = new HashMap<>();
     private static SiteDO DEFAULT_APP = new SiteDO("其它");
     public static final String PKG_PREFIX = "$";
 
@@ -39,15 +37,6 @@ public class SiteMapping {
         return localSiteMapping.getOrDefault(0, DEFAULT_APP);
     }
 
-    public static SiteDO matchDomain(String url) {
-        for (Map.Entry<String, SiteDO> entry : domainMapping.entrySet()) {
-            if (url.contains(entry.getKey())) {
-                return entry.getValue();
-            }
-        }
-        return getAppByLocal(0);
-    }
-
     public static boolean match(int siteId, SiteTag tag) {
         return match(SiteMapping.getAppByLocal(siteId), tag);
     }
@@ -57,16 +46,10 @@ public class SiteMapping {
     }
 
     public static List<SiteDO> list() {
-        return new ArrayList<>(appMapping.values());
-    }
-
-    public static SiteDO getById(long id) {
-        return appMapping.get(id);
+        return new ArrayList<>(localSiteMapping.values());
     }
 
     public static void reset(List<SiteDO> apps) {
-        Map<String, SiteDO> tmpDomainMapping = new HashMap<>();
-        Map<Long, SiteDO> tmpAppMapping = new HashMap<>();
         Map<Integer, SiteDO> tmpLocalSiteMapping = new HashMap<>();
         apps.forEach(siteDO -> {
             SiteConfig appConfig = new SiteConfig();
@@ -79,14 +62,10 @@ public class SiteMapping {
             appConfig.setIosAppUrl(iosSetting.url);
             appConfig.setItunesUrl(iosSetting.itunesUrl);
             siteDO.setCategoryList(CommonUtils.toLongArray(siteDO.getCategories(), ","));
-            tmpAppMapping.put(siteDO.getId(), siteDO);
             tmpLocalSiteMapping.put(siteDO.getSite(), siteDO);
         });
-        domainMapping = tmpDomainMapping;
-        appMapping = tmpAppMapping;
         localSiteMapping = tmpLocalSiteMapping;
-        tracer.trace("finish reload localSiteMap:" + tmpAppMapping.keySet());
-        tracer.trace("finish reload domainMapping:" + tmpDomainMapping.keySet());
+        tracer.trace("finish reload localSiteMapping:" + localSiteMapping.keySet());
     }
 
     /**
