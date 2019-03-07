@@ -29,30 +29,7 @@
     </insert>
 
     <sql id="queryColumns">
-        gmt_create
-        ,gmt_modified
-        ,programme_id
-        ,site
-        ,source_id
-        ,url
-        ,title
-        ,release_year
-        ,img
-        ,types
-        ,directors
-        ,performers
-        ,languages
-        ,alias
-        ,seconds
-        ,score
-        ,imdb
-        ,summary
-        ,areas
-        ,show_status
-        ,season
-        ,total_episode
-        ,status
-        ,attributes
+        gmt_create,gmt_modified,programme_id,site,source_id,url,title,release_year,img,types,directors,performers,languages,alias,seconds,score,imdb,summary,areas,show_status,season,total_episode,status,attributes
     </sql>
 
     <select id="get" parameterType="long" resultType="com.abb.bye.client.domain.ProgrammeSourceDO">

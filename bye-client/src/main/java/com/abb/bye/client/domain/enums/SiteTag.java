@@ -10,7 +10,8 @@ public enum SiteTag {
     IOS(8, "IOS"),
     ANDROID(16, "ANDROID"),
     H5_SUPPORT(32, "H5"),
-    ENABLE_SPIDER(64, "开启爬虫");
+    ENABLE_SPIDER(64, "开启爬虫"),
+    AUTO_PASS(128, "资源自动录入");
     private long value;
     private String name;
 

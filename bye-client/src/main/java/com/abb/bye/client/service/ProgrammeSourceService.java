@@ -12,6 +12,7 @@ public interface ProgrammeSourceService {
      * 更新
      *
      * @param programmeSourceDO
+     * @return
      */
     ResultDTO<Void> insertOrUpdate(ProgrammeSourceDO programmeSourceDO);
 }
