@@ -5,6 +5,7 @@ import com.abb.bye.client.domain.ResultDTO;
 import com.abb.bye.client.service.ProgrammeSourceService;
 import com.abb.bye.mapper.ProgrammeSourceMapper;
 import org.springframework.stereotype.Service;
+
 import javax.annotation.Resource;
 
 /**
@@ -19,7 +20,7 @@ public class ProgrammeSourceServiceImpl implements ProgrammeSourceService {
     @Override
     public ResultDTO<Void> insertOrUpdate(ProgrammeSourceDO programmeSourceDO) {
         System.out.println("insertOrUpdate:" + programmeSourceDO);
-        //programmeSourceMapper.insert(programmeSourceDO);
+        programmeSourceMapper.replace(programmeSourceDO);
         return ResultDTO.buildSuccess(null);
     }
 }

@@ -73,4 +73,13 @@ public class CommonUtils {
         }
         return sb.toString();
     }
+
+    public static final <T> List<T> subList(List<T> list, int start, int limit) {
+        int index = Math.min(limit + start, list.size());
+        List<T> sub = new ArrayList<>(limit);
+        for (int i = start; i < index; i++) {
+            sub.add(list.get(i));
+        }
+        return sub;
+    }
 }

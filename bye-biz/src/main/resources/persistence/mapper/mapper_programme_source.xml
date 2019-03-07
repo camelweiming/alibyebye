@@ -9,6 +9,25 @@
         (now(),now(),#{programmeId},#{site},#{sourceId},#{url},#{title},#{releaseYear},#{img},#{types},#{directors},#{performers},#{languages},#{alias},#{seconds},#{score},#{imdb},#{summary},#{areas},#{showStatus},#{season},#{totalEpisode},#{status},#{attributes})
     </insert>
 
+    <insert id="replace" parameterType="com.abb.bye.client.domain.ProgrammeSourceDO" useGeneratedKeys="true" keyProperty="id">
+        insert into
+        programme_source(gmt_create,gmt_modified,programme_id,site,source_id,url,title,release_year,img,types,directors,performers,languages,alias,seconds,score,imdb,summary,areas,show_status,season,total_episode,status,attributes)
+        values
+        (now(),now(),#{programmeId},#{site},#{sourceId},#{url},#{title},#{releaseYear},#{img},#{types},#{directors},#{performers},#{languages},#{alias},#{seconds},#{score},#{imdb},#{summary},#{areas},#{showStatus},#{season},#{totalEpisode},#{status},#{attributes})
+        ON DUPLICATE KEY UPDATE
+        gmt_modified=now(),
+        img=#{img},
+        types=#{types},
+        directors=#{directors},
+        performers=#{performers},
+        score=#{score},
+        imdb=#{imdb},
+        seconds=#{seconds},
+        alias=#{alias},
+        season=#{season},
+        total_episode=#{totalEpisode}
+    </insert>
+
     <sql id="queryColumns">
         gmt_create
         ,gmt_modified

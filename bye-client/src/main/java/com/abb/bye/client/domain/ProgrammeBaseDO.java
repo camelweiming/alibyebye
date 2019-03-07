@@ -2,6 +2,7 @@ package com.abb.bye.client.domain;
 
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
+
 import java.io.Serializable;
 import java.util.Date;
 
@@ -11,6 +12,8 @@ import java.util.Date;
  */
 public abstract class ProgrammeBaseDO implements Serializable {
     private static final long serialVersionUID = -4385904300519377327L;
+    public static final byte STATUS_ENABLE = 1;
+    public static final byte STATUS_UNABLE = 0;
     protected Long id;
     protected Date gmtCreate;
     protected Date gmtModified;

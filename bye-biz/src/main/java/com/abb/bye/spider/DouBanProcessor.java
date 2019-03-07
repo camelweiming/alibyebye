@@ -16,6 +16,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 import us.codecraft.webmagic.Page;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -30,19 +32,12 @@ import java.util.regex.Pattern;
 @Component
 public class DouBanProcessor extends AbstractProcessor {
     private static final Logger logger = LoggerFactory.getLogger(DouBanProcessor.class);
-    private static String[] TAGS = new String[] {"电影", "电视剧", "综艺", "动漫", "纪录片"};
-    private static int PAGE_STEP = 20;
-    private static int MAX_PAGE = 1;
     private static Pattern pattern = Pattern.compile("douban.com/subject/(\\d+)");
     private static Pattern personPattern = Pattern.compile("/celebrity/(\\d+)");
 
     @Override
     public void process(Page page) {
         logger.info("begin process-page:" + page.getUrl());
-        if (true) {
-            page.setSkip(true);
-            return;
-        }
         String id = getId(page);
         if (id == null) {
             processList(page);
@@ -79,7 +74,7 @@ public class DouBanProcessor extends AbstractProcessor {
             director.setName(link.text());
             directors.add(director);
         });
-        programme.setDirectors(JSON.toJSONString(directors));
+        programme.setDirectors(JSON.toJSONString(CommonUtils.subList(directors, 0, 5)));
         /**
          * 演员
          */
@@ -91,7 +86,7 @@ public class DouBanProcessor extends AbstractProcessor {
             director.setName(link.text());
             performers.add(director);
         });
-        programme.setPerformers(JSON.toJSONString(performers));
+        programme.setPerformers(JSON.toJSONString(CommonUtils.subList(performers, 0, 10)));
         /**
          * 季数
          */
@@ -148,7 +143,9 @@ public class DouBanProcessor extends AbstractProcessor {
         if (StringUtils.isNotBlank(score)) {
             programme.setScore(Double.parseDouble(score));
         }
-        programme.setSummary(doc.select("div.related-info").select("[property=v:summary]").text());
+        String summary = doc.select("div.related-info").select("[property=v:summary]").text();
+        programme.setStatus(ProgrammeSourceDO.STATUS_ENABLE);
+        programme.setSummary(StringUtils.substring(summary, 0, 500));
         programme.setAttributes(JSON.toJSONString(attributes));
         page.putField(Constants.SPIDER_PROGRAMME_FIELD_NAME, programme);
         if (logger.isDebugEnabled()) {
@@ -188,5 +185,23 @@ public class DouBanProcessor extends AbstractProcessor {
             return matcher.group(1);
         }
         return null;
+    }
+
+    public static void main(String[] args) throws UnsupportedEncodingException {
+        String[] TAGS = new String[] {"电影", "电视剧", "综艺", "动漫", "纪录片"};
+        int PAGE_STEP = 20;
+        int MAX_PAGE = 1000;
+        List<String> urls = new ArrayList<>(1024);
+        for (String tag : TAGS) {
+            String url = "https://movie.douban.com/j/new_search_subjects?sort=R&range=1,10&tags=" + URLEncoder.encode(tag, "UTF-8");
+            int start = 0;
+            for (int i = 0; i < MAX_PAGE; i++) {
+                urls.add(url + "&start=" + start);
+                start += PAGE_STEP;
+            }
+        }
+        urls.forEach(url -> {
+            System.out.println(url);
+        });
     }
 }

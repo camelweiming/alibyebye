@@ -16,6 +16,14 @@ public interface ProgrammeSourceMapper {
     long insert(ProgrammeSourceDO programmeSourceDO);
 
     /**
+     * 插入或更新
+     *
+     * @param programmeSourceDO
+     * @return
+     */
+    long replace(ProgrammeSourceDO programmeSourceDO);
+
+    /**
      * get
      *
      * @param id
