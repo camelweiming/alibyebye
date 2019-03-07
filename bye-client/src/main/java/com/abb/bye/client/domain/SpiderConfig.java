@@ -15,7 +15,7 @@ public class SpiderConfig {
     private int cycleRetryTimes = 0;
     private int retrySleepTime = 1000;
     private int timeOut = 5000;
-    private int threadCount = 1;
+    private int threadCount = 2;
 
     public int getThreadCount() {
         return threadCount;

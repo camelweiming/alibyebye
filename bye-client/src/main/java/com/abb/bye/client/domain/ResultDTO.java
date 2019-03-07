@@ -46,6 +46,12 @@ public class ResultDTO<T> implements Serializable {
         resultDTO.errMsg = errMsg;
         return resultDTO;
     }
+    public static <T> ResultDTO<T> buildError(int errCode,String errMsg) {
+        ResultDTO<T> resultDTO = new ResultDTO<T>(false);
+        resultDTO.errCode = errCode;
+        resultDTO.errMsg = errMsg;
+        return resultDTO;
+    }
 
     public ResultDTO<T> setErrCode(int errCode) {
         this.errCode = errCode;

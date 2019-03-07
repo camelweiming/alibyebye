@@ -29,8 +29,8 @@ public class CommandController {
                @RequestParam(required = false) Integer site
     ) {
         if ("restartSpider".equals(cmd) && site != null) {
-            spiderService.stop(site);
-            spiderService.start(site);
+            //spiderService.stop(site);
+            //spiderService.start(site);
         }
         return "success";
     }
