@@ -9,14 +9,14 @@ import org.slf4j.LoggerFactory;
  * @date 2018/09/10
  * @since 2018/9/10
  */
-public class Environment {
-    private static Logger logger = LoggerFactory.getLogger(Environment.class);
-    private static Env env;
+public class SystemEnv {
+    private static Logger logger = LoggerFactory.getLogger(SystemEnv.class);
+    private Env env;
 
-    private Environment(String env) {
+    public SystemEnv(String env) {
         for (Env e : Env.values()) {
-            if (env.equals(e.getName())) {
-                Environment.env = e;
+            if (env.equals(e.name())) {
+                this.env = e;
                 logger.info("current env:" + env);
                 return;
             }
@@ -24,14 +24,14 @@ public class Environment {
         throw new IllegalStateException("Cant get local env");
     }
 
-    public static Env current() {
+    public Env current() {
         if (env == null) {
-            throw new IllegalStateException("Environment not init");
+            throw new IllegalStateException("SystemEnv not init");
         }
         return env;
     }
 
-    public static boolean isDaily() {
+    public boolean isDaily() {
         return current() == Env.DAILY;
     }
 }

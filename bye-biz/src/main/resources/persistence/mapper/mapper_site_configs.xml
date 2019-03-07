@@ -33,6 +33,13 @@
         where id=#{id}
     </select>
 
+    <select id="getConfig" resultType="com.abb.bye.client.domain.SiteConfigsDO">
+        select
+        <include refid="columns"/>
+        from site_configs
+        where site=#{site} and config_key=#{configKey} and env=#{env} limit 1
+    </select>
+
     <insert id="insert" parameterType="com.abb.bye.client.domain.SiteConfigsDO">
         insert site_configs
         ( id, gmt_create, gmt_modified, site, config_key, content, env, status, domains, name, platform)
@@ -53,5 +60,12 @@
         ,platform=#{platform}
         where id=#{id}
     </update>
+
+    <select id="listAll" resultType="com.abb.bye.client.domain.SiteConfigsDO">
+        select
+        <include refid="columns"/>
+        from site_configs
+        where env=#{env} and status=1
+    </select>
 
 </mapper>

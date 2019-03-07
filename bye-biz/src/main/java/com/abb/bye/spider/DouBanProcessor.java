@@ -1,7 +1,9 @@
 package com.abb.bye.spider;
 
+import com.abb.bye.Constants;
 import com.abb.bye.client.domain.PersonDO;
 import com.abb.bye.client.domain.ProgrammeSourceDO;
+import com.abb.bye.utils.CommonUtils;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
@@ -11,8 +13,8 @@ import org.jsoup.nodes.Document;
 import org.jsoup.select.Elements;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
 import us.codecraft.webmagic.Page;
-import us.codecraft.webmagic.processor.PageProcessor;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -25,7 +27,8 @@ import java.util.regex.Pattern;
  * @author cenpeng.lwm
  * @since 2019/3/6
  */
-public class DouBanProcessor extends AbstractProcessor implements PageProcessor {
+@Component
+public class DouBanProcessor extends AbstractProcessor {
     private static final Logger logger = LoggerFactory.getLogger(DouBanProcessor.class);
     private static String[] TAGS = new String[] {"电影", "电视剧", "综艺", "动漫", "纪录片"};
     private static int PAGE_STEP = 20;
@@ -35,6 +38,11 @@ public class DouBanProcessor extends AbstractProcessor implements PageProcessor 
 
     @Override
     public void process(Page page) {
+        logger.info("begin process-page:" + page.getUrl());
+        if (true) {
+            page.setSkip(true);
+            return;
+        }
         String id = getId(page);
         if (id == null) {
             processList(page);
@@ -51,7 +59,7 @@ public class DouBanProcessor extends AbstractProcessor implements PageProcessor 
         Document doc = page.getHtml().getDocument();
         Elements content = doc.select("div#content");
         programme.setTitle(content.select("h1 span[property=v:itemreviewed]").text());
-        String year = content.select("h1 span.year").text();
+        String year = CommonUtils.clean(content.select("h1 span.year").text());
         if (year == null) {
             logger.warn("no-release-year:" + programme.getUrl());
             page.setSkip(true);
@@ -142,7 +150,7 @@ public class DouBanProcessor extends AbstractProcessor implements PageProcessor 
         }
         programme.setSummary(doc.select("div.related-info").select("[property=v:summary]").text());
         programme.setAttributes(JSON.toJSONString(attributes));
-        page.putField("programme", programme);
+        page.putField(Constants.SPIDER_PROGRAMME_FIELD_NAME, programme);
         if (logger.isDebugEnabled()) {
             logger.debug("process:" + programme);
         }

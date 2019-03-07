@@ -1,6 +1,7 @@
 package com.abb.bye.mapper;
 
 import com.abb.bye.client.domain.SiteConfigsDO;
+import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
 
@@ -33,10 +34,28 @@ public interface SiteConfigMapper {
     List<SiteConfigsDO> list(int site);
 
     /**
+     * 加载所有配置
+     *
+     * @param env
+     * @return
+     */
+    List<SiteConfigsDO> listAll(@Param("env") String env);
+
+    /**
      * 通过id查询
      *
      * @param id
      * @return
      */
     SiteConfigsDO get(long id);
+
+    /**
+     * 获取key
+     *
+     * @param site
+     * @param configKey
+     * @param env
+     * @return
+     */
+    SiteConfigsDO getConfig(@Param("site") int site, @Param("configKey") String configKey, @Param("env") String env);
 }

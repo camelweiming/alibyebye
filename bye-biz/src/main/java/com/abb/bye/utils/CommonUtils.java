@@ -60,4 +60,17 @@ public class CommonUtils {
     public static String setNullWhenBlank(String v) {
         return StringUtils.isBlank(v) ? null : v;
     }
+
+    public static String clean(String content) {
+        if (content == null) {
+            return null;
+        }
+        StringBuilder sb = new StringBuilder();
+        for (char c : content.toCharArray()) {
+            if (Character.isLetterOrDigit(c)) {
+                sb.append(c);
+            }
+        }
+        return sb.toString();
+    }
 }

@@ -14,11 +14,11 @@
     <tx:annotation-driven/>
     <context:annotation-config/>
     <!--<cache:annotation-driven/>-->
-    <bean class="com.abb.bye.Environment">
+    <bean class="com.abb.bye.SystemEnv">
         <constructor-arg value="${env}"/>
     </bean>
     <import resource="classpath:beans/*.xml"/>
-    <context:component-scan base-package="com.abb.bye.service"/>
+    <context:component-scan base-package="com.abb.bye.service,com.abb.bye.spider"/>
     <aop:aspectj-autoproxy/>
 
 </beans>

@@ -43,7 +43,7 @@ public class SiteConfigsController {
         try {
             String vm = "site_configs";
             SiteDO appDO = siteService.getBySiteFromDB(site);
-            if (StringUtils.isBlank(env) || StringUtils.equals("all", env)) {
+            if (StringUtils.isBlank(env) || StringUtils.equals("ALL", env)) {
                 env = null;
             }
             if (status == null) {

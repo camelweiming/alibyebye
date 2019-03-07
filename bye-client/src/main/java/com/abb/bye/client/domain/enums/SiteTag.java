@@ -5,11 +5,12 @@ package com.abb.bye.client.domain.enums;
  * @since 2018/10/2
  */
 public enum SiteTag {
-    APP(2, "TEST"),
-    ONLINE(4, "ONLINE"),
+    APP(2, "测试环境"),
+    ONLINE(4, "线上环境"),
     IOS(8, "IOS"),
     ANDROID(16, "ANDROID"),
-    H5_SUPPORT(32, "H5");
+    H5_SUPPORT(32, "H5"),
+    ENABLE_SPIDER(64, "开启爬虫");
     private long value;
     private String name;
 

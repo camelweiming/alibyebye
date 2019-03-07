@@ -14,10 +14,10 @@
         <div class="form-group">
             <label>环境</label>
             <select class="form-control form-control-sm" name="env" required>
-                <option value="all" #if("all"==$env) selected #end>所有</option>
-                <option value="pre" #if("pre"==$env) selected #end>预发</option>
-                <option value="online" #if("online"==$env) selected #end>线上</option>
-                <option value="daily" #if("daily"==$env) selected #end>日常</option>
+                <option value="ALL" #if("ALL"==$env) selected #end>所有</option>
+                <option value="PRE" #if("PRE"==$env) selected #end>预发</option>
+                <option value="ONLINE" #if("ONLINE"==$env) selected #end>线上</option>
+                <option value="DAILY" #if("DAILY"==$env) selected #end>日常</option>
             </select>
         </div>
         <button class="btn btn-danger btn-sm" type="submit">保存</button>

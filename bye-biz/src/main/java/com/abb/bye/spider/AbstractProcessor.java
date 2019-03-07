@@ -19,12 +19,10 @@ import java.util.Map;
  * @since 2019/3/6
  */
 public abstract class AbstractProcessor implements PageProcessor {
-    protected String DEFAULT_UA = "Mozilla/5.0 (Linux; Android 6.0.1; Nexus 7 Build/MOB30X) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/71.0.3578.98 Safari/537.36";
-    private Site DEFAULT_SITE = Site.me().setRetryTimes(3).setSleepTime(100).setUserAgent(DEFAULT_UA);
 
     @Override
     public Site getSite() {
-        return DEFAULT_SITE;
+        return null;
     }
 
     protected String[] toMultiValue(String content) {
