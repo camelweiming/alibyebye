@@ -37,4 +37,13 @@
         <include refid="queryColumns"/>
         from programme_source where id=#{id}
     </select>
+
+    <select id="sourceIds" resultType="string">
+        select
+        source_id
+        from programme_source where site=#{site}
+        <if test="gmtModified!=null">
+            <![CDATA[ and gmt_modified>=#{gmtModified} ]]>
+        </if>
+    </select>
 </mapper>

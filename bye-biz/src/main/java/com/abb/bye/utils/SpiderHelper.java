@@ -1,4 +1,4 @@
-package com.abb.bye.spider;
+package com.abb.bye.utils;
 
 import org.apache.commons.lang3.StringUtils;
 import org.jsoup.nodes.Element;
@@ -6,8 +6,6 @@ import org.jsoup.nodes.Node;
 import org.jsoup.nodes.TextNode;
 import org.jsoup.select.Elements;
 import org.jsoup.select.NodeVisitor;
-import us.codecraft.webmagic.Site;
-import us.codecraft.webmagic.processor.PageProcessor;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -16,16 +14,10 @@ import java.util.Map;
 
 /**
  * @author cenpeng.lwm
- * @since 2019/3/6
+ * @since 2019/3/8
  */
-public abstract class AbstractProcessor implements PageProcessor {
-
-    @Override
-    public Site getSite() {
-        return null;
-    }
-
-    protected String[] toMultiValue(String content) {
+public class SpiderHelper {
+    public static String[] toMultiValue(String content) {
         if (content == null) {
             return null;
         }
@@ -38,7 +30,7 @@ public abstract class AbstractProcessor implements PageProcessor {
         return vs;
     }
 
-    protected Map<String, String> toProperties(Elements elements) {
+    public static Map<String, String> toProperties(Elements elements) {
         Map<String, String> map = new HashMap<>();
         List<String> list = new ArrayList<>();
         StringBuilder sb = new StringBuilder();

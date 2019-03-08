@@ -1,20 +1,23 @@
 package com.abb.bye.spider;
 
 import com.abb.bye.Constants;
+import com.abb.bye.client.domain.PageDTO;
 import com.abb.bye.client.domain.PersonDO;
 import com.abb.bye.client.domain.ProgrammeSourceDO;
+import com.abb.bye.client.spider.SpiderProcessor;
 import com.abb.bye.utils.CommonUtils;
+import com.abb.bye.utils.SpiderHelper;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.google.common.base.Joiner;
 import org.apache.commons.lang3.StringUtils;
+import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.select.Elements;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
-import us.codecraft.webmagic.Page;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
@@ -30,15 +33,15 @@ import java.util.regex.Pattern;
  * @since 2019/3/6
  */
 @Component
-public class DouBanProcessor extends AbstractProcessor {
+public class DouBanProcessor implements SpiderProcessor {
     private static final Logger logger = LoggerFactory.getLogger(DouBanProcessor.class);
     private static Pattern pattern = Pattern.compile("douban.com/subject/(\\d+)");
     private static Pattern personPattern = Pattern.compile("/celebrity/(\\d+)");
 
     @Override
-    public void process(Page page) {
+    public void process(PageDTO page) {
         logger.info("begin process-page:" + page.getUrl());
-        String id = getId(page);
+        String id = parseSourceId(page.getUrl());
         if (id == null) {
             processList(page);
         } else {
@@ -46,12 +49,22 @@ public class DouBanProcessor extends AbstractProcessor {
         }
     }
 
-    public void processDetail(String sourceId, Page page) {
+    @Override
+    public String parseSourceId(String url) {
+        Matcher matcher = pattern.matcher(url);
+        boolean isDetail = matcher.find();
+        if (isDetail) {
+            return matcher.group(1);
+        }
+        return null;
+    }
+
+    public void processDetail(String sourceId, PageDTO page) {
         ProgrammeSourceDO programme = new ProgrammeSourceDO();
         programme.setSourceId(sourceId);
         programme.setSite(1);
-        programme.setUrl(page.getUrl().get());
-        Document doc = page.getHtml().getDocument();
+        programme.setUrl(page.getUrl());
+        Document doc = Jsoup.parse(page.getHtml(), page.getUrl());
         Elements content = doc.select("div#content");
         programme.setTitle(content.select("h1 span[property=v:itemreviewed]").text());
         String year = CommonUtils.clean(content.select("h1 span.year").text());
@@ -116,9 +129,9 @@ public class DouBanProcessor extends AbstractProcessor {
          * 属性
          */
         Elements elements = content.select("#info").select("*");
-        Map<String, String> properties = toProperties(elements);
-        programme.setLanguages(Joiner.on(",").join(toMultiValue(properties.get("语言"))));
-        programme.setAlias(Joiner.on(",").join(toMultiValue(properties.get("又名"))));
+        Map<String, String> properties = SpiderHelper.toProperties(elements);
+        programme.setLanguages(Joiner.on(",").join(SpiderHelper.toMultiValue(properties.get("语言"))));
+        programme.setAlias(Joiner.on(",").join(SpiderHelper.toMultiValue(properties.get("又名"))));
         String totalEpisode = properties.get("集数");
         if (StringUtils.isNotBlank(totalEpisode)) {
             programme.setTotalEpisode(Integer.valueOf(totalEpisode));
@@ -147,14 +160,14 @@ public class DouBanProcessor extends AbstractProcessor {
         programme.setStatus(ProgrammeSourceDO.STATUS_ENABLE);
         programme.setSummary(StringUtils.substring(summary, 0, 500));
         programme.setAttributes(JSON.toJSONString(attributes));
-        page.putField(Constants.SPIDER_PROGRAMME_FIELD_NAME, programme);
+        page.addField(Constants.SPIDER_PROGRAMME_FIELD_NAME, programme);
         if (logger.isDebugEnabled()) {
             logger.debug("process:" + programme);
         }
     }
 
-    public void processList(Page page) {
-        JSONObject json = JSON.parseObject(page.getRawText());
+    public void processList(PageDTO page) {
+        JSONObject json = JSON.parseObject(page.getHtml());
         JSONArray jsonArray = json.getJSONArray("data");
         JSONObject obj;
         List<String> links = new ArrayList<>(jsonArray.size());
@@ -162,17 +175,8 @@ public class DouBanProcessor extends AbstractProcessor {
             obj = jsonArray.getJSONObject(i);
             links.add(obj.getString("url"));
         }
-        page.addTargetRequests(links);
+        page.setTargetRequests(links);
         page.setSkip(true);
-    }
-
-    private String getId(Page page) {
-        Matcher matcher = pattern.matcher(page.getUrl().get());
-        boolean isDetail = matcher.find();
-        if (isDetail) {
-            return matcher.group(1);
-        }
-        return null;
     }
 
     private String getPersonId(String url) {
@@ -204,4 +208,15 @@ public class DouBanProcessor extends AbstractProcessor {
             System.out.println(url);
         });
     }
+
+    @Override
+    public void init() {
+
+    }
+
+    @Override
+    public void destroy() {
+
+    }
+
 }

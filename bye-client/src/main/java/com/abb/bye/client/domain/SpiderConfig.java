@@ -16,6 +16,30 @@ public class SpiderConfig {
     private int retrySleepTime = 1000;
     private int timeOut = 5000;
     private int threadCount = 2;
+    /**
+     * 只处理新增
+     */
+    private boolean onlyInsert = true;
+    /**
+     * 更新间隔
+     */
+    private int updateIntervalSeconds = 24 * 3600;
+
+    public boolean isOnlyInsert() {
+        return onlyInsert;
+    }
+
+    public void setOnlyInsert(boolean onlyInsert) {
+        this.onlyInsert = onlyInsert;
+    }
+
+    public int getUpdateIntervalSeconds() {
+        return updateIntervalSeconds;
+    }
+
+    public void setUpdateIntervalSeconds(int updateIntervalSeconds) {
+        this.updateIntervalSeconds = updateIntervalSeconds;
+    }
 
     public int getThreadCount() {
         return threadCount;

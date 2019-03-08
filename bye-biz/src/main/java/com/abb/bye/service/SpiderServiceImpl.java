@@ -1,12 +1,10 @@
 package com.abb.bye.service;
 
 import com.abb.bye.Constants;
-import com.abb.bye.client.domain.ProgrammeSourceDO;
-import com.abb.bye.client.domain.ResultDTO;
-import com.abb.bye.client.domain.SiteDO;
-import com.abb.bye.client.domain.SpiderConfig;
+import com.abb.bye.client.domain.*;
 import com.abb.bye.client.domain.enums.SiteTag;
 import com.abb.bye.client.service.*;
+import com.abb.bye.client.spider.SpiderProcessor;
 import com.abb.bye.utils.CommonThreadPool;
 import com.abb.bye.utils.Tracer;
 import com.alibaba.fastjson.JSON;
@@ -40,6 +38,8 @@ public class SpiderServiceImpl implements SpiderService, ApplicationContextAware
     private ProgrammeSourceService programmeSourceService;
     @Resource
     private SchedulerService schedulerService;
+    @Resource
+    private RejectStrategy rejectStrategy;
 
     public ResultDTO<Void> start(int site) {
         Tracer tracer = new Tracer("SPIDER").setEntityId(site);
@@ -81,11 +81,14 @@ public class SpiderServiceImpl implements SpiderService, ApplicationContextAware
         SpiderConfig spiderConfig = StringUtils.isBlank(config) ? new SpiderConfig() : JSON.parseObject(config, SpiderConfig.class);
         tracer.trace("spiderConfig:" + spiderConfig);
         try {
-            Spider spider = Spider.create(buildProcessor(spiderConfig, spiderProcessor))
+            Class<SpiderProcessor> clazz = (Class<SpiderProcessor>)Class.forName(spiderProcessor);
+            SpiderProcessor processor = applicationContext.getBean(clazz);
+            PageProcessorProxy pageProcessor = new PageProcessorProxy(site, spiderConfig, processor);
+            Runnable spider = new SpiderRunner(Spider.create(pageProcessor)
                 .setExecutorService(CommonThreadPool.getCommonExecutor())
                 .addUrl(urlList.toArray(new String[urlList.size()]))
                 .addPipeline(new ProgrammePipeline())
-                .thread(spiderConfig.getThreadCount());
+                .thread(spiderConfig.getThreadCount()), pageProcessor.processor, spiderConfig, site);
             return ResultDTO.buildSuccess(spider);
         } catch (Throwable e) {
             tracer.trace("Error startSpider", true, e);
@@ -94,39 +97,77 @@ public class SpiderServiceImpl implements SpiderService, ApplicationContextAware
     }
 
     @Override
-    public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
-        this.applicationContext = applicationContext;
-
-    }
-
-    public PageProcessor buildProcessor(SpiderConfig spiderConfig, String spiderProcessor) throws ClassNotFoundException {
-        Site spiderSite = Site.me()
-            .setTimeOut(spiderConfig.getTimeOut())
-            .setCycleRetryTimes(spiderConfig.getCycleRetryTimes())
-            .setRetryTimes(spiderConfig.getRetryTimes())
-            .setSleepTime(spiderConfig.getSleepTime())
-            .setUserAgent(spiderConfig.getUserAgent() == null ? Constants.SPIDER_DEFAULT_USER_AGENT : spiderConfig.getUserAgent());
-
-        Class<PageProcessor> clazz = (Class<PageProcessor>)Class.forName(spiderProcessor);
-        PageProcessor processor = applicationContext.getBean(clazz);
-        PageProcessor proxy = new PageProcessor() {
-            @Override
-            public void process(Page page) {
-                processor.process(page);
-            }
-
-            @Override
-            public Site getSite() {
-                return spiderSite;
-            }
-        };
-        return proxy;
-    }
-
-    @Override
-    public void afterPropertiesSet() throws Exception {
+    public void afterPropertiesSet() {
         List<SiteDO> sites = siteService.filter(siteService.listFromDB(), Lists.newArrayList(SiteTag.ENABLE_SPIDER), SiteDO.STATUS_ENABLE);
         sites.forEach(siteDO -> start(siteDO.getSite()));
+    }
+
+    public class SpiderRunner implements Runnable {
+        private Spider spider;
+        private SpiderProcessor spiderProcessor;
+        private RejectStrategyConfig rejectStrategyConfig;
+        private Integer site;
+
+        public SpiderRunner(Spider spider, SpiderProcessor spiderProcessor, SpiderConfig spiderConfig, Integer site) {
+            this.spider = spider;
+            this.spiderProcessor = spiderProcessor;
+            this.site = site;
+            this.rejectStrategyConfig = new RejectStrategyConfig(spiderConfig.isOnlyInsert(), spiderConfig.getUpdateIntervalSeconds());
+        }
+
+        @Override
+        public void run() {
+            spiderProcessor.init();
+            rejectStrategy.init(site, rejectStrategyConfig);
+            spider.run();
+            spiderProcessor.destroy();
+            rejectStrategy.destroy(site);
+        }
+    }
+
+    public class PageProcessorProxy implements PageProcessor {
+        private SpiderProcessor processor;
+        private Site spiderSite;
+        private int site;
+        private RejectStrategyConfig rejectStrategyConfig;
+
+        private PageProcessorProxy(int site, SpiderConfig spiderConfig, SpiderProcessor processor) {
+            this.processor = processor;
+            this.site = site;
+            this.rejectStrategyConfig = new RejectStrategyConfig(spiderConfig.isOnlyInsert(), spiderConfig.getUpdateIntervalSeconds());
+            spiderSite = Site.me()
+                .setTimeOut(spiderConfig.getTimeOut())
+                .setCycleRetryTimes(spiderConfig.getCycleRetryTimes())
+                .setRetryTimes(spiderConfig.getRetryTimes())
+                .setSleepTime(spiderConfig.getSleepTime())
+                .setUserAgent(spiderConfig.getUserAgent() == null ? Constants.SPIDER_DEFAULT_USER_AGENT : spiderConfig.getUserAgent());
+
+        }
+
+        @Override
+        public void process(Page page) {
+            PageDTO pageDTO = new PageDTO();
+            pageDTO.setUrl(page.getUrl().get());
+            pageDTO.setHtml(page.getRawText());
+            pageDTO.setCharset(page.getCharset());
+            pageDTO.setDownloadSuccess(page.isDownloadSuccess());
+            pageDTO.setStatusCode(page.getStatusCode());
+            processor.process(pageDTO);
+            page.setSkip(pageDTO.isSkip());
+            page.addTargetRequests(pageDTO.getTargetRequests());
+            if (pageDTO.getFields() != null) {
+                pageDTO.getFields().forEach((k, v) -> {
+                    if (!rejectStrategy.reject(site, processor.parseSourceId(k), rejectStrategyConfig)) {
+                        page.putField(k, v);
+                    }
+                });
+            }
+        }
+
+        @Override
+        public Site getSite() {
+            return spiderSite;
+        }
     }
 
     public class ProgrammePipeline implements Pipeline {
@@ -136,5 +177,10 @@ public class SpiderServiceImpl implements SpiderService, ApplicationContextAware
             ProgrammeSourceDO programmeSourceDO = resultItems.get(Constants.SPIDER_PROGRAMME_FIELD_NAME);
             programmeSourceService.insertOrUpdate(programmeSourceDO);
         }
+    }
+
+    @Override
+    public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
+        this.applicationContext = applicationContext;
     }
 }
