@@ -51,7 +51,9 @@ public class SpiderServiceImpl implements SpiderService, ApplicationContextAware
             if (!resultDTO.isSuccess()) {
                 tracer.trace("Create job failed:" + resultDTO);
             }
+            tracer.trace("begin do job");
             resultDTO.getData().run();
+            tracer.trace("job finished");
             return ResultDTO.buildSuccess(null);
         } catch (Throwable e) {
             tracer.trace("Create job error:", e);
