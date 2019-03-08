@@ -43,20 +43,20 @@ public class SpiderServiceImpl implements SpiderService, ApplicationContextAware
     @Resource
     private RejectStrategy rejectStrategy;
 
-    public ResultDTO<Void> start(int site) {
-        Tracer tracer = new Tracer("SPIDER").setEntityId(site);
-        String schedule = siteConfigsService.getFromDB(site, Constants.SYSTEM_CONFIG_SPIDER_SCHEDULE);
-        if (schedule == null) {
-            tracer.trace("miss schedule");
-            return ResultDTO.buildError("miss schedule");
+    @Override
+    public ResultDTO<Void> doJob(int site) {
+        Tracer tracer = new Tracer("SCHEDULE_TASK").setEntityId(site);
+        try {
+            ResultDTO<Runnable> resultDTO = createJob(site);
+            if (!resultDTO.isSuccess()) {
+                tracer.trace("Create job failed:" + resultDTO);
+            }
+            resultDTO.getData().run();
+            return ResultDTO.buildSuccess(null);
+        } catch (Throwable e) {
+            tracer.trace("Create job error:", e);
+            return ResultDTO.buildError(e.getMessage());
         }
-        ResultDTO<Runnable> resultDTO = createJob(site);
-        if (!resultDTO.isSuccess()) {
-            return ResultDTO.buildError(resultDTO.getErrCode(), resultDTO.getErrMsg());
-        }
-        schedulerService.register(Constants.SCHEDULE_SPIDER_PREFIX + site, resultDTO.getData(), schedule);
-        tracer.trace("register spider-job site:" + site + " schedule:" + schedule);
-        return ResultDTO.buildSuccess(null);
     }
 
     @Override
@@ -96,12 +96,6 @@ public class SpiderServiceImpl implements SpiderService, ApplicationContextAware
             tracer.trace("Error startSpider", true, e);
             return ResultDTO.buildError(e.getMessage());
         }
-    }
-
-    @Override
-    public void afterPropertiesSet() {
-        List<SiteDO> sites = siteService.filter(siteService.listFromDB(), Lists.newArrayList(SiteTag.ENABLE_SPIDER), SiteDO.STATUS_ENABLE);
-        sites.forEach(siteDO -> start(siteDO.getSite()));
     }
 
     public class SpiderRunner implements Runnable {
@@ -184,6 +178,21 @@ public class SpiderServiceImpl implements SpiderService, ApplicationContextAware
         public void process(ResultItems resultItems, Task task) {
             ProgrammeSourceDO programmeSourceDO = resultItems.get(Constants.SPIDER_PROGRAMME_FIELD_NAME);
             programmeSourceService.insertOrUpdate(programmeSourceDO);
+        }
+    }
+
+    @Override
+    public void afterPropertiesSet() {
+        Tracer tracer = new Tracer("SPIDER_SCHEDULE_REGISTER");
+        List<SiteDO> sites = siteService.filter(siteService.listFromDB(), Lists.newArrayList(SiteTag.ENABLE_SPIDER), SiteDO.STATUS_ENABLE);
+        for (SiteDO site : sites) {
+            String schedule = siteConfigsService.getFromDB(site.getSite(), Constants.SYSTEM_CONFIG_SPIDER_SCHEDULE);
+            if (schedule == null) {
+                tracer.trace("miss schedule");
+                continue;
+            }
+            schedulerService.register(Constants.SCHEDULE_SPIDER_PREFIX + site.getSite(), () -> doJob(site.getSite()), schedule);
+            tracer.trace("register spider-job site:" + site.getSite() + " schedule:" + schedule);
         }
     }
 

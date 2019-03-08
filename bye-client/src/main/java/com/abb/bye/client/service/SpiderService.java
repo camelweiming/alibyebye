@@ -8,6 +8,14 @@ import com.abb.bye.client.domain.ResultDTO;
  */
 public interface SpiderService {
     /**
+     * 执行job
+     *
+     * @param site
+     * @return
+     */
+    ResultDTO<Void> doJob(int site);
+
+    /**
      * 创建job
      *
      * @param site
