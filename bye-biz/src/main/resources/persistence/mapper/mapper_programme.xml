@@ -10,7 +10,7 @@
     </insert>
 
     <insert id="copyFromSource" parameterType="com.abb.bye.client.domain.ProgrammeDO" useGeneratedKeys="true" keyProperty="id">
-        insert into
+        insert ignore into
         programme(gmt_create,gmt_modified,title,release_year,img,types,directors,performers,languages,alias,seconds,score,imdb,summary,areas,season,total_episode,status,attributes,tags,unique_key,sites,keywords)
         values
         (now(),now(),#{title},#{releaseYear},#{img},#{types},#{directors},#{performers},#{languages},#{alias},#{seconds},#{score},#{imdb},#{summary},#{areas},#{season},#{totalEpisode},#{status},#{attributes},#{tags},#{uniqueKey},#{sites},#{keywords})

@@ -8,6 +8,8 @@ import java.io.Serializable;
  */
 public class ProgrammeDO extends ProgrammeBaseDO implements Serializable {
     private static final long serialVersionUID = -2151284983855939932L;
+    public static final String ATTRS_SOURCE_ID = "SOURCE_ID";
+    public static final String ATTRS_SOURCE_SITE = "SOURCE_SITE";
     private String tags;
     private String attributes;
     private String uniqueKey;

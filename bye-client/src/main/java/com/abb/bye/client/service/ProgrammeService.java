@@ -1,6 +1,6 @@
 package com.abb.bye.client.service;
 
-import com.abb.bye.client.domain.ProgrammeDO;
+import com.abb.bye.client.domain.ProgrammeSourceDO;
 import com.abb.bye.client.domain.ResultDTO;
 
 /**
@@ -11,8 +11,8 @@ public interface ProgrammeService {
     /**
      * 更新
      *
-     * @param programmeDO
+     * @param programmeSourceDO
      * @return
      */
-    ResultDTO<Void> copyFromSource(ProgrammeDO programmeDO);
+    ResultDTO<Void> copyFromSource(ProgrammeSourceDO programmeSourceDO);
 }

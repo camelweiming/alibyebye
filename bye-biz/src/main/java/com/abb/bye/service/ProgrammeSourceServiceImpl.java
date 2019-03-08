@@ -30,7 +30,10 @@ public class ProgrammeSourceServiceImpl implements ProgrammeSourceService {
         try {
             programmeSourceMapper.replace(programmeSourceDO);
             if (SiteMapping.match(programmeSourceDO.getSite(), SiteTag.AUTO_PASS)) {
-                //programmeService.copyFromSource(programmeSourceDO);
+                /**
+                 * 不加事务，后面补偿，优先保证抓取逻辑
+                 */
+                programmeService.copyFromSource(programmeSourceDO);
             }
             return ResultDTO.buildSuccess(null);
         } catch (Throwable e) {
