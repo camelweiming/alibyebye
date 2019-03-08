@@ -151,6 +151,9 @@ public class DouBanProcessor implements SpiderProcessor {
                 }
             }
         }
+        if (programme.getSeconds() == null) {
+            programme.setSeconds(0);
+        }
         programme.setImdb(properties.get("IMDb链接"));
         String score = doc.select("div.rating_self").select("strong.rating_num").text();
         if (StringUtils.isNotBlank(score)) {
@@ -194,7 +197,7 @@ public class DouBanProcessor implements SpiderProcessor {
     public static void main(String[] args) throws UnsupportedEncodingException {
         String[] TAGS = new String[] {"电影", "电视剧", "综艺", "动漫", "纪录片"};
         int PAGE_STEP = 20;
-        int MAX_PAGE = 1000;
+        int MAX_PAGE = 10;
         List<String> urls = new ArrayList<>(1024);
         for (String tag : TAGS) {
             String url = "https://movie.douban.com/j/new_search_subjects?sort=R&range=1,10&tags=" + URLEncoder.encode(tag, "UTF-8");

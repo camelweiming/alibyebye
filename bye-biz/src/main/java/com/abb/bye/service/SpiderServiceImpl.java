@@ -9,7 +9,6 @@ import com.abb.bye.client.spider.SpiderProcessor;
 import com.abb.bye.utils.CommonThreadPool;
 import com.abb.bye.utils.Tracer;
 import com.alibaba.fastjson.JSON;
-import com.google.common.base.Splitter;
 import com.google.common.collect.Iterators;
 import org.apache.commons.lang3.StringUtils;
 import org.assertj.core.util.Lists;
@@ -81,7 +80,7 @@ public class SpiderServiceImpl implements SpiderService, ApplicationContextAware
             tracer.trace("miss processor");
             return ResultDTO.buildError("miss processor");
         }
-        List<String> urlList = Splitter.on("\r\n").splitToList(urls);
+        String[] urlList = StringUtils.split(urls, "\r\n");
         SpiderConfig spiderConfig = StringUtils.isBlank(config) ? new SpiderConfig() : JSON.parseObject(config, SpiderConfig.class);
         tracer.trace("spiderConfig:" + spiderConfig);
         try {
@@ -90,7 +89,7 @@ public class SpiderServiceImpl implements SpiderService, ApplicationContextAware
             PageProcessorProxy pageProcessor = new PageProcessorProxy(site, spiderConfig, processor);
             Runnable spider = new SpiderRunner(Spider.create(pageProcessor)
                 .setExecutorService(CommonThreadPool.getCommonExecutor())
-                .addUrl(urlList.toArray(new String[urlList.size()]))
+                .addUrl(urlList)
                 .addPipeline(new ProgrammePipeline())
                 .thread(spiderConfig.getThreadCount()), pageProcessor.processor, spiderConfig, site);
             return ResultDTO.buildSuccess(spider);
