@@ -1,5 +1,6 @@
 package com.abb.bye.test;
 
+import com.abb.bye.utils.Tracer;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -12,8 +13,8 @@ public class Test {
     static Logger logger = LoggerFactory.getLogger(Test.class);
 
     public static void main(String[] args) {
-        DateTime dateTime = DateTime.now().plusSeconds(-3600);
-        System.out.println(dateTime.toString("yyyy-MM-dd hh:mm:ss"));
-
+        logger.info("xxxxxxxxx");
+        Tracer tracer = new Tracer("xxxxx");
+        tracer.trace("xxdddg");
     }
 }
