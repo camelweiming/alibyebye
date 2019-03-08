@@ -82,4 +82,42 @@ public class CommonUtils {
         }
         return sub;
     }
+
+    public static final String formatTitle(String title) {
+        if (title == null) {
+            return null;
+        }
+        title = StringUtils.replaceEach(title, new String[] {"：", "（", "）", "“", "”", "！"}, new String[] {":", "(", ")", "\"", "\"", "!"});
+        title = title.replaceAll("\\s{1,}", " ").trim();
+        return title;
+    }
+
+    //public static String full2Half(String string) {
+    //    if (string == null) {
+    //        return string;
+    //    }
+    //    char[] charArray = string.toCharArray();
+    //    for (int i = 0; i < charArray.length; i++) {
+    //        char c = charArray[i];
+    //        if (Character.isLetterOrDigit(c)) {
+    //            continue;
+    //        }
+    //        if (c == 12288) {
+    //            charArray[i] = ' ';
+    //        } else if (c >= ' ' &&
+    //            c <= 65374) {
+    //            charArray[i] = (char)(c - 65248);
+    //        } else {
+    //        }
+    //    }
+    //    return new String(charArray);
+    //}
+
+    public static void main(String[] args) {
+        String title = formatTitle(" 阿丽塔:战斗天使     （豆瓣）");
+        title = StringUtils.replace(title, "(豆瓣)", "").trim();
+        System.out.println(title);
+        String alias = formatTitle("阿丽塔：战斗天使 Alita: Battle Angel");
+        System.out.println(alias);
+    }
 }

@@ -21,10 +21,7 @@ import org.springframework.stereotype.Component;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -65,8 +62,12 @@ public class DouBanProcessor implements SpiderProcessor {
         programme.setSite(1);
         programme.setUrl(page.getUrl());
         Document doc = Jsoup.parse(page.getHtml(), page.getUrl());
+        String title = parseTitle(doc);
+        programme.setTitle(title);
         Elements content = doc.select("div#content");
-        programme.setTitle(content.select("h1 span[property=v:itemreviewed]").text());
+        String titleAlias = CommonUtils.formatTitle(content.select("h1 span[property=v:itemreviewed]").text());
+        titleAlias = StringUtils.replace(titleAlias, title, "").trim();
+
         String year = CommonUtils.clean(content.select("h1 span.year").text());
         if (year == null) {
             logger.warn("no-release-year:" + programme.getUrl());
@@ -131,7 +132,11 @@ public class DouBanProcessor implements SpiderProcessor {
         Elements elements = content.select("#info").select("*");
         Map<String, String> properties = SpiderHelper.toProperties(elements);
         programme.setLanguages(Joiner.on(",").join(SpiderHelper.toMultiValue(properties.get("语言"))));
-        programme.setAlias(Joiner.on(",").join(SpiderHelper.toMultiValue(properties.get("又名"))));
+        Set<String> alias = SpiderHelper.toMultiValue(properties.get("又名"));
+        if (StringUtils.isNotBlank(titleAlias)) {
+            alias.add(titleAlias);
+        }
+        programme.setAlias(Joiner.on(",").join(alias));
         String totalEpisode = properties.get("集数");
         if (StringUtils.isNotBlank(totalEpisode)) {
             programme.setTotalEpisode(Integer.valueOf(totalEpisode));
@@ -167,6 +172,12 @@ public class DouBanProcessor implements SpiderProcessor {
         if (logger.isDebugEnabled()) {
             logger.debug("process:" + programme);
         }
+    }
+
+    private String parseTitle(Document doc) {
+        String title = CommonUtils.formatTitle(doc.title());
+        title = StringUtils.replace(title, "(豆瓣)", "").trim();
+        return title;
     }
 
     public void processList(PageDTO page) {

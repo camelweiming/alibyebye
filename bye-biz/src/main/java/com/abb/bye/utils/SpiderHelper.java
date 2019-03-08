@@ -7,25 +7,21 @@ import org.jsoup.nodes.TextNode;
 import org.jsoup.select.Elements;
 import org.jsoup.select.NodeVisitor;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * @author cenpeng.lwm
  * @since 2019/3/8
  */
 public class SpiderHelper {
-    public static String[] toMultiValue(String content) {
+    public static Set<String> toMultiValue(String content) {
+        Set<String> vs = new HashSet<>(8);
         if (content == null) {
-            return null;
+            return vs;
         }
         String[] values = StringUtils.split(content, "/");
-        String[] vs = new String[values.length];
-        int i = 0;
         for (String v : values) {
-            vs[i++] = v.trim();
+            vs.add(v.trim());
         }
         return vs;
     }
