@@ -1,6 +1,10 @@
 package com.abb.bye.mapper;
 
 import com.abb.bye.client.domain.ProgrammeSourceDO;
+import org.apache.ibatis.annotations.Param;
+
+import java.util.Date;
+import java.util.List;
 
 /**
  * @author cenpeng.lwm
@@ -30,4 +34,13 @@ public interface ProgrammeSourceMapper {
      * @return
      */
     ProgrammeSourceDO get(long id);
+
+    /**
+     * 取所有源ID
+     *
+     * @param site
+     * @param gmtModified
+     * @return
+     */
+    List<String> getSourceIds(@Param("site") int site, @Param("gmtModified") Date gmtModified);
 }

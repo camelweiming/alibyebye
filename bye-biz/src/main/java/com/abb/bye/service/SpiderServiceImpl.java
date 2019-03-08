@@ -1,6 +1,7 @@
 package com.abb.bye.service;
 
 import com.abb.bye.Constants;
+import com.abb.bye.Switcher;
 import com.abb.bye.client.domain.*;
 import com.abb.bye.client.domain.enums.SiteTag;
 import com.abb.bye.client.service.*;
@@ -130,6 +131,7 @@ public class SpiderServiceImpl implements SpiderService, ApplicationContextAware
         private Site spiderSite;
         private int site;
         private RejectStrategyConfig rejectStrategyConfig;
+        private Tracer tracer = new Tracer("PAGE_PROCESSOR");
 
         private PageProcessorProxy(int site, SpiderConfig spiderConfig, SpiderProcessor processor) {
             this.processor = processor;
@@ -141,7 +143,7 @@ public class SpiderServiceImpl implements SpiderService, ApplicationContextAware
                 .setRetryTimes(spiderConfig.getRetryTimes())
                 .setSleepTime(spiderConfig.getSleepTime())
                 .setUserAgent(spiderConfig.getUserAgent() == null ? Constants.SPIDER_DEFAULT_USER_AGENT : spiderConfig.getUserAgent());
-
+            tracer.setEntityId(site);
         }
 
         @Override
@@ -154,10 +156,16 @@ public class SpiderServiceImpl implements SpiderService, ApplicationContextAware
             pageDTO.setStatusCode(page.getStatusCode());
             processor.process(pageDTO);
             page.setSkip(pageDTO.isSkip());
-            page.addTargetRequests(pageDTO.getTargetRequests());
+            if (pageDTO.getTargetRequests() != null) {
+                page.addTargetRequests(pageDTO.getTargetRequests());
+            }
             if (pageDTO.getFields() != null) {
                 pageDTO.getFields().forEach((k, v) -> {
-                    if (!rejectStrategy.reject(site, processor.parseSourceId(k), rejectStrategyConfig)) {
+                    if (rejectStrategy.reject(site, processor.parseSourceId(k), rejectStrategyConfig)) {
+                        if (Switcher.isDebug()) {
+                            tracer.trace("reject:" + k);
+                        }
+                    } else {
                         page.putField(k, v);
                     }
                 });

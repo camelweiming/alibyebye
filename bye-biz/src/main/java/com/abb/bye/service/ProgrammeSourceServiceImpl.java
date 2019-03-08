@@ -10,6 +10,8 @@ import com.abb.bye.utils.Tracer;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
+import java.util.Date;
+import java.util.List;
 
 /**
  * @author cenpeng.lwm
@@ -35,5 +37,10 @@ public class ProgrammeSourceServiceImpl implements ProgrammeSourceService {
             tracer.trace("Error insertOrUpdate:" + programmeSourceDO, e);
             return ResultDTO.buildError(e.getMessage());
         }
+    }
+
+    @Override
+    public List<String> getSourceIds(int site, Date gmtModified) {
+        return programmeSourceMapper.getSourceIds(site, gmtModified);
     }
 }

@@ -29,6 +29,7 @@ public interface RejectStrategy {
      *
      * @param site
      * @param sourceId
+     * @param rejectStrategyConfig
      * @return
      */
     boolean reject(int site, String sourceId, RejectStrategyConfig rejectStrategyConfig);

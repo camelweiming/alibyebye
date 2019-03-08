@@ -148,6 +148,11 @@
                 <artifactId>velocity-spring-boot-starter</artifactId>
                 <version>1.0.4.RELEASE</version>
             </dependency>
+            <dependency>
+                <groupId>joda-time</groupId>
+                <artifactId>joda-time</artifactId>
+                <version>2.10.1</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 

@@ -38,7 +38,7 @@
         from programme_source where id=#{id}
     </select>
 
-    <select id="sourceIds" resultType="string">
+    <select id="getSourceIds" resultType="string">
         select
         source_id
         from programme_source where site=#{site}
