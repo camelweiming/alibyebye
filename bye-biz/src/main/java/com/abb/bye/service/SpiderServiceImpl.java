@@ -10,6 +10,7 @@ import com.abb.bye.utils.CommonThreadPool;
 import com.abb.bye.utils.Tracer;
 import com.alibaba.fastjson.JSON;
 import com.google.common.base.Splitter;
+import com.google.common.collect.Iterators;
 import org.apache.commons.lang3.StringUtils;
 import org.assertj.core.util.Lists;
 import org.springframework.beans.BeansException;
@@ -157,18 +158,17 @@ public class SpiderServiceImpl implements SpiderService, ApplicationContextAware
             processor.process(pageDTO);
             page.setSkip(pageDTO.isSkip());
             if (pageDTO.getTargetRequests() != null) {
+                Iterators.removeIf(pageDTO.getTargetRequests().iterator(), url -> {
+                    boolean reject = rejectStrategy.reject(site, processor.parseSourceId(url), rejectStrategyConfig);
+                    if (reject && Switcher.isDebug()) {
+                        tracer.trace("reject:" + url);
+                    }
+                    return reject;
+                });
                 page.addTargetRequests(pageDTO.getTargetRequests());
             }
             if (pageDTO.getFields() != null) {
-                pageDTO.getFields().forEach((k, v) -> {
-                    if (rejectStrategy.reject(site, processor.parseSourceId(k), rejectStrategyConfig)) {
-                        if (Switcher.isDebug()) {
-                            tracer.trace("reject:" + k);
-                        }
-                    } else {
-                        page.putField(k, v);
-                    }
-                });
+                pageDTO.getFields().forEach((k, v) -> page.putField(k, v));
             }
         }
 

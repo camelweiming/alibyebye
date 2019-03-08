@@ -36,7 +36,7 @@ public class RejectStrategyDbImpl implements RejectStrategy {
             ids = programmeSourceService.getSourceIds(site, dateTime.toDate());
         }
         Set<String> set = new HashSet<>(ids);
-        logger.info("init site:" + site + " ids:" + ids);
+        logger.info("init site:" + site + "rejectStrategyConfig:" + rejectStrategyConfig + " ids:" + ids);
         sourceIds.put(site, set);
     }
 
