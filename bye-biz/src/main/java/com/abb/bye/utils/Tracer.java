@@ -14,8 +14,7 @@ import java.net.UnknownHostException;
  * @since 2018/9/21
  */
 public class Tracer {
-    private static final Logger logger = LoggerFactory.getLogger("trace");
-    private static final Logger errorLog = LoggerFactory.getLogger("T");
+    private static final Logger logger = LoggerFactory.getLogger("TRACE");
     public static String SERVER_IP;
     /**
      * 关键属性,可按此选项过滤
@@ -61,14 +60,12 @@ public class Tracer {
         sb.append("|").append(nameSpace);
         sb.append("|").append(entityId == null ? 0 : entityId);
         sb.append("|").append(SERVER_IP);
+        sb.append("|").append("ALARM");
         sb.append("|").append(format(msg));
         if (e != null) {
             sb.append("|").append(toString(e, 8));
         }
         logger.warn(sb.toString());
-        if (alarm) {
-            errorLog.error(msg, e);
-        }
     }
 
     public static String format(String e) {
