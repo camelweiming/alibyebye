@@ -1,6 +1,7 @@
 package com.abb.bye.utils;
 
 import org.apache.commons.lang3.StringUtils;
+import org.assertj.core.util.Lists;
 import org.jsoup.nodes.Element;
 import org.jsoup.nodes.Node;
 import org.jsoup.nodes.TextNode;
@@ -8,12 +9,20 @@ import org.jsoup.select.Elements;
 import org.jsoup.select.NodeVisitor;
 
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * @author cenpeng.lwm
  * @since 2019/3/8
  */
 public class SpiderHelper {
+    /**
+     * @page-split[0:20->100] 分页[起始页:步长->总页数]
+     */
+    public static final String EXP_PAGE_SPLIT = "@page-split";
+    private static Pattern LIST_PATTERN = Pattern.compile(EXP_PAGE_SPLIT + "\\[(\\d+)\\:(\\d+)->(\\d+)\\]");
+
     public static Set<String> toMultiValue(String content) {
         Set<String> vs = new HashSet<>(8);
         if (content == null) {
@@ -62,9 +71,33 @@ public class SpiderHelper {
         return map;
     }
 
-    public List<String> splitPages(String url) {
+    public static boolean isSplitPages(String url) {
+        return url.contains(EXP_PAGE_SPLIT);
+    }
+
+    public static List<String> splitPages(String url) {
         List<String> urls = new ArrayList<>();
-        //https://movie.douban.com/j/new_search_subjects?sort=R&range=1,10&tags=xxx&start=[0->20]&length=20
+        Matcher matcher = LIST_PATTERN.matcher(url);
+        if (!matcher.find()) {
+            return Lists.newArrayList(url);
+        }
+        int start = Integer.parseInt(matcher.group(1));
+        int length = Integer.parseInt(matcher.group(2));
+        int pages = Integer.parseInt(matcher.group(3));
+        String _url = matcher.replaceAll(EXP_PAGE_SPLIT);
+        for (int i = 0; i < pages; i++) {
+            String real = StringUtils.replace(_url, EXP_PAGE_SPLIT, "" + start);
+            urls.add(real);
+            start += length;
+        }
         return urls;
+    }
+
+    public static void main(String[] args) {
+        List<String> urls = splitPages("https://movie.douban.com/j/new_search_subjects?sort=R&range=1,10&tags=xxx&start=@page-split[0:20->100]");
+        urls.forEach(u -> {
+            System.out.println(u);
+        });
+
     }
 }
