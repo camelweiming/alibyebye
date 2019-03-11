@@ -62,4 +62,9 @@ public class SpiderHelper {
         return map;
     }
 
+    public List<String> splitPages(String url) {
+        List<String> urls = new ArrayList<>();
+        //https://movie.douban.com/j/new_search_subjects?sort=R&range=1,10&tags=xxx&start=[0->20]&length=20
+        return urls;
+    }
 }
