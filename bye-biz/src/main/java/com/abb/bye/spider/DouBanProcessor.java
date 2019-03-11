@@ -13,6 +13,7 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.google.common.base.Joiner;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.math.NumberUtils;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.select.Elements;
@@ -146,7 +147,7 @@ public class DouBanProcessor implements SpiderProcessor {
          */
         String min = info.select("[property=v:runtime]").attr("content");
         if (StringUtils.isNotBlank(min)) {
-            programme.setSeconds(Integer.parseInt(min) * 60);
+            programme.setSeconds(NumberUtils.toInt(min, 0) * 60);
         } else {
             min = properties.get("单集片长");
             if (StringUtils.isNotBlank(min)) {
