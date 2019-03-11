@@ -4,16 +4,16 @@
 
     <insert id="insert" parameterType="com.abb.bye.client.domain.ProgrammeDO" useGeneratedKeys="true" keyProperty="id">
         insert into
-        programme(gmt_create,gmt_modified,title,release_year,img,types,directors,performers,languages,alias,seconds,score,imdb,summary,areas,season,total_episode,status,attributes,tags,unique_key,sites,keywords)
+        programme(gmt_create,gmt_modified,title,release_year,img,types,directors,performers,languages,alias,seconds,score,imdb,summary,areas,season,total_episode,status,attributes,tags,unique_key,sites,keywords,categories)
         values
-        (now(),now(),#{title},#{releaseYear},#{img},#{types},#{directors},#{performers},#{languages},#{alias},#{seconds},#{score},#{imdb},#{summary},#{areas},#{season},#{totalEpisode},#{status},#{attributes},#{tags},#{uniqueKey},#{sites},#{keywords})
+        (now(),now(),#{title},#{releaseYear},#{img},#{types},#{directors},#{performers},#{languages},#{alias},#{seconds},#{score},#{imdb},#{summary},#{areas},#{season},#{totalEpisode},#{status},#{attributes},#{tags},#{uniqueKey},#{sites},#{keywords},#{categories})
     </insert>
 
     <insert id="copyFromSource" parameterType="com.abb.bye.client.domain.ProgrammeDO" useGeneratedKeys="true" keyProperty="id">
         insert ignore into
-        programme(gmt_create,gmt_modified,title,release_year,img,types,directors,performers,languages,alias,seconds,score,imdb,summary,areas,season,total_episode,status,attributes,tags,unique_key,sites,keywords)
+        programme(gmt_create,gmt_modified,title,release_year,img,types,directors,performers,languages,alias,seconds,score,imdb,summary,areas,season,total_episode,status,attributes,tags,unique_key,sites,keywords,categories)
         values
-        (now(),now(),#{title},#{releaseYear},#{img},#{types},#{directors},#{performers},#{languages},#{alias},#{seconds},#{score},#{imdb},#{summary},#{areas},#{season},#{totalEpisode},#{status},#{attributes},#{tags},#{uniqueKey},#{sites},#{keywords})
+        (now(),now(),#{title},#{releaseYear},#{img},#{types},#{directors},#{performers},#{languages},#{alias},#{seconds},#{score},#{imdb},#{summary},#{areas},#{season},#{totalEpisode},#{status},#{attributes},#{tags},#{uniqueKey},#{sites},#{keywords},#{categories})
         ON DUPLICATE KEY UPDATE
         gmt_modified=now(),
         img=#{img},
@@ -22,11 +22,12 @@
         imdb=#{imdb},
         alias=#{alias},
         season=#{season},
+        categories=#{categories},
         total_episode=#{totalEpisode}
     </insert>
 
     <sql id="queryColumns">
-        gmt_create,gmt_modified,title,release_year,img,types,directors,performers,languages,alias,seconds,score,imdb,summary,areas,season,total_episode,status,attributes,tags,unique_key,sites,keywords
+        gmt_create,gmt_modified,title,release_year,img,types,directors,performers,languages,alias,seconds,score,imdb,summary,areas,season,total_episode,status,attributes,tags,unique_key,sites,keywords,categories
     </sql>
 
     <select id="get" parameterType="long" resultType="com.abb.bye.client.domain.ProgrammeDO">

@@ -90,6 +90,7 @@ CREATE TABLE `programme` (
   `unique_key` VARCHAR(64) NOT NULL COMMENT '唯一键',
   `sites` VARCHAR(32) NOT NULL COMMENT '支持站点',
   `keywords` VARCHAR(128) NOT NULL COMMENT '支持站点',
+  `categories` VARCHAR(16) DEFAULT NULL COMMENT '类目',
   PRIMARY KEY (`id`),
   UNIQUE KEY `unique_key` (`unique_key`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4 COMMENT='节目总表'
@@ -125,6 +126,7 @@ CREATE TABLE `programme_source` (
   `total_episode` int(8) DEFAULT NULL COMMENT '总集数',
   `status` tinyint(4) NOT NULL COMMENT '0：无效，1：有效',
   `attributes` VARCHAR(256) DEFAULT NULL COMMENT '附加属性',
+  `category` int(8) DEFAULT NULL COMMENT '类目',
   PRIMARY KEY (`id`),
   UNIQUE KEY `uk_source` (`site`,`source_id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4 COMMENT='节目源'

@@ -13,6 +13,15 @@ public class ProgrammeSourceDO extends ProgrammeBaseDO implements Serializable {
     private String sourceId;
     private String showStatus;
     private String url;
+    private Integer category;
+
+    public Integer getCategory() {
+        return category;
+    }
+
+    public void setCategory(Integer category) {
+        this.category = category;
+    }
 
     public String getUrl() {
         return url;

@@ -90,7 +90,7 @@ public class SpiderServiceImpl implements SpiderService, ApplicationContextAware
             Runnable spider = new SpiderRunner(Spider.create(pageProcessor)
                 .setExecutorService(CommonThreadPool.getCommonExecutor())
                 .addUrl(urlList)
-                .addPipeline(new ProgrammePipeline())
+                .addPipeline(new ProgrammePipeline(site))
                 .thread(spiderConfig.getThreadCount()), pageProcessor.processor, spiderConfig, site);
             return ResultDTO.buildSuccess(spider);
         } catch (Throwable e) {
@@ -174,10 +174,23 @@ public class SpiderServiceImpl implements SpiderService, ApplicationContextAware
     }
 
     public class ProgrammePipeline implements Pipeline {
+        private int site;
+
+        private ProgrammePipeline(int site) {
+            this.site = site;
+        }
 
         @Override
         public void process(ResultItems resultItems, Task task) {
             ProgrammeSourceDO programmeSourceDO = resultItems.get(Constants.SPIDER_PROGRAMME_FIELD_NAME);
+            programmeSourceDO.setSite(site);
+            programmeSourceDO.setStatus(ProgrammeBaseDO.STATUS_ENABLE);
+            if (programmeSourceDO.getSeconds() == null) {
+                programmeSourceDO.setSeconds(0);
+            }
+            if (programmeSourceDO.getScore() == null) {
+                programmeSourceDO.setScore((double)0);
+            }
             programmeSourceService.insertOrUpdate(programmeSourceDO);
         }
     }

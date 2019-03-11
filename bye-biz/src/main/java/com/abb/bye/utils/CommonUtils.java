@@ -6,6 +6,8 @@ import org.springframework.beans.BeanUtils;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * @author cenpeng.lwm
@@ -83,11 +85,22 @@ public class CommonUtils {
         return sub;
     }
 
+    private static Pattern SERIES_PATTERN = Pattern.compile("第(.*)季");
+
     public static final String formatTitle(String title) {
         if (title == null) {
             return null;
         }
         title = StringUtils.replaceEach(title, new String[] {"：", "（", "）", "“", "”", "！"}, new String[] {":", "(", ")", "\"", "\"", "!"});
+        Matcher m = SERIES_PATTERN.matcher(title);
+        if (m.find()) {
+            StringBuffer sb = new StringBuffer();
+            m.appendReplacement(sb, " 第" + m.group(1) + "季");
+            m.appendTail(sb);
+            title = sb.toString();
+        }
+        title = title.replaceAll("\\[.*?\\]", "");
+        title = title.replaceAll("\\(.*?\\)", "");
         title = title.replaceAll("\\s{1,}", " ").trim();
         return title;
     }
@@ -114,8 +127,8 @@ public class CommonUtils {
     //}
 
     public static void main(String[] args) {
-        String title = formatTitle(" 阿丽塔:战斗天使     （豆瓣）");
-        title = StringUtils.replace(title, "(豆瓣)", "").trim();
+        String title = formatTitle("无耻之徒(美版)第九季");
+        formatTitle(title);
         System.out.println(title);
         String alias = formatTitle("阿丽塔：战斗天使 Alita: Battle Angel");
         System.out.println(alias);

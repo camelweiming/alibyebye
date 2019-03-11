@@ -42,6 +42,7 @@ public class ProgrammeServiceImpl implements ProgrammeService {
             tags.add(ProgrammeTag.FROM_SOURCE.getType());
             programmeDO.setTags(Joiner.on(",").join(tags));
             setProperties(programmeDO);
+            programmeDO.setCategories(programmeSourceDO.getCategory() == null ? null : programmeSourceDO.getCategory().toString());
             programmeMapper.copyFromSource(programmeDO);
             return ResultDTO.buildSuccess(null);
         } catch (Throwable e) {

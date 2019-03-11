@@ -4,6 +4,7 @@ import com.abb.bye.Constants;
 import com.abb.bye.client.domain.PageDTO;
 import com.abb.bye.client.domain.PersonDO;
 import com.abb.bye.client.domain.ProgrammeSourceDO;
+import com.abb.bye.client.domain.enums.ProgrammeCategory;
 import com.abb.bye.client.spider.SpiderProcessor;
 import com.abb.bye.utils.CommonUtils;
 import com.abb.bye.utils.SpiderHelper;
@@ -59,7 +60,6 @@ public class DouBanProcessor implements SpiderProcessor {
     public void processDetail(String sourceId, PageDTO page) {
         ProgrammeSourceDO programme = new ProgrammeSourceDO();
         programme.setSourceId(sourceId);
-        programme.setSite(1);
         programme.setUrl(page.getUrl());
         Document doc = Jsoup.parse(page.getHtml(), page.getUrl());
         String title = parseTitle(doc);
@@ -159,19 +159,56 @@ public class DouBanProcessor implements SpiderProcessor {
         if (programme.getSeconds() == null) {
             programme.setSeconds(0);
         }
+        /**
+         * imdb
+         */
         programme.setImdb(properties.get("IMDb链接"));
         String score = doc.select("div.rating_self").select("strong.rating_num").text();
         if (StringUtils.isNotBlank(score)) {
             programme.setScore(Double.parseDouble(score));
         }
+        /**
+         * 简介
+         */
         String summary = doc.select("div.related-info").select("[property=v:summary]").text();
-        programme.setStatus(ProgrammeSourceDO.STATUS_ENABLE);
         programme.setSummary(StringUtils.substring(summary, 0, 500));
+        /**
+         * 分类
+         */
+        ProgrammeCategory category = category(content, programme.getTypes());
+        if (category != null) {
+            programme.setCategory(category.getType());
+        }
         programme.setAttributes(JSON.toJSONString(attributes));
         page.addField(Constants.SPIDER_PROGRAMME_FIELD_NAME, programme);
         if (logger.isDebugEnabled()) {
             logger.debug("process:" + programme);
         }
+    }
+
+    private ProgrammeCategory category(Elements content, String types) {
+        String text = content.select("div#recommendations").select("h2").text();
+        if (types == null) {
+            types = "";
+        }
+        if (types.contains("纪录片")) {
+            return ProgrammeCategory.DOC;
+        }
+        if (types.contains("脱口秀") || types.contains("歌舞")) {
+            return ProgrammeCategory.ZY;
+        }
+        if (text == null) {
+            return null;
+        }
+        if (text.contains("电影")) {
+            return ProgrammeCategory.MOVIE;
+        } else if (text.contains("剧集")) {
+            if (types.contains("动画")) {
+                return ProgrammeCategory.COMIC;
+            }
+            return ProgrammeCategory.SHOW;
+        }
+        return null;
     }
 
     private String parseTitle(Document doc) {

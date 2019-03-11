@@ -4,16 +4,16 @@
 
     <insert id="insert" parameterType="com.abb.bye.client.domain.ProgrammeSourceDO" useGeneratedKeys="true" keyProperty="id">
         insert into
-        programme_source(gmt_create,gmt_modified,programme_id,site,source_id,url,title,release_year,img,types,directors,performers,languages,alias,seconds,score,imdb,summary,areas,show_status,season,total_episode,status,attributes)
+        programme_source(gmt_create,gmt_modified,programme_id,site,source_id,url,title,release_year,img,types,directors,performers,languages,alias,seconds,score,imdb,summary,areas,show_status,season,total_episode,status,attributes,category)
         values
-        (now(),now(),#{programmeId},#{site},#{sourceId},#{url},#{title},#{releaseYear},#{img},#{types},#{directors},#{performers},#{languages},#{alias},#{seconds},#{score},#{imdb},#{summary},#{areas},#{showStatus},#{season},#{totalEpisode},#{status},#{attributes})
+        (now(),now(),#{programmeId},#{site},#{sourceId},#{url},#{title},#{releaseYear},#{img},#{types},#{directors},#{performers},#{languages},#{alias},#{seconds},#{score},#{imdb},#{summary},#{areas},#{showStatus},#{season},#{totalEpisode},#{status},#{attributes},#{category})
     </insert>
 
     <insert id="replace" parameterType="com.abb.bye.client.domain.ProgrammeSourceDO" useGeneratedKeys="true" keyProperty="id">
         insert into
-        programme_source(gmt_create,gmt_modified,programme_id,site,source_id,url,title,release_year,img,types,directors,performers,languages,alias,seconds,score,imdb,summary,areas,show_status,season,total_episode,status,attributes)
+        programme_source(gmt_create,gmt_modified,programme_id,site,source_id,url,title,release_year,img,types,directors,performers,languages,alias,seconds,score,imdb,summary,areas,show_status,season,total_episode,status,attributes,category)
         values
-        (now(),now(),#{programmeId},#{site},#{sourceId},#{url},#{title},#{releaseYear},#{img},#{types},#{directors},#{performers},#{languages},#{alias},#{seconds},#{score},#{imdb},#{summary},#{areas},#{showStatus},#{season},#{totalEpisode},#{status},#{attributes})
+        (now(),now(),#{programmeId},#{site},#{sourceId},#{url},#{title},#{releaseYear},#{img},#{types},#{directors},#{performers},#{languages},#{alias},#{seconds},#{score},#{imdb},#{summary},#{areas},#{showStatus},#{season},#{totalEpisode},#{status},#{attributes},#{category})
         ON DUPLICATE KEY UPDATE
         gmt_modified=now(),
         img=#{img},
@@ -25,11 +25,12 @@
         seconds=#{seconds},
         alias=#{alias},
         season=#{season},
+        category=#{category},
         total_episode=#{totalEpisode}
     </insert>
 
     <sql id="queryColumns">
-        gmt_create,gmt_modified,programme_id,site,source_id,url,title,release_year,img,types,directors,performers,languages,alias,seconds,score,imdb,summary,areas,show_status,season,total_episode,status,attributes
+        gmt_create,gmt_modified,programme_id,site,source_id,url,title,release_year,img,types,directors,performers,languages,alias,seconds,score,imdb,summary,areas,show_status,season,total_episode,status,attributes,category
     </sql>
 
     <select id="get" parameterType="long" resultType="com.abb.bye.client.domain.ProgrammeSourceDO">

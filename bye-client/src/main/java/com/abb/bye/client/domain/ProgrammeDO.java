@@ -15,6 +15,15 @@ public class ProgrammeDO extends ProgrammeBaseDO implements Serializable {
     private String uniqueKey;
     private String sites;
     private String keywords;
+    private String categories;
+
+    public String getCategories() {
+        return categories;
+    }
+
+    public void setCategories(String categories) {
+        this.categories = categories;
+    }
 
     public String getTags() {
         return tags;
