@@ -150,10 +150,9 @@ public class DouBanProcessor implements SpiderProcessor {
         } else {
             min = properties.get("单集片长");
             if (StringUtils.isNotBlank(min)) {
-                if (min.endsWith("分钟")) {
-                    min = min.replace("分钟", "");
-                    programme.setSeconds(Integer.parseInt(min) * 60);
-                }
+                min = min.replace("分钟", "");
+                min = min.replace("约", "");
+                programme.setSeconds(Integer.parseInt(min) * 60);
             }
         }
         if (programme.getSeconds() == null) {
