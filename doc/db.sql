@@ -89,7 +89,7 @@ CREATE TABLE `programme` (
   `attributes` VARCHAR(256) DEFAULT NULL COMMENT '附加属性',
   `unique_key` VARCHAR(64) NOT NULL COMMENT '唯一键',
   `sites` VARCHAR(32) NOT NULL COMMENT '支持站点',
-  `keywords` VARCHAR(128) NOT NULL COMMENT '支持站点',
+  `keywords` VARCHAR(128) NOT NULL COMMENT '关键字',
   `categories` VARCHAR(16) DEFAULT NULL COMMENT '类目',
   PRIMARY KEY (`id`),
   UNIQUE KEY `unique_key` (`unique_key`)
@@ -115,7 +115,7 @@ CREATE TABLE `programme_source` (
   `directors` VARCHAR(512) DEFAULT NULL COMMENT '导演',
   `performers` VARCHAR(512) DEFAULT NULL COMMENT '演员',
   `languages` VARCHAR(32) DEFAULT NULL COMMENT '语言',
-  `alias` VARCHAR(64) DEFAULT NULL COMMENT '别名',
+  `alias` VARCHAR(128) DEFAULT NULL COMMENT '别名',
   `seconds` bigint(20) unsigned NOT NULL COMMENT '时长',
   `score` decimal(10,2) NOT NULL COMMENT '评分',
   `imdb` VARCHAR(16) DEFAULT NULL COMMENT 'IMDB',

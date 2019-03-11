@@ -175,7 +175,7 @@ public class DouBanProcessor implements SpiderProcessor {
         /**
          * 分类
          */
-        ProgrammeCategory category = category(content, programme.getTypes());
+        ProgrammeCategory category = category(programme);
         if (category != null) {
             programme.setCategory(category.getType());
         }
@@ -186,10 +186,10 @@ public class DouBanProcessor implements SpiderProcessor {
         }
     }
 
-    private ProgrammeCategory category(Elements content, String types) {
-        String text = content.select("div#recommendations").select("h2").text();
-        if (types == null) {
-            types = "";
+    private ProgrammeCategory category(ProgrammeSourceDO programmeSourceDO) {
+        String types = programmeSourceDO.getTypes() == null ? "" : programmeSourceDO.getTypes();
+        if (types.contains("儿童")) {
+            return ProgrammeCategory.CHILDREN;
         }
         if (types.contains("纪录片")) {
             return ProgrammeCategory.DOC;
@@ -197,18 +197,13 @@ public class DouBanProcessor implements SpiderProcessor {
         if (types.contains("脱口秀") || types.contains("歌舞")) {
             return ProgrammeCategory.ZY;
         }
-        if (text == null) {
-            return null;
-        }
-        if (text.contains("电影")) {
-            return ProgrammeCategory.MOVIE;
-        } else if (text.contains("剧集")) {
+        if (programmeSourceDO.getTotalEpisode() != null) {
             if (types.contains("动画")) {
                 return ProgrammeCategory.COMIC;
             }
             return ProgrammeCategory.SHOW;
         }
-        return null;
+        return ProgrammeCategory.MOVIE;
     }
 
     private String parseTitle(Document doc) {
