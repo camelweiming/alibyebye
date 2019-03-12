@@ -70,7 +70,7 @@ public class DouBanProcessor implements SpiderProcessor {
         titleAlias = StringUtils.replace(titleAlias, title, "").trim();
 
         String year = CommonUtils.clean(content.select("h1 span.year").text());
-        if (year == null) {
+        if (StringUtils.isBlank(year)) {
             logger.warn("no-release-year:" + programme.getUrl());
             page.setSkip(true);
             return;
@@ -153,7 +153,7 @@ public class DouBanProcessor implements SpiderProcessor {
             if (StringUtils.isNotBlank(min)) {
                 min = min.replace("分钟", "");
                 min = min.replace("约", "");
-                programme.setSeconds(Integer.parseInt(min) * 60);
+                programme.setSeconds(NumberUtils.toInt(min) * 60);
             }
         }
         if (programme.getSeconds() == null) {
@@ -194,7 +194,7 @@ public class DouBanProcessor implements SpiderProcessor {
         if (types.contains("纪录片")) {
             return ProgrammeCategory.DOC;
         }
-        if (types.contains("脱口秀") || types.contains("歌舞")) {
+        if (types.contains("脱口秀") || types.contains("歌舞") || types.contains("真人秀")) {
             return ProgrammeCategory.ZY;
         }
         if (programmeSourceDO.getTotalEpisode() != null) {
@@ -239,20 +239,10 @@ public class DouBanProcessor implements SpiderProcessor {
 
     public static void main(String[] args) throws UnsupportedEncodingException {
         String[] TAGS = new String[] {"电影", "电视剧", "综艺", "动漫", "纪录片"};
-        int PAGE_STEP = 20;
-        int MAX_PAGE = 10;
-        List<String> urls = new ArrayList<>(1024);
+        String url = "https://movie.douban.com/j/new_search_subjects?sort=R&range=1,10&tags=%s&start=@page-split[0:20->100]";
         for (String tag : TAGS) {
-            String url = "https://movie.douban.com/j/new_search_subjects?sort=R&range=1,10&tags=" + URLEncoder.encode(tag, "UTF-8");
-            int start = 0;
-            for (int i = 0; i < MAX_PAGE; i++) {
-                urls.add(url + "&start=" + start);
-                start += PAGE_STEP;
-            }
+            System.out.println(String.format(url, URLEncoder.encode(tag, "UTF-8")));
         }
-        urls.forEach(url -> {
-            System.out.println(url);
-        });
     }
 
     @Override

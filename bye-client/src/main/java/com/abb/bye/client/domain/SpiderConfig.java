@@ -8,9 +8,13 @@ import org.apache.commons.lang3.builder.ToStringStyle;
  * @since 2019/3/7
  */
 public class SpiderConfig {
+    /**
+     * 处理器class
+     */
+    private String processor;
     private String userAgent;
     private String charset;
-    private int sleepTime = 5000;
+    private int sleepTime = 500;
     private int retryTimes = 0;
     private int cycleRetryTimes = 0;
     private int retrySleepTime = 1000;
@@ -24,6 +28,14 @@ public class SpiderConfig {
      * 更新间隔
      */
     private int updateIntervalSeconds = 24 * 3600;
+
+    public String getProcessor() {
+        return processor;
+    }
+
+    public void setProcessor(String processor) {
+        this.processor = processor;
+    }
 
     public boolean isOnlyInsert() {
         return onlyInsert;

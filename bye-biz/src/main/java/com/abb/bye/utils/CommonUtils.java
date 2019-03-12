@@ -1,11 +1,11 @@
 package com.abb.bye.utils;
 
+import org.apache.commons.beanutils.PropertyUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
+import java.io.ByteArrayInputStream;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -103,6 +103,23 @@ public class CommonUtils {
         title = title.replaceAll("\\(.*?\\)", "");
         title = title.replaceAll("\\s{1,}", " ").trim();
         return title;
+    }
+
+    public static final void setProperties(Object obj, String propertiesContent) {
+        try {
+            Properties properties = new Properties();
+            properties.load(new ByteArrayInputStream(propertiesContent.getBytes("UTF-8")));
+            Enumeration<String> enumeration = (Enumeration<String>)properties.propertyNames();
+            while (enumeration.hasMoreElements()) {
+                String name = enumeration.nextElement();
+                String value = properties.getProperty(name);
+                if (StringUtils.isNotBlank(value)) {
+                    PropertyUtils.setProperty(obj, name, value);
+                }
+            }
+        } catch (Throwable e) {
+            throw new RuntimeException(e);
+        }
     }
 
     //public static String full2Half(String string) {

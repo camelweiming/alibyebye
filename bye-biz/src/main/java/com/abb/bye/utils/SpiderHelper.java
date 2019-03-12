@@ -8,6 +8,8 @@ import org.jsoup.nodes.TextNode;
 import org.jsoup.select.Elements;
 import org.jsoup.select.NodeVisitor;
 
+import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -93,11 +95,6 @@ public class SpiderHelper {
         return urls;
     }
 
-    public static void main(String[] args) {
-        List<String> urls = splitPages("https://movie.douban.com/j/new_search_subjects?sort=R&range=1,10&tags=xxx&start=@page-split[0:20->100]");
-        urls.forEach(u -> {
-            System.out.println(u);
-        });
-
+    public static void main(String[] args) throws IOException, IllegalAccessException, NoSuchMethodException, InvocationTargetException {
     }
 }

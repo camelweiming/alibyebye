@@ -7,21 +7,26 @@ import com.abb.bye.client.domain.enums.SiteTag;
 import com.abb.bye.client.service.*;
 import com.abb.bye.client.spider.SpiderProcessor;
 import com.abb.bye.utils.CommonThreadPool;
+import com.abb.bye.utils.CommonUtils;
+import com.abb.bye.utils.SpiderHelper;
 import com.abb.bye.utils.Tracer;
-import com.alibaba.fastjson.JSON;
 import com.google.common.collect.Iterators;
+import com.google.common.collect.Lists;
 import org.apache.commons.lang3.StringUtils;
-import org.assertj.core.util.Lists;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.stereotype.Service;
 import us.codecraft.webmagic.*;
+import us.codecraft.webmagic.downloader.HttpClientDownloader;
 import us.codecraft.webmagic.pipeline.Pipeline;
 import us.codecraft.webmagic.processor.PageProcessor;
+import us.codecraft.webmagic.proxy.Proxy;
+import us.codecraft.webmagic.proxy.SimpleProxyProvider;
 
 import javax.annotation.Resource;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -41,6 +46,7 @@ public class SpiderServiceImpl implements SpiderService, ApplicationContextAware
     private SchedulerService schedulerService;
     @Resource
     private RejectStrategy rejectStrategy;
+    private HttpClientDownloader httpClientDownloader;
 
     @Override
     public ResultDTO<Void> doJob(int site) {
@@ -71,24 +77,29 @@ public class SpiderServiceImpl implements SpiderService, ApplicationContextAware
         }
         String urls = siteConfigsService.getFromDB(site, Constants.SYSTEM_CONFIG_SPIDER_URLS);
         String config = siteConfigsService.getFromDB(site, Constants.SYSTEM_CONFIG_SPIDER_CONFIG);
-        String spiderProcessor = siteConfigsService.getFromDB(site, Constants.SYSTEM_CONFIG_SPIDER_PROCESSOR);
+        SpiderConfig spiderConfig = new SpiderConfig();
+        CommonUtils.copyPropertiesQuietly(spiderConfig, config);
+        if (StringUtils.isBlank(config)) {
+            tracer.trace("empty config");
+            return ResultDTO.buildError("empty spider config");
+        }
         if (StringUtils.isBlank(urls)) {
             tracer.trace("empty spider urls");
             return ResultDTO.buildError("empty spider urls");
         }
-        if (spiderProcessor == null) {
+        if (spiderConfig.getProcessor() == null) {
             tracer.trace("miss processor");
             return ResultDTO.buildError("miss processor");
         }
-        String[] urlList = StringUtils.split(urls, "\r\n");
-        SpiderConfig spiderConfig = StringUtils.isBlank(config) ? new SpiderConfig() : JSON.parseObject(config, SpiderConfig.class);
+        String[] urlList = splitUrls(urls);
         tracer.trace("spiderConfig:" + spiderConfig);
         try {
-            Class<SpiderProcessor> clazz = (Class<SpiderProcessor>)Class.forName(spiderProcessor);
+            Class<SpiderProcessor> clazz = (Class<SpiderProcessor>)Class.forName(spiderConfig.getProcessor());
             SpiderProcessor processor = applicationContext.getBean(clazz);
             PageProcessorProxy pageProcessor = new PageProcessorProxy(site, spiderConfig, processor);
             Runnable spider = new SpiderRunner(Spider.create(pageProcessor)
                 .setExecutorService(CommonThreadPool.getCommonExecutor())
+                .setDownloader(httpClientDownloader)
                 .addUrl(urlList)
                 .addPipeline(new ProgrammePipeline(site))
                 .thread(spiderConfig.getThreadCount()), pageProcessor.processor, spiderConfig, site);
@@ -97,6 +108,19 @@ public class SpiderServiceImpl implements SpiderService, ApplicationContextAware
             tracer.trace("Error startSpider", true, e);
             return ResultDTO.buildError(e.getMessage());
         }
+    }
+
+    String[] splitUrls(String content) {
+        String[] array = StringUtils.split(content, "\r\n");
+        List<String> urls = new ArrayList<>();
+        for (String url : array) {
+            if (SpiderHelper.isSplitPages(url)) {
+                urls.addAll(SpiderHelper.splitPages(url));
+            } else {
+                urls.add(url);
+            }
+        }
+        return urls.toArray(new String[urls.size()]);
     }
 
     public class SpiderRunner implements Runnable {
@@ -198,6 +222,18 @@ public class SpiderServiceImpl implements SpiderService, ApplicationContextAware
     @Override
     public void afterPropertiesSet() {
         Tracer tracer = new Tracer("SPIDER_SCHEDULE_REGISTER");
+        httpClientDownloader = new HttpClientDownloader();
+        String proxies = siteConfigsService.getFromDB(0, Constants.SYSTEM_CONFIG_SPIDER_PROXY);
+        if (StringUtils.isNotBlank(proxies)) {
+            String[] array = StringUtils.split(proxies, "\r\n");
+            Proxy[] pxs = new Proxy[proxies.length()];
+            int i = 0;
+            for (String p : array) {
+                String[] line = StringUtils.split(p, ":");
+                pxs[i++] = new Proxy(line[0], Integer.valueOf(line[1]));
+            }
+            httpClientDownloader.setProxyProvider(SimpleProxyProvider.from(pxs));
+        }
         List<SiteDO> sites = siteService.filter(siteService.listFromDB(), Lists.newArrayList(SiteTag.ENABLE_SPIDER), SiteDO.STATUS_ENABLE);
         for (SiteDO site : sites) {
             String schedule = siteConfigsService.getFromDB(site.getSite(), Constants.SYSTEM_CONFIG_SPIDER_SCHEDULE);
