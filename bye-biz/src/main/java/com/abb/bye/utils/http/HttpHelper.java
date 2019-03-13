@@ -69,9 +69,10 @@ public class HttpHelper {
     }
 
     public static void main(String[] args) throws Exception {
-        HttpHost httpHost = new HttpHost("http://www.xicidaili.com/nt/");
+        HttpHost httpHost = new HttpHost("http://113.200.214.164",9999);
         CloseableHttpAsyncClient closeableHttpAsyncClient = new SimpleHttpBuilder().build();
         String content = HttpHelper.get(closeableHttpAsyncClient, "https://blog.csdn.net/taozhexuan123/article/details/73739960",new ReqConfig().setProxy(httpHost));
         System.out.println(content);
+        closeableHttpAsyncClient.close();
     }
 }

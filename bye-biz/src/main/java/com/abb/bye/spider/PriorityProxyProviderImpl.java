@@ -72,9 +72,9 @@ public class PriorityProxyProviderImpl implements PriorityProxyProvider, Initial
             proxyQueue.getHosts().parallelStream().forEach(h -> {
                 try {
                     long t = System.currentTimeMillis();
-                    HttpHelper.touch(closeableHttpAsyncClient, preloadUrl, new ReqConfig().setProxy(h));
+                    String content = HttpHelper.get(closeableHttpAsyncClient, preloadUrl, new ReqConfig().setProxy(h));
                     long cost = System.currentTimeMillis() - t;
-                    logger.info("preload-success:" + h + " cost:" + cost);
+                    logger.info("preload-success:" + h + " cost:" + cost + " content:" + (content == null ? "" : content.substring(0, 20)));
                     proxyQueue.success(h, cost);
                 } catch (Exception e) {
                     logger.info("preload-failed:" + h);
