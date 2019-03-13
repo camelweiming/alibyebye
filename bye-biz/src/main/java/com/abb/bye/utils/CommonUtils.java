@@ -1,6 +1,6 @@
 package com.abb.bye.utils;
 
-import org.apache.commons.beanutils.PropertyUtils;
+import com.abb.bye.client.domain.SpiderConfig;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 
@@ -105,7 +105,13 @@ public class CommonUtils {
         return title;
     }
 
-    public static final void setProperties(Object obj, String propertiesContent) {
+    /**
+     * 从属性文件设置属性，性能差
+     *
+     * @param obj
+     * @param propertiesContent
+     */
+    public static final void copyFromProperties(Object obj, String propertiesContent) {
         try {
             Properties properties = new Properties();
             properties.load(new ByteArrayInputStream(propertiesContent.getBytes("UTF-8")));
@@ -114,7 +120,8 @@ public class CommonUtils {
                 String name = enumeration.nextElement();
                 String value = properties.getProperty(name);
                 if (StringUtils.isNotBlank(value)) {
-                    PropertyUtils.setProperty(obj, name, value);
+                    org.apache.commons.beanutils.BeanUtils.copyProperty(obj, name, value);
+
                 }
             }
         } catch (Throwable e) {
@@ -122,32 +129,9 @@ public class CommonUtils {
         }
     }
 
-    //public static String full2Half(String string) {
-    //    if (string == null) {
-    //        return string;
-    //    }
-    //    char[] charArray = string.toCharArray();
-    //    for (int i = 0; i < charArray.length; i++) {
-    //        char c = charArray[i];
-    //        if (Character.isLetterOrDigit(c)) {
-    //            continue;
-    //        }
-    //        if (c == 12288) {
-    //            charArray[i] = ' ';
-    //        } else if (c >= ' ' &&
-    //            c <= 65374) {
-    //            charArray[i] = (char)(c - 65248);
-    //        } else {
-    //        }
-    //    }
-    //    return new String(charArray);
-    //}
-
     public static void main(String[] args) {
-        String title = formatTitle("无耻之徒(美版)第九季");
-        formatTitle(title);
-        System.out.println(title);
-        String alias = formatTitle("阿丽塔：战斗天使 Alita: Battle Angel");
-        System.out.println(alias);
+        SpiderConfig spiderConfig = new SpiderConfig();
+        copyFromProperties(spiderConfig, "retryTimes=13");
+        System.out.println(spiderConfig);
     }
 }

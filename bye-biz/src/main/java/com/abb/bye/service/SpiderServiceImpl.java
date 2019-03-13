@@ -19,11 +19,9 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.stereotype.Service;
 import us.codecraft.webmagic.*;
-import us.codecraft.webmagic.downloader.HttpClientDownloader;
+import us.codecraft.webmagic.downloader.Downloader;
 import us.codecraft.webmagic.pipeline.Pipeline;
 import us.codecraft.webmagic.processor.PageProcessor;
-import us.codecraft.webmagic.proxy.Proxy;
-import us.codecraft.webmagic.proxy.SimpleProxyProvider;
 
 import javax.annotation.Resource;
 import java.util.ArrayList;
@@ -46,7 +44,8 @@ public class SpiderServiceImpl implements SpiderService, ApplicationContextAware
     private SchedulerService schedulerService;
     @Resource
     private RejectStrategy rejectStrategy;
-    private HttpClientDownloader httpClientDownloader;
+    @Resource
+    private Downloader customDownloader;
 
     @Override
     public ResultDTO<Void> doJob(int site) {
@@ -78,7 +77,7 @@ public class SpiderServiceImpl implements SpiderService, ApplicationContextAware
         String urls = siteConfigsService.getFromDB(site, Constants.SYSTEM_CONFIG_SPIDER_URLS);
         String config = siteConfigsService.getFromDB(site, Constants.SYSTEM_CONFIG_SPIDER_CONFIG);
         SpiderConfig spiderConfig = new SpiderConfig();
-        CommonUtils.copyPropertiesQuietly(spiderConfig, config);
+        CommonUtils.copyFromProperties(spiderConfig, config);
         if (StringUtils.isBlank(config)) {
             tracer.trace("empty config");
             return ResultDTO.buildError("empty spider config");
@@ -99,7 +98,7 @@ public class SpiderServiceImpl implements SpiderService, ApplicationContextAware
             PageProcessorProxy pageProcessor = new PageProcessorProxy(site, spiderConfig, processor);
             Runnable spider = new SpiderRunner(Spider.create(pageProcessor)
                 .setExecutorService(CommonThreadPool.getCommonExecutor())
-                .setDownloader(httpClientDownloader)
+                .setDownloader(customDownloader)
                 .addUrl(urlList)
                 .addPipeline(new ProgrammePipeline(site))
                 .thread(spiderConfig.getThreadCount()), pageProcessor.processor, spiderConfig, site);
@@ -222,18 +221,6 @@ public class SpiderServiceImpl implements SpiderService, ApplicationContextAware
     @Override
     public void afterPropertiesSet() {
         Tracer tracer = new Tracer("SPIDER_SCHEDULE_REGISTER");
-        httpClientDownloader = new HttpClientDownloader();
-        String proxies = siteConfigsService.getFromDB(0, Constants.SYSTEM_CONFIG_SPIDER_PROXY);
-        if (StringUtils.isNotBlank(proxies)) {
-            String[] array = StringUtils.split(proxies, "\r\n");
-            Proxy[] pxs = new Proxy[proxies.length()];
-            int i = 0;
-            for (String p : array) {
-                String[] line = StringUtils.split(p, ":");
-                pxs[i++] = new Proxy(line[0], Integer.valueOf(line[1]));
-            }
-            httpClientDownloader.setProxyProvider(SimpleProxyProvider.from(pxs));
-        }
         List<SiteDO> sites = siteService.filter(siteService.listFromDB(), Lists.newArrayList(SiteTag.ENABLE_SPIDER), SiteDO.STATUS_ENABLE);
         for (SiteDO site : sites) {
             String schedule = siteConfigsService.getFromDB(site.getSite(), Constants.SYSTEM_CONFIG_SPIDER_SCHEDULE);
