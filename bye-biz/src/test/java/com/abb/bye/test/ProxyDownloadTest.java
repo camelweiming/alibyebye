@@ -6,13 +6,13 @@ import com.abb.bye.utils.http.HttpHelper;
 import com.abb.bye.utils.http.ReqConfig;
 import com.abb.bye.utils.http.SimpleHttpBuilder;
 import com.alibaba.fastjson.JSON;
-import org.apache.http.impl.nio.client.CloseableHttpAsyncClient;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.select.Elements;
 import org.junit.Test;
 
 import javax.annotation.Resource;
+import java.io.Closeable;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -27,7 +27,7 @@ public class ProxyDownloadTest extends BaseDAOTest {
         headers.put("User-Agent", "Mozilla/5.0 (Linux; Android 6.0.1; Nexus 7 Build/MOB30X) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/72.0.3626.121 Safari/537.36");
     }
 
-    private static CloseableHttpAsyncClient httpAsyncClient = new SimpleHttpBuilder().build();
+    private static Closeable httpCLient = new SimpleHttpBuilder().build();
     @Resource
     private ProxyMapper proxyMapper;
     //private static String[] domains = new String[] {"https://www.xicidaili.com/nt/"};
@@ -49,7 +49,7 @@ public class ProxyDownloadTest extends BaseDAOTest {
             for (int k = 1; k < 50; k++) {
                 String url = domain + k;
                 try {
-                    String content = HttpHelper.get(httpAsyncClient, url, new ReqConfig().setHeaders(headers));
+                    String content = HttpHelper.get(httpCLient, url, new ReqConfig().setHeaders(headers));
                     Document doc = Jsoup.parse(content);
                     Elements trs = doc.select("table#ip_list").select("tr");
                     ProxyDO proxyDO = new ProxyDO();

@@ -19,6 +19,7 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
+import java.io.Closeable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ArrayBlockingQueue;
@@ -43,7 +44,7 @@ public class ProxyServiceImpl implements ProxyService, InitializingBean {
             logger.error("Error put queue", e);
         }
     });
-    private CloseableHttpAsyncClient httpClient = new SimpleHttpBuilder().setSocketTimeout(5000).setConnectionTimeout(5000).setConnectionRequestTimeout(5000).build();
+    private Closeable httpClient = new SimpleHttpBuilder().setSocketTimeout(5000).setConnectionTimeout(5000).setConnectionRequestTimeout(5000).build();
     @Resource
     private ProxyMapper proxyMapper;
     private String checkUrl = "https://baidu.com";

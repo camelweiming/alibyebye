@@ -9,7 +9,6 @@ import com.abb.bye.utils.http.SimpleHttpBuilder;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpHost;
 import org.apache.http.HttpResponse;
-import org.apache.http.impl.nio.client.CloseableHttpAsyncClient;
 import org.apache.http.util.EntityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,8 +22,11 @@ import us.codecraft.webmagic.utils.CharsetUtils;
 import us.codecraft.webmagic.utils.HttpClientUtils;
 
 import javax.annotation.Resource;
+import java.io.Closeable;
 import java.io.IOException;
 import java.nio.charset.Charset;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * @author cenpeng.lwm
@@ -33,7 +35,7 @@ import java.nio.charset.Charset;
 @Service("customDownloader")
 public class CustomDownloader extends AbstractDownloader {
     private static final Logger logger = LoggerFactory.getLogger(CustomDownloader.class);
-    private CloseableHttpAsyncClient closeableHttpAsyncClient = new SimpleHttpBuilder().setRedirectStrategy(new SimpleHttpBuilder.CustomRedirectStrategy()).build();
+    private Closeable httpClient = new SimpleHttpBuilder().setRedirectStrategy(new SimpleHttpBuilder.CustomRedirectStrategy()).build();
     @Resource
     private ProxyService proxyService;
     private int thread;
@@ -43,12 +45,15 @@ public class CustomDownloader extends AbstractDownloader {
     @Override
     public Page download(Request request, Task task) {
         Page page = Page.fail();
+        Map<String, String> headers = new HashMap<>();
+        headers.put("User-Agent", task.getSite().getUserAgent());
         for (Proxy proxy : proxyService.getProxy(3)) {
             HttpResponse response = null;
             try {
                 localLimiter.add(thread);
                 long t = System.currentTimeMillis();
-                response = HttpHelper.getResponse(closeableHttpAsyncClient, request.getUrl(), new ReqConfig()
+                response = HttpHelper.getResponse(httpClient, request.getUrl(), new ReqConfig()
+                    .setHeaders(headers)
                     .setCharset(request.getCharset())
                     .setConnectionTimeout(task.getSite().getTimeOut())
                     .setConnectionRequestTimeout(task.getSite().getTimeOut())
@@ -59,7 +64,7 @@ public class CustomDownloader extends AbstractDownloader {
                 proxyService.report(proxy.setSuccess(true).setCost((System.currentTimeMillis() - t)));
                 return page;
             } catch (Throwable e) {
-                logger.warn("Error download (" + proxy + ") url:" + request.getUrl(), e);
+                logger.warn("Error download (" + proxy + ") url:" + request.getUrl() + " " + e.getMessage());
                 proxyService.report(proxy.setSuccess(false));
             } finally {
                 localLimiter.release();

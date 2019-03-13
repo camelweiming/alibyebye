@@ -9,7 +9,11 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpRequestWrapper;
 import org.apache.http.client.methods.HttpUriRequest;
+import org.apache.http.conn.ssl.NoopHostnameVerifier;
+import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
 import org.apache.http.conn.ssl.TrustAllStrategy;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClients;
 import org.apache.http.impl.client.LaxRedirectStrategy;
 import org.apache.http.impl.nio.client.CloseableHttpAsyncClient;
 import org.apache.http.impl.nio.client.HttpAsyncClients;
@@ -20,6 +24,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.net.ssl.SSLContext;
+import java.io.Closeable;
 import java.net.URI;
 
 /**
@@ -34,12 +39,17 @@ public class SimpleHttpBuilder {
     private int totalConnPerRoute = 100;
     private boolean autoStart = true;
     private RedirectStrategy redirectStrategy;
-    private String[] supportedCipherSuites = new String[] {"SSLv3", "TLSv1", "TLSv1.1", "TLSv1.2"};
+    private String[] supportedProtocols = new String[] {"SSLv3", "TLSv1", "TLSv1.1", "TLSv1.2"};
+    private boolean async = true;
 
-    public CloseableHttpAsyncClient build() {
+    public Closeable build() {
+        return async ? buildAsyncHttpClient() : buildSyncHttpClient();
+    }
+
+    public CloseableHttpAsyncClient buildAsyncHttpClient() {
         try {
             SSLContext sslcontext = SSLContexts.custom().loadTrustMaterial(new TrustAllStrategy()).build();
-            SSLIOSessionStrategy sslSessionStrategy = new SSLIOSessionStrategy(sslcontext, supportedCipherSuites, null, SSLIOSessionStrategy.getDefaultHostnameVerifier());
+            SSLIOSessionStrategy sslSessionStrategy = new SSLIOSessionStrategy(sslcontext, supportedProtocols, null, SSLIOSessionStrategy.getDefaultHostnameVerifier());
             CloseableHttpAsyncClient closeableHttpAsyncClient = HttpAsyncClients.custom()
                 .setRedirectStrategy(redirectStrategy)
                 .setDefaultRequestConfig(RequestConfig.custom()
@@ -54,6 +64,27 @@ public class SimpleHttpBuilder {
             if (autoStart) {
                 closeableHttpAsyncClient.start();
             }
+            return closeableHttpAsyncClient;
+        } catch (Throwable e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public CloseableHttpClient buildSyncHttpClient() {
+        try {
+            SSLContext sslContext = SSLContexts.custom().loadTrustMaterial(new TrustAllStrategy()).build();
+            SSLConnectionSocketFactory sslConnectionSocketFactory = new SSLConnectionSocketFactory(sslContext, supportedProtocols, null, NoopHostnameVerifier.INSTANCE);
+            CloseableHttpClient closeableHttpAsyncClient = HttpClients.custom()
+                .setRedirectStrategy(redirectStrategy)
+                .setDefaultRequestConfig(RequestConfig.custom()
+                    .setConnectionRequestTimeout(connectionRequestTimeout)
+                    .setSocketTimeout(socketTimeout)
+                    .setConnectTimeout(connectionTimeout)
+                    .build())
+                .setMaxConnPerRoute(maxConnPerRoute)
+                .setMaxConnTotal(totalConnPerRoute)
+                .setSSLSocketFactory(sslConnectionSocketFactory)
+                .build();
             return closeableHttpAsyncClient;
         } catch (Throwable e) {
             throw new RuntimeException(e);
@@ -91,7 +122,12 @@ public class SimpleHttpBuilder {
     }
 
     public SimpleHttpBuilder setSupportedCipherSuites(String[] supportedCipherSuites) {
-        this.supportedCipherSuites = supportedCipherSuites;
+        this.supportedProtocols = supportedProtocols;
+        return this;
+    }
+
+    public SimpleHttpBuilder setAsync(boolean async) {
+        this.async = async;
         return this;
     }
 
