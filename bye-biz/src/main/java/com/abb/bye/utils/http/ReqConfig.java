@@ -14,6 +14,7 @@ public class ReqConfig {
     private int socketTimeout = 5000;
     private int connectionTimeout = 5000;
     private int connectionRequestTimeout = 5000;
+    private int retry;
     private String charset;
     private Map<String, String> headers;
     private HttpHost proxy;
@@ -60,6 +61,15 @@ public class ReqConfig {
 
     public ReqConfig setHeaders(Map<String, String> headers) {
         this.headers = headers;
+        return this;
+    }
+
+    public int getRetry() {
+        return retry;
+    }
+
+    public ReqConfig setRetry(int retry) {
+        this.retry = retry;
         return this;
     }
 

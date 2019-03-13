@@ -1,8 +1,9 @@
 package com.abb.bye.spider;
 
+import com.abb.bye.client.domain.Proxy;
+import com.abb.bye.client.service.ProxyService;
 import com.abb.bye.utils.LocalLimiter;
 import com.abb.bye.utils.http.HttpHelper;
-import com.abb.bye.utils.http.PriorityProxyProvider;
 import com.abb.bye.utils.http.ReqConfig;
 import com.abb.bye.utils.http.SimpleHttpBuilder;
 import org.apache.commons.io.IOUtils;
@@ -34,38 +35,37 @@ public class CustomDownloader extends AbstractDownloader {
     private static final Logger logger = LoggerFactory.getLogger(CustomDownloader.class);
     private CloseableHttpAsyncClient closeableHttpAsyncClient = new SimpleHttpBuilder().setRedirectStrategy(new SimpleHttpBuilder.CustomRedirectStrategy()).build();
     @Resource
-    private PriorityProxyProvider priorityProxyProvider;
+    private ProxyService proxyService;
     private int thread;
     private LocalLimiter localLimiter = new LocalLimiter();
     private boolean responseHeader = true;
 
     @Override
     public Page download(Request request, Task task) {
-        HttpHost httpHost = priorityProxyProvider.getProxy();
         Page page = Page.fail();
-        HttpResponse response = null;
-        try {
-            localLimiter.add(thread);
-            long t = System.currentTimeMillis();
-            response = HttpHelper.getResponse(closeableHttpAsyncClient, request.getUrl(), new ReqConfig()
-                .setCharset(request.getCharset())
-                .setConnectionTimeout(task.getSite().getTimeOut())
-                .setConnectionRequestTimeout(task.getSite().getTimeOut())
-                .setSocketTimeout(task.getSite().getTimeOut())
-                .setProxy(httpHost)
-            );
-            page = handleResponse(request, request.getCharset() != null ? request.getCharset() : task.getSite().getCharset(), response, task);
-            onSuccess(request);
-            priorityProxyProvider.success(httpHost, (System.currentTimeMillis() - t));
-            return page;
-        } catch (Throwable e) {
-            logger.warn("Error download:" + request.getUrl(), e);
-            priorityProxyProvider.failed(httpHost);
-            onError(request);
-        } finally {
-            localLimiter.release();
-            if (response != null) {
-                EntityUtils.consumeQuietly(response.getEntity());
+        for (Proxy proxy : proxyService.getProxy(3)) {
+            HttpResponse response = null;
+            try {
+                localLimiter.add(thread);
+                long t = System.currentTimeMillis();
+                response = HttpHelper.getResponse(closeableHttpAsyncClient, request.getUrl(), new ReqConfig()
+                    .setCharset(request.getCharset())
+                    .setConnectionTimeout(task.getSite().getTimeOut())
+                    .setConnectionRequestTimeout(task.getSite().getTimeOut())
+                    .setSocketTimeout(task.getSite().getTimeOut())
+                    .setProxy(new HttpHost(proxy.getHost(), proxy.getPort()))
+                );
+                page = handleResponse(request, request.getCharset() != null ? request.getCharset() : task.getSite().getCharset(), response, task);
+                proxyService.report(proxy.setSuccess(true).setCost((System.currentTimeMillis() - t)));
+                return page;
+            } catch (Throwable e) {
+                logger.warn("Error download (" + proxy + ") url:" + request.getUrl(), e);
+                proxyService.report(proxy.setSuccess(false));
+            } finally {
+                localLimiter.release();
+                if (response != null) {
+                    EntityUtils.consumeQuietly(response.getEntity());
+                }
             }
         }
         return page;
@@ -105,9 +105,5 @@ public class CustomDownloader extends AbstractDownloader {
     @Override
     public void setThread(int threadNum) {
         this.thread = threadNum;
-    }
-
-    public void setPriorityProxyProvider(PriorityProxyProvider priorityProxyProvider) {
-        this.priorityProxyProvider = priorityProxyProvider;
     }
 }

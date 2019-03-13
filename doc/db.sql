@@ -131,3 +131,20 @@ CREATE TABLE `programme_source` (
   UNIQUE KEY `uk_source` (`site`,`source_id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4 COMMENT='节目源'
 ;
+
+
+CREATE TABLE `proxy` (
+  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT COMMENT '主键',
+  `host` VARCHAR(128) NOT NULL COMMENT '基础表ID',
+  `gmt_create` datetime NOT NULL COMMENT '创建时间',
+  `gmt_modified` datetime NOT NULL COMMENT '修改时间',
+  `avg_cost` int(11) NOT NULL COMMENT '平均耗时',
+  `success_rate` decimal(10,2) NOT NULL COMMENT '平均耗时',
+  `source` VARCHAR(128) DEFAULT NULL COMMENT '失败',
+  `failed_count` int(8) DEFAULT NULL COMMENT '失败次数',
+  `attributes` VARCHAR(512) DEFAULT NULL COMMENT '扩展字段',
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uk_host` (`host`)
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4 COMMENT='代理'
+;
+

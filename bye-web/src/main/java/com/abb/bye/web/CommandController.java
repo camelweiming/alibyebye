@@ -1,5 +1,6 @@
 package com.abb.bye.web;
 
+import com.abb.bye.client.service.ProxyService;
 import com.abb.bye.client.service.SpiderService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,6 +22,8 @@ public class CommandController {
     private static final Logger logger = LoggerFactory.getLogger(CommandController.class);
     @Resource
     private SpiderService spiderService;
+    @Resource
+    private ProxyService proxyService;
 
     @RequestMapping(value = "command.htm", method = {RequestMethod.POST, RequestMethod.GET})
     @ResponseBody
@@ -30,7 +33,8 @@ public class CommandController {
     ) {
         if ("run".equals(cmd) && site != null) {
             new Thread(() -> spiderService.doJob(site)).start();
-
+        } else if ("check".equals(cmd)) {
+            new Thread(() -> proxyService.check()).start();
         }
         return "success";
     }

@@ -8,6 +8,8 @@ import org.apache.http.impl.nio.client.CloseableHttpAsyncClient;
 import org.apache.http.nio.client.HttpAsyncClient;
 import org.apache.http.util.EntityUtils;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.Future;
 
 /**
@@ -69,9 +71,11 @@ public class HttpHelper {
     }
 
     public static void main(String[] args) throws Exception {
-        HttpHost httpHost = new HttpHost("http://113.200.214.164",9999);
-        CloseableHttpAsyncClient closeableHttpAsyncClient = new SimpleHttpBuilder().build();
-        String content = HttpHelper.get(closeableHttpAsyncClient, "https://blog.csdn.net/taozhexuan123/article/details/73739960",new ReqConfig().setProxy(httpHost));
+        HttpHost httpHost = new HttpHost("119.57.108.73", 53281);
+        CloseableHttpAsyncClient closeableHttpAsyncClient = new SimpleHttpBuilder().setConnectionTimeout(20000).setConnectionRequestTimeout(20000).setSocketTimeout(20000).build();
+        Map<String, String> headers = new HashMap<>();
+        headers.put("User-Agent", "Mozilla/5.0 (Linux; Android 6.0.1; Nexus 7 Build/MOB30X) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/72.0.3626.121 Safari/537.36");
+        String content = HttpHelper.get(closeableHttpAsyncClient, "https://baidu.com", new ReqConfig().setHeaders(headers).setProxy(httpHost));
         System.out.println(content);
         closeableHttpAsyncClient.close();
     }
