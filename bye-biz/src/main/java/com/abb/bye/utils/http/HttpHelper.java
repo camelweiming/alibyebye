@@ -79,11 +79,11 @@ public class HttpHelper {
     }
 
     public static void main(String[] args) throws Exception {
-        HttpHost httpHost = new HttpHost("112.16.154.190", 808);
+        HttpHost httpHost =new HttpHost("122.136.212.132", 53281);
         Closeable closeableHttpClient = new SimpleHttpBuilder().setAsync(true).setConnectionTimeout(20000).setConnectionRequestTimeout(20000).setSocketTimeout(20000).buildSyncHttpClient();
         Map<String, String> headers = new HashMap<>();
         headers.put("User-Agent", "Mozilla/5.0 (Linux; Android 6.0.1; Nexus 7 Build/MOB30X) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/72.0.3626.121 Safari/537.36");
-        HttpResponse content = HttpHelper.getResponse(closeableHttpClient, "https://douban.com", new ReqConfig().setHeaders(headers).setProxy(httpHost));
+        HttpResponse content = HttpHelper.getResponse(closeableHttpClient, "https://baidu.com", new ReqConfig().setHeaders(headers).setProxy(httpHost));
         System.out.println(content.getStatusLine().getStatusCode());
         System.out.println(EntityUtils.toString(content.getEntity(), "UTF-8"));
         closeableHttpClient.close();

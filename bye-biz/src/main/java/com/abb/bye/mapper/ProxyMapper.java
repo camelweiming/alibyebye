@@ -21,10 +21,10 @@ public interface ProxyMapper {
      * 获取代理
      *
      * @param length
-     * @param maxFailedCount
+     * @param successRate
      * @return
      */
-    List<String> list(@Param("length") int length, @Param("maxFailedCount") int maxFailedCount);
+    List<String> list(@Param("length") int length, @Param("successRate") double successRate);
 
     /**
      * 查询所有
@@ -33,5 +33,5 @@ public interface ProxyMapper {
      * @param maxFailedCount
      * @return
      */
-    List<String> listAll(@Param("id") long id, @Param("length") int length, @Param("maxFailedCount") int maxFailedCount);
+    List<ProxyDO> listAll(@Param("id") long id, @Param("length") int length, @Param("maxFailedCount") int maxFailedCount);
 }

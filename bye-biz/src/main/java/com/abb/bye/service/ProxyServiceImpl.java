@@ -12,7 +12,6 @@ import com.abb.bye.utils.http.SimpleHttpBuilder;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpHost;
 import org.apache.http.HttpStatus;
-import org.apache.http.impl.nio.client.CloseableHttpAsyncClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
@@ -23,6 +22,7 @@ import java.io.Closeable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.Future;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
@@ -49,26 +49,19 @@ public class ProxyServiceImpl implements ProxyService, InitializingBean {
     private ProxyMapper proxyMapper;
     private String checkUrl = "https://baidu.com";
     private static int STEP = 1000;
+    private static int CHECKOUT_COUNT = 3;
     private ProxyQueue proxyQueue;
 
     @Override
-    public List<String> list(int count, int maxFailedCount) {
-        return proxyMapper.list(count, maxFailedCount);
+    public List<String> list(int count, double successRate) {
+        return proxyMapper.list(count, successRate);
     }
 
     public void reload() {
         if (proxyQueue != null) {
-            proxyQueue.getReport().forEach((proxy, report) -> {
-                ProxyDO p = new ProxyDO();
-                p.setHost(proxy.toString());
-                p.setAvgCost(report.getAvgCost());
-                p.setSuccessRate(report.getSuccessRate());
-                p.setFailedCount(report.getTotalFailed() == 0 ? -1 : report.getTotalFailed());
-                logger.info("write proxy report:" + p);
-                proxyMapper.insert(p);
-            });
+            saveReport(proxyQueue);
         }
-        List<String> proxies = list(1000, 3);
+        List<String> proxies = list(1000, 0.6d);
         List<Proxy> list = new ArrayList<>();
         for (String p : proxies) {
             String[] line = StringUtils.split(p, ":");
@@ -82,38 +75,47 @@ public class ProxyServiceImpl implements ProxyService, InitializingBean {
     @Override
     public void check() {
         long id = 0;
-        List<String> hosts;
+        List<ProxyDO> hosts;
+        ProxyQueue proxyQueue = new ProxyQueue(new ArrayList<>());
+        List<Future<?>> futures = new ArrayList<>();
         while (true) {
             hosts = proxyMapper.listAll(id, STEP, 3);
             if (hosts.isEmpty()) {
                 break;
             }
-            id += STEP;
-            for (String host : hosts) {
-                EXECUTOR.submit(() -> {
+            id = hosts.get(hosts.size() - 1).getId();
+            for (ProxyDO proxyDO : hosts) {
+                futures.add(EXECUTOR.submit(() -> {
+                    String host = proxyDO.getHost();
                     String[] array = StringUtils.split(host, ":");
-                    try {
-                        long t = System.currentTimeMillis();
-                        int status = HttpHelper.touch(httpClient, checkUrl, new ReqConfig().setProxy(new HttpHost(array[0], Integer.valueOf(array[1]))));
-                        if (status == HttpStatus.SC_OK) {
-                            ProxyDO p = new ProxyDO();
-                            p.setHost(host);
-                            p.setSuccessRate(1d);
-                            p.setAvgCost((int)((System.currentTimeMillis()) - t));
-                            p.setFailedCount(-1);
-                            makeSuccess(p);
-                            logger.info("check-success:" + host + " cost:" + p.getAvgCost());
-                        } else {
-                            makeFailed(host);
-                            logger.info("check-failed:" + host + " status:" + status);
+                    for (int i = 0; i < CHECKOUT_COUNT; i++) {
+                        try {
+                            long t = System.currentTimeMillis();
+                            int status = HttpHelper.touch(httpClient, checkUrl, new ReqConfig().setProxy(new HttpHost(array[0], Integer.valueOf(array[1]))));
+                            if (status == HttpStatus.SC_OK) {
+                                long cost = (System.currentTimeMillis() - t);
+                                proxyQueue.report(new Proxy(host).setCost(cost).setSuccess(true));
+                                logger.info("check-success:" + host + " cost:" + cost);
+                            } else {
+                                proxyQueue.report(new Proxy(host).setSuccess(false).setFailedCount(CHECKOUT_COUNT));
+                                logger.info("check-failed:" + host + " status:" + status);
+                                break;
+                            }
+                        } catch (Exception e) {
+                            proxyQueue.report(new Proxy(host).setSuccess(false));
+                            logger.info("check-failed:" + host + " status:" + e.getMessage());
                         }
-                    } catch (Exception e) {
-                        makeFailed(host);
-                        logger.info("check-failed:" + host + " status:" + e.getMessage());
                     }
-                });
+                }));
             }
         }
+        for (Future<?> future : futures) {
+            try {
+                future.get(5000, TimeUnit.MILLISECONDS);
+            } catch (Throwable e) {
+            }
+        }
+        saveReport(proxyQueue);
     }
 
     @Override
@@ -148,6 +150,18 @@ public class ProxyServiceImpl implements ProxyService, InitializingBean {
     @Override
     public void report(Proxy proxy) {
         proxyQueue.report(proxy);
+    }
+
+    private void saveReport(ProxyQueue proxyQueue) {
+        proxyQueue.getReport().forEach((proxy, report) -> {
+            ProxyDO p = new ProxyDO();
+            p.setHost(proxy.toString());
+            p.setAvgCost(report.getAvgCost());
+            p.setSuccessRate(report.getSuccessRate());
+            p.setFailedCount(report.getTotalFailed() == 0 ? -1 : report.getTotalFailed());
+            logger.info("write proxy report:" + p);
+            proxyMapper.insert(p);
+        });
     }
 
     @Override

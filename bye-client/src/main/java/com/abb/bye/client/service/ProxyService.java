@@ -14,10 +14,10 @@ public interface ProxyService {
      * 取最优代理列表
      *
      * @param count
-     * @param maxFailedCount
+     * @param successRate
      * @return
      */
-    List<String> list(int count, int maxFailedCount);
+    List<String> list(int count, double successRate);
 
     /**
      * 检测

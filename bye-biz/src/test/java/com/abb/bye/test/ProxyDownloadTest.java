@@ -2,13 +2,9 @@ package com.abb.bye.test;
 
 import com.abb.bye.client.domain.ProxyDO;
 import com.abb.bye.mapper.ProxyMapper;
-import com.abb.bye.utils.http.HttpHelper;
-import com.abb.bye.utils.http.ReqConfig;
 import com.abb.bye.utils.http.SimpleHttpBuilder;
-import com.alibaba.fastjson.JSON;
-import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
-import org.jsoup.select.Elements;
+import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.junit.Test;
 
 import javax.annotation.Resource;
@@ -44,38 +40,54 @@ public class ProxyDownloadTest extends BaseDAOTest {
     }
 
     @Test
-    public void doImport() {
-        for (String domain : domains) {
-            for (int k = 1; k < 50; k++) {
-                String url = domain + k;
-                try {
-                    String content = HttpHelper.get(httpCLient, url, new ReqConfig().setHeaders(headers));
-                    Document doc = Jsoup.parse(content);
-                    Elements trs = doc.select("table#ip_list").select("tr");
-                    ProxyDO proxyDO = new ProxyDO();
-                    Map<String, String> attrs = new HashMap<>();
-                    if (trs.size() >= 2) {
-                        for (int i = 1; i < trs.size(); i++) {
-                            Elements tds = trs.get(i).select("td");
-                            String host = tds.get(1).text() + ":" + tds.get(2).text();
-                            String address = tds.get(3).text();
-                            String type = tds.get(4).text();
-                            System.out.println(host);
-                            proxyDO.setHost(host);
-                            proxyDO.setAvgCost(0);
-                            proxyDO.setSuccessRate(0d);
-                            proxyDO.setFailedCount(-1);
-                            attrs.clear();
-                            attrs.put("address", address);
-                            attrs.put("type", type);
-                            proxyDO.setAttributes(JSON.toJSONString(attrs));
-                            proxyMapper.insert(proxyDO);
-                        }
-                    }
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            }
+    public void doImport31f() throws Exception {
+        String content = IOUtils.toString(ProxyDownloadTest.class.getClassLoader().getResourceAsStream("proxy.txt"), "UTF-8");
+        String[] lines = StringUtils.split(content, "\r\n");
+        for (String s : lines) {
+            String[] array = StringUtils.split(s, "\t ");
+            String host = array[0] + ":" + array[1];
+            insert(host);
         }
     }
+
+    private void insert(String host) {
+        ProxyDO proxyDO = new ProxyDO();
+        proxyDO.setHost(host);
+        proxyMapper.insert(proxyDO);
+    }
+
+    //public void doImport() {
+    //    for (String domain : domains) {
+    //        for (int k = 1; k < 50; k++) {
+    //            String url = domain + k;
+    //            try {
+    //                String content = HttpHelper.get(httpCLient, url, new ReqConfig().setHeaders(headers));
+    //                Document doc = Jsoup.parse(content);
+    //                Elements trs = doc.select("table#ip_list").select("tr");
+    //                ProxyDO proxyDO = new ProxyDO();
+    //                Map<String, String> attrs = new HashMap<>();
+    //                if (trs.size() >= 2) {
+    //                    for (int i = 1; i < trs.size(); i++) {
+    //                        Elements tds = trs.get(i).select("td");
+    //                        String host = tds.get(1).text() + ":" + tds.get(2).text();
+    //                        String address = tds.get(3).text();
+    //                        String type = tds.get(4).text();
+    //                        System.out.println(host);
+    //                        proxyDO.setHost(host);
+    //                        proxyDO.setAvgCost(0);
+    //                        proxyDO.setSuccessRate(0d);
+    //                        proxyDO.setFailedCount(-1);
+    //                        attrs.clear();
+    //                        attrs.put("address", address);
+    //                        attrs.put("type", type);
+    //                        proxyDO.setAttributes(JSON.toJSONString(attrs));
+    //                        proxyMapper.insert(proxyDO);
+    //                    }
+    //                }
+    //            } catch (Exception e) {
+    //                e.printStackTrace();
+    //            }
+    //        }
+    //    }
+    //}
 }

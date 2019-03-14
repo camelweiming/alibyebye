@@ -1,5 +1,7 @@
 package com.abb.bye.client.domain;
 
+import org.apache.commons.lang3.StringUtils;
+
 import java.util.Objects;
 
 /**
@@ -11,6 +13,16 @@ public class Proxy {
     private Integer port;
     private boolean success;
     private long cost;
+    private int failedCount;
+
+    public int getFailedCount() {
+        return failedCount;
+    }
+
+    public Proxy setFailedCount(int failedCount) {
+        this.failedCount = failedCount;
+        return this;
+    }
 
     @Override
     public String toString() {
@@ -46,6 +58,14 @@ public class Proxy {
     public Proxy(String host, Integer port) {
         this.host = host;
         this.port = port;
+    }
+
+    public Proxy(String host) {
+        String[] array = StringUtils.split(host, ":");
+        this.host = array[0];
+        if (array.length == 2) {
+            this.port = Integer.valueOf(array[1]);
+        }
     }
 
     @Override

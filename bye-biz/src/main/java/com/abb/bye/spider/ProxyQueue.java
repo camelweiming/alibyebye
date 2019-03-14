@@ -40,7 +40,7 @@ public class ProxyQueue {
         if (proxy.isSuccess()) {
             report.plusSuccess(proxy.getCost());
         } else {
-            report.plusFailed();
+            report.plusFailed(proxy.getFailedCount() <= 0 ? 1 : proxy.getFailedCount());
         }
     }
 
@@ -58,8 +58,8 @@ public class ProxyQueue {
             totalCost += cost;
         }
 
-        public void plusFailed() {
-            totalFailed++;
+        public void plusFailed(int failedCount) {
+            totalFailed += failedCount;
         }
 
         public int getTotalFailed() {

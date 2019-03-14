@@ -20,7 +20,7 @@
         insert proxy
         ( id, gmt_create, gmt_modified, host, avg_cost, success_rate, source, attributes,failed_count)
         values
-        ( #{id}, now() ,now(), #{host}, #{avgCost}, #{successRate}, #{source}, #{attributes},#{failedCount})
+        ( #{id}, now() ,now(), #{host}, 0 , 0, #{source}, #{attributes},0)
          ON DUPLICATE KEY UPDATE
         gmt_modified=now()
         <if test="avgCost!=null">,avg_cost=#{avgCost}</if>
@@ -31,13 +31,13 @@
 
     <select id="list" resultType="string">
         select host from proxy where
-        <![CDATA[ failed_count<#{maxFailedCount} ]]>
+        <![CDATA[ success_rate >= #{successRate} ]]>
         order by success_rate desc ,avg_cost asc ,failed_count asc
         limit #{length}
     </select>
 
-    <select id="listAll" resultType="string">
-        select host from proxy where
+    <select id="listAll" resultType="com.abb.bye.client.domain.ProxyDO">
+        select id,host from proxy where
         <![CDATA[
           id > #{id}
           and  failed_count<#{maxFailedCount}
