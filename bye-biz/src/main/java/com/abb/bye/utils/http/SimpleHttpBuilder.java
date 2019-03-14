@@ -3,15 +3,20 @@ package com.abb.bye.utils.http;
 import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
 import org.apache.http.ProtocolException;
+import org.apache.http.auth.AuthScope;
+import org.apache.http.auth.UsernamePasswordCredentials;
+import org.apache.http.client.CredentialsProvider;
 import org.apache.http.client.RedirectStrategy;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpRequestWrapper;
 import org.apache.http.client.methods.HttpUriRequest;
+import org.apache.http.conn.ConnectionKeepAliveStrategy;
 import org.apache.http.conn.ssl.NoopHostnameVerifier;
 import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
 import org.apache.http.conn.ssl.TrustAllStrategy;
+import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.impl.client.LaxRedirectStrategy;
@@ -41,6 +46,9 @@ public class SimpleHttpBuilder {
     private RedirectStrategy redirectStrategy;
     private String[] supportedProtocols = new String[] {"SSLv3", "TLSv1", "TLSv1.1", "TLSv1.2"};
     private boolean async = true;
+    private String proxyUserName;
+    private String proxyPassword;
+    private ConnectionKeepAliveStrategy connectionKeepAliveStrategy;
 
     public Closeable build() {
         return async ? buildAsyncHttpClient() : buildSyncHttpClient();
@@ -48,10 +56,17 @@ public class SimpleHttpBuilder {
 
     public CloseableHttpAsyncClient buildAsyncHttpClient() {
         try {
+            CredentialsProvider credentialsProvider = null;
+            if (proxyUserName != null) {
+                credentialsProvider = new BasicCredentialsProvider();
+                credentialsProvider.setCredentials(AuthScope.ANY, new UsernamePasswordCredentials(proxyUserName, proxyPassword));
+            }
             SSLContext sslcontext = SSLContexts.custom().loadTrustMaterial(new TrustAllStrategy()).build();
             SSLIOSessionStrategy sslSessionStrategy = new SSLIOSessionStrategy(sslcontext, supportedProtocols, null, SSLIOSessionStrategy.getDefaultHostnameVerifier());
             CloseableHttpAsyncClient closeableHttpAsyncClient = HttpAsyncClients.custom()
                 .setRedirectStrategy(redirectStrategy)
+                .setDefaultCredentialsProvider(credentialsProvider)
+                .setKeepAliveStrategy(connectionKeepAliveStrategy)
                 .setDefaultRequestConfig(RequestConfig.custom()
                     .setConnectionRequestTimeout(connectionRequestTimeout)
                     .setSocketTimeout(socketTimeout)
@@ -72,10 +87,17 @@ public class SimpleHttpBuilder {
 
     public CloseableHttpClient buildSyncHttpClient() {
         try {
+            CredentialsProvider credentialsProvider = null;
+            if (proxyUserName != null) {
+                credentialsProvider = new BasicCredentialsProvider();
+                credentialsProvider.setCredentials(AuthScope.ANY, new UsernamePasswordCredentials(proxyUserName, proxyPassword));
+            }
             SSLContext sslContext = SSLContexts.custom().loadTrustMaterial(new TrustAllStrategy()).build();
             SSLConnectionSocketFactory sslConnectionSocketFactory = new SSLConnectionSocketFactory(sslContext, supportedProtocols, null, NoopHostnameVerifier.INSTANCE);
             CloseableHttpClient closeableHttpAsyncClient = HttpClients.custom()
+                .setDefaultCredentialsProvider(credentialsProvider)
                 .setRedirectStrategy(redirectStrategy)
+                .setKeepAliveStrategy(connectionKeepAliveStrategy)
                 .setDefaultRequestConfig(RequestConfig.custom()
                     .setConnectionRequestTimeout(connectionRequestTimeout)
                     .setSocketTimeout(socketTimeout)
@@ -133,6 +155,40 @@ public class SimpleHttpBuilder {
 
     public SimpleHttpBuilder setRedirectStrategy(RedirectStrategy redirectStrategy) {
         this.redirectStrategy = redirectStrategy;
+        return this;
+    }
+
+    public String getProxyUserName() {
+        return proxyUserName;
+    }
+
+    public SimpleHttpBuilder setProxyUserName(String proxyUserName) {
+        this.proxyUserName = proxyUserName;
+        return this;
+    }
+
+    public String getProxyPassword() {
+        return proxyPassword;
+    }
+
+    public SimpleHttpBuilder setProxyPassword(String proxyPassword) {
+        this.proxyPassword = proxyPassword;
+        return this;
+    }
+
+    public static class DisableConnectionKeepAliveStrategy implements ConnectionKeepAliveStrategy {
+        @Override
+        public long getKeepAliveDuration(final HttpResponse response, final HttpContext context) {
+            return -1;
+        }
+    }
+
+    public ConnectionKeepAliveStrategy getConnectionKeepAliveStrategy() {
+        return connectionKeepAliveStrategy;
+    }
+
+    public SimpleHttpBuilder setConnectionKeepAliveStrategy(ConnectionKeepAliveStrategy connectionKeepAliveStrategy) {
+        this.connectionKeepAliveStrategy = connectionKeepAliveStrategy;
         return this;
     }
 

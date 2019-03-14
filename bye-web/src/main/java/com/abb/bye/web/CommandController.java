@@ -34,7 +34,7 @@ public class CommandController {
         if ("run".equals(cmd) && site != null) {
             new Thread(() -> spiderService.doJob(site)).start();
         } else if ("check".equals(cmd)) {
-            new Thread(() -> proxyService.check()).start();
+            //new Thread(() -> proxyService.check()).start();
         }
         return "success";
     }

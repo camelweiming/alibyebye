@@ -1,6 +1,8 @@
 package com.abb.bye.utils;
 
+import com.abb.bye.client.domain.ProxyDO;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.http.HttpHost;
 import org.assertj.core.util.Lists;
 import org.jsoup.nodes.Element;
 import org.jsoup.nodes.Node;
@@ -93,6 +95,14 @@ public class SpiderHelper {
             start += length;
         }
         return urls;
+    }
+
+    public static HttpHost create(ProxyDO proxy) {
+        String[] array = StringUtils.split(proxy.getHost(), ":");
+        if (array.length == 1) {
+            return new HttpHost(array[0]);
+        }
+        return new HttpHost(array[0], Integer.valueOf(array[1]));
     }
 
     public static void main(String[] args) throws IOException, IllegalAccessException, NoSuchMethodException, InvocationTargetException {

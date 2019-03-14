@@ -1,13 +1,13 @@
 package com.abb.bye.spider;
 
-import com.abb.bye.client.domain.Proxy;
+import com.abb.bye.client.domain.ProxyDO;
 import com.abb.bye.client.service.ProxyService;
 import com.abb.bye.utils.LocalLimiter;
+import com.abb.bye.utils.SpiderHelper;
 import com.abb.bye.utils.http.HttpHelper;
 import com.abb.bye.utils.http.ReqConfig;
 import com.abb.bye.utils.http.SimpleHttpBuilder;
 import org.apache.commons.io.IOUtils;
-import org.apache.http.HttpHost;
 import org.apache.http.HttpResponse;
 import org.apache.http.util.EntityUtils;
 import org.slf4j.Logger;
@@ -35,7 +35,11 @@ import java.util.Map;
 @Service("customDownloader")
 public class CustomDownloader extends AbstractDownloader {
     private static final Logger logger = LoggerFactory.getLogger(CustomDownloader.class);
-    private Closeable httpClient = new SimpleHttpBuilder().setRedirectStrategy(new SimpleHttpBuilder.CustomRedirectStrategy()).build();
+    private Closeable httpClient = new SimpleHttpBuilder()
+        .setProxyUserName("MRCAMELFCF3LO8P0")
+        .setProxyPassword("wPfm8o9d")
+        .setConnectionKeepAliveStrategy(new SimpleHttpBuilder.DisableConnectionKeepAliveStrategy())
+        .build();
     @Resource
     private ProxyService proxyService;
     private int thread;
@@ -47,30 +51,28 @@ public class CustomDownloader extends AbstractDownloader {
         Page page = Page.fail();
         Map<String, String> headers = new HashMap<>();
         headers.put("User-Agent", task.getSite().getUserAgent());
-        for (Proxy proxy : proxyService.getProxy(3)) {
-            HttpResponse response = null;
-            try {
-                localLimiter.add(thread);
-                long t = System.currentTimeMillis();
-                response = HttpHelper.getResponse(httpClient, request.getUrl(), new ReqConfig()
-                    .setHeaders(headers)
-                    .setCharset(request.getCharset())
-                    .setConnectionTimeout(task.getSite().getTimeOut())
-                    .setConnectionRequestTimeout(task.getSite().getTimeOut())
-                    .setSocketTimeout(task.getSite().getTimeOut())
-                    .setProxy(new HttpHost(proxy.getHost(), proxy.getPort()))
-                );
-                page = handleResponse(request, request.getCharset() != null ? request.getCharset() : task.getSite().getCharset(), response, task);
-                proxyService.report(proxy.setSuccess(true).setCost((System.currentTimeMillis() - t)));
-                return page;
-            } catch (Throwable e) {
-                logger.warn("Error download (" + proxy + ") url:" + request.getUrl() + " " + e.getMessage());
-                proxyService.report(proxy.setSuccess(false));
-            } finally {
-                localLimiter.release();
-                if (response != null) {
-                    EntityUtils.consumeQuietly(response.getEntity());
-                }
+        ProxyDO proxy = proxyService.get();
+        HttpResponse response = null;
+        try {
+            localLimiter.add(thread);
+            ReqConfig reqConfig = new ReqConfig()
+                .setHeaders(headers)
+                .setCharset(request.getCharset())
+                .setConnectionTimeout(10000)
+                .setConnectionRequestTimeout(10000)
+                .setSocketTimeout(10000);
+            if (proxy != null) {
+                reqConfig.setProxy(SpiderHelper.create(proxy)).setProxyUserName(proxy.getUserName()).setProxyPassword(proxy.getPassword());
+            }
+            response = HttpHelper.getResponse(httpClient, request.getUrl(), reqConfig);
+            page = handleResponse(request, request.getCharset() != null ? request.getCharset() : task.getSite().getCharset(), response, task);
+            return page;
+        } catch (Throwable e) {
+            logger.warn("Error download (" + proxy + ") url:" + request.getUrl(), e);
+        } finally {
+            localLimiter.release();
+            if (response != null) {
+                EntityUtils.consumeQuietly(response.getEntity());
             }
         }
         return page;

@@ -143,6 +143,8 @@ CREATE TABLE `proxy` (
   `source` VARCHAR(128) DEFAULT NULL COMMENT '失败',
   `failed_count` int(8) DEFAULT NULL COMMENT '失败次数',
   `attributes` VARCHAR(512) DEFAULT NULL COMMENT '扩展字段',
+  `user_name` VARCHAR(64) DEFAULT NULL COMMENT '用户名',
+  `password` VARCHAR(64) DEFAULT NULL COMMENT '密码',
   PRIMARY KEY (`id`),
   UNIQUE KEY `uk_host` (`host`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4 COMMENT='代理'

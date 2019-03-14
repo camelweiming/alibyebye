@@ -24,13 +24,14 @@ public interface ProxyMapper {
      * @param successRate
      * @return
      */
-    List<String> list(@Param("length") int length, @Param("successRate") double successRate);
+    List<ProxyDO> list(@Param("length") int length, @Param("successRate") double successRate);
 
     /**
      * 查询所有
      *
      * @param id
      * @param maxFailedCount
+     * @param length
      * @return
      */
     List<ProxyDO> listAll(@Param("id") long id, @Param("length") int length, @Param("maxFailedCount") int maxFailedCount);

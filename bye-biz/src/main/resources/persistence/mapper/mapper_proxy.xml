@@ -13,24 +13,28 @@
         success_rate,
         source,
         attributes,
-        failed_count
+        failed_count,
+        user_name,
+        password
     </sql>
 
     <insert id="insert" parameterType="com.abb.bye.client.domain.ProxyDO">
         insert proxy
-        ( id, gmt_create, gmt_modified, host, avg_cost, success_rate, source, attributes,failed_count)
+        ( id, gmt_create, gmt_modified, host, avg_cost, success_rate, source, attributes,failed_count,user_name,password)
         values
-        ( #{id}, now() ,now(), #{host}, 0 , 0, #{source}, #{attributes},0)
-         ON DUPLICATE KEY UPDATE
+        ( #{id}, now() ,now(), #{host}, 0 , 0, #{source}, #{attributes},0,#{userName},#{password})
+        ON DUPLICATE KEY UPDATE
         gmt_modified=now()
         <if test="avgCost!=null">,avg_cost=#{avgCost}</if>
         <if test="successRate!=null">,success_rate=#{successRate}</if>
         <if test="failedCount==-1">,failed_count=0</if>
         <if test="failedCount>=0">,failed_count=failed_count+#{failedCount}</if>
+        <if test="userName!=null">,user_name=#{userName}</if>
+        <if test="password!=null">,password=#{password}</if>
     </insert>
 
-    <select id="list" resultType="string">
-        select host from proxy where
+    <select id="list" resultType="com.abb.bye.client.domain.ProxyDO">
+        select host,user_name,password from proxy where
         <![CDATA[ success_rate >= #{successRate} ]]>
         order by success_rate desc ,avg_cost asc ,failed_count asc
         limit #{length}

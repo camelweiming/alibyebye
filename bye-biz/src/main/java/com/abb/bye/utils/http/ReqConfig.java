@@ -18,6 +18,26 @@ public class ReqConfig {
     private String charset;
     private Map<String, String> headers;
     private HttpHost proxy;
+    private String proxyUserName;
+    private String proxyPassword;
+
+    public String getProxyUserName() {
+        return proxyUserName;
+    }
+
+    public ReqConfig setProxyUserName(String proxyUserName) {
+        this.proxyUserName = proxyUserName;
+        return this;
+    }
+
+    public String getProxyPassword() {
+        return proxyPassword;
+    }
+
+    public ReqConfig setProxyPassword(String proxyPassword) {
+        this.proxyPassword = proxyPassword;
+        return this;
+    }
 
     public int getSocketTimeout() {
         return socketTimeout;

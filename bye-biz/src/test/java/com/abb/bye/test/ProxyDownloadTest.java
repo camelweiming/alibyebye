@@ -32,10 +32,12 @@ public class ProxyDownloadTest extends BaseDAOTest {
     @Test
     public void test() {
         ProxyDO proxyDO = new ProxyDO();
-        proxyDO.setHost("221.217.55.235:9000");
-        proxyDO.setAvgCost(1);
-        proxyDO.setSuccessRate(0d);
-        proxyDO.setFailedCount(-1);
+        proxyDO.setHost("http-proxy-t1.dobel.cn:9180");
+        proxyDO.setUserName("MRCAMELFCF3LO8P02");
+        proxyDO.setPassword("wPfm8o9d");
+        proxyDO.setAvgCost(0);
+        proxyDO.setSuccessRate(1d);
+        proxyDO.setFailedCount(0);
         proxyMapper.insert(proxyDO);
     }
 
@@ -44,7 +46,11 @@ public class ProxyDownloadTest extends BaseDAOTest {
         String content = IOUtils.toString(ProxyDownloadTest.class.getClassLoader().getResourceAsStream("proxy.txt"), "UTF-8");
         String[] lines = StringUtils.split(content, "\r\n");
         for (String s : lines) {
-            String[] array = StringUtils.split(s, "\t ");
+            if (StringUtils.isBlank(s)) {
+                continue;
+            }
+            s = s.replace("\t", " ").replaceAll("\\s{1,}", " ").trim();
+            String[] array = StringUtils.split(s, " ");
             String host = array[0] + ":" + array[1];
             insert(host);
         }

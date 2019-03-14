@@ -1,6 +1,5 @@
 package com.abb.bye.client.service;
 
-import com.abb.bye.client.domain.Proxy;
 import com.abb.bye.client.domain.ProxyDO;
 
 import java.util.List;
@@ -17,46 +16,12 @@ public interface ProxyService {
      * @param successRate
      * @return
      */
-    List<String> list(int count, double successRate);
+    List<ProxyDO> list(int count, double successRate);
 
     /**
-     * 检测
-     */
-    void check();
-
-    /**
-     * 置为成功
-     *
-     * @param proxyDO
-     */
-    void makeSuccess(ProxyDO proxyDO);
-
-    /**
-     * 置为失败
-     *
-     * @param host
-     */
-    void makeFailed(String host);
-
-    /**
-     * 代理
+     * 选取proxy
      *
      * @return
      */
-    Proxy getProxy();
-
-    /**
-     * 活动代理
-     *
-     * @param n
-     * @return
-     */
-    List<Proxy> getProxy(int n);
-
-    /**
-     * 汇报状态
-     *
-     * @param proxy
-     */
-    void report(Proxy proxy);
+    ProxyDO get();
 }
