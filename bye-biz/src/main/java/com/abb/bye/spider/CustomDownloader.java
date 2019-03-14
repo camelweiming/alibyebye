@@ -46,7 +46,6 @@ public class CustomDownloader extends AbstractDownloader {
     private LocalLimiter localLimiter = new LocalLimiter();
     private boolean responseHeader = true;
     private Map<String, AtomicInteger> proxyMapping = new ConcurrentHashMap<>();
-    private AtomicInteger error403 = new AtomicInteger();
 
     @Override
     public Page download(Request request, Task task) {
@@ -81,11 +80,6 @@ public class CustomDownloader extends AbstractDownloader {
             }
             HttpHelper.Callback<HttpHelper.Res> callback = (response, httpRequestBase) -> new HttpHelper.Res(response, httpRequestBase);
             res = HttpHelper.execute(httpClient, request.getUrl(), reqConfig, callback);
-            if (res.getResponse().getStatusLine().getStatusCode() == 403) {
-                if (error403.incrementAndGet() > 10) {
-                    switchHttpClient();
-                }
-            }
             page = handleResponse(request, request.getCharset() != null ? request.getCharset() : task.getSite().getCharset(), res.getResponse(), task);
             return page;
         } catch (Throwable e) {
@@ -122,18 +116,6 @@ public class CustomDownloader extends AbstractDownloader {
                 logger.warn("switch-ip failed", e);
             }
         }
-    }
-
-    private synchronized void switchHttpClient() {
-        //Closeable _httpClient = new SimpleHttpBuilder().build();
-        //Closeable old = httpClient;
-        //httpClient = _httpClient;
-        //logger.warn("httpClientSwitch.....................");
-        //try {
-        //    old.close();
-        //} catch (IOException e) {
-        //    logger.warn("client-close-error");
-        //}
     }
 
     protected Page handleResponse(Request request, String charset, HttpResponse httpResponse, Task task) throws IOException {
