@@ -6,9 +6,9 @@ import com.abb.bye.client.domain.*;
 import com.abb.bye.client.domain.enums.SiteTag;
 import com.abb.bye.client.service.*;
 import com.abb.bye.client.spider.SpiderProcessor;
+import com.abb.bye.spider.CustomScheduler;
 import com.abb.bye.utils.CommonThreadPool;
 import com.abb.bye.utils.CommonUtils;
-import com.abb.bye.utils.SpiderHelper;
 import com.abb.bye.utils.Tracer;
 import com.google.common.collect.Iterators;
 import com.google.common.collect.Lists;
@@ -24,7 +24,6 @@ import us.codecraft.webmagic.pipeline.Pipeline;
 import us.codecraft.webmagic.processor.PageProcessor;
 
 import javax.annotation.Resource;
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -90,7 +89,6 @@ public class SpiderServiceImpl implements SpiderService, ApplicationContextAware
             tracer.trace("miss processor");
             return ResultDTO.buildError("miss processor");
         }
-        String[] urlList = splitUrls(urls);
         tracer.trace("spiderConfig:" + spiderConfig);
         try {
             Class<SpiderProcessor> clazz = (Class<SpiderProcessor>)Class.forName(spiderConfig.getProcessor());
@@ -99,7 +97,8 @@ public class SpiderServiceImpl implements SpiderService, ApplicationContextAware
             Runnable spider = new SpiderRunner(Spider.create(pageProcessor)
                 .setExecutorService(CommonThreadPool.getCommonExecutor())
                 .setDownloader(customDownloader)
-                .addUrl(urlList)
+                .addUrl(StringUtils.split(urls, "\r\n"))
+                .setScheduler(new CustomScheduler())
                 .addPipeline(new ProgrammePipeline(site))
                 .thread(spiderConfig.getThreadCount()), pageProcessor.processor, spiderConfig, site);
             return ResultDTO.buildSuccess(spider);
@@ -107,19 +106,6 @@ public class SpiderServiceImpl implements SpiderService, ApplicationContextAware
             tracer.trace("Error startSpider", true, e);
             return ResultDTO.buildError(e.getMessage());
         }
-    }
-
-    String[] splitUrls(String content) {
-        String[] array = StringUtils.split(content, "\r\n");
-        List<String> urls = new ArrayList<>();
-        for (String url : array) {
-            if (SpiderHelper.isSplitPages(url)) {
-                urls.addAll(SpiderHelper.splitPages(url));
-            } else {
-                urls.add(url);
-            }
-        }
-        return urls.toArray(new String[urls.size()]);
     }
 
     public class SpiderRunner implements Runnable {

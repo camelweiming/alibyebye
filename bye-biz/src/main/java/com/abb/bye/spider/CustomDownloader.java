@@ -9,8 +9,10 @@ import com.abb.bye.utils.UserAgents;
 import com.abb.bye.utils.http.HttpHelper;
 import com.abb.bye.utils.http.ReqConfig;
 import com.abb.bye.utils.http.SimpleHttpBuilder;
-import org.apache.commons.io.IOUtils;
+import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
+import org.apache.http.entity.ContentType;
+import org.apache.http.protocol.HTTP;
 import org.apache.http.util.EntityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,13 +22,14 @@ import us.codecraft.webmagic.Request;
 import us.codecraft.webmagic.Task;
 import us.codecraft.webmagic.downloader.AbstractDownloader;
 import us.codecraft.webmagic.selector.PlainText;
-import us.codecraft.webmagic.utils.CharsetUtils;
 import us.codecraft.webmagic.utils.HttpClientUtils;
 
 import javax.annotation.Resource;
 import java.io.Closeable;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
+import java.nio.charset.UnsupportedCharsetException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -39,7 +42,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 @Service("customDownloader")
 public class CustomDownloader extends AbstractDownloader {
     private static final Logger logger = LoggerFactory.getLogger(CustomDownloader.class);
-    private Closeable httpClient = new SimpleHttpBuilder().setAsync(true).setDisableKeepAlive(true).build();
+    private Closeable httpClient = new SimpleHttpBuilder().setEnableCompress(false).setAsync(true).setDisableKeepAlive(true).build();
     @Resource
     private ProxyService proxyService;
     private int thread;
@@ -119,35 +122,50 @@ public class CustomDownloader extends AbstractDownloader {
     }
 
     protected Page handleResponse(Request request, String charset, HttpResponse httpResponse, Task task) throws IOException {
-        byte[] bytes = IOUtils.toByteArray(httpResponse.getEntity().getContent());
-        String contentType = httpResponse.getEntity().getContentType() == null ? "" : httpResponse.getEntity().getContentType().getValue();
+        ContentType contentType = getContentType(httpResponse.getEntity(), charset);
         Page page = new Page();
-        page.setBytes(bytes);
-        if (!request.isBinaryContent()) {
-            if (charset == null) {
-                charset = getHtmlCharset(contentType, bytes);
-            }
-            page.setCharset(charset);
-            page.setRawText(new String(bytes, charset));
-        }
+        page.setCharset(getHtmlCharset(contentType).name());
         page.setUrl(new PlainText(request.getUrl()));
         page.setRequest(request);
+        page.setRawText(EntityUtils.toString(httpResponse.getEntity(), charset));
         page.setStatusCode(httpResponse.getStatusLine().getStatusCode());
         page.setDownloadSuccess(true);
         if (responseHeader) {
             page.setHeaders(HttpClientUtils.convertHeaders(httpResponse.getAllHeaders()));
         }
-        //if (page.getStatusCode() != HttpStatus.SC_OK) {
-        //    logger.info("page status code error:" + page.getUrl() + "-->" + page.getRawText());
-        //}
         return page;
     }
 
-    private String getHtmlCharset(String contentType, byte[] contentBytes) throws IOException {
-        String charset = CharsetUtils.detectCharset(contentType, contentBytes);
+    ContentType getContentType(HttpEntity entity, String defaultCharset) throws UnsupportedEncodingException {
+        ContentType contentType = null;
+        try {
+            contentType = ContentType.get(entity);
+        } catch (final UnsupportedCharsetException ex) {
+            if (defaultCharset == null) {
+                throw new UnsupportedEncodingException(ex.getMessage());
+            }
+        }
+        if (contentType != null) {
+            if (contentType.getCharset() == null) {
+                contentType = contentType.withCharset(defaultCharset);
+            }
+        } else {
+            contentType = ContentType.DEFAULT_TEXT.withCharset(defaultCharset);
+        }
+        return contentType;
+    }
+
+    private Charset getHtmlCharset(ContentType contentType) throws IOException {
+        Charset charset = null;
+        if (contentType != null) {
+            charset = contentType.getCharset();
+            if (charset == null) {
+                final ContentType defaultContentType = ContentType.getByMimeType(contentType.getMimeType());
+                charset = defaultContentType != null ? defaultContentType.getCharset() : null;
+            }
+        }
         if (charset == null) {
-            charset = Charset.defaultCharset().name();
-            logger.warn("Charset autodetect failed, use {} as charset. Please specify charset in Site.setCharset()", Charset.defaultCharset());
+            charset = HTTP.DEF_CONTENT_CHARSET;
         }
         return charset;
     }

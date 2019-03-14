@@ -137,22 +137,23 @@ public class HttpHelper {
     }
 
     public static void main(String[] args) throws Exception {
-        HttpHost httpHost = new HttpHost("http-proxy-t1.dobel.cn", 9180);
-        Closeable closeableHttpClient = new SimpleHttpBuilder().setAsync(false).setConnectionTimeout(20000)
+        HttpHost httpHost = null;//new HttpHost("http-proxy-t1.dobel.cn", 9180);
+        Closeable closeableHttpClient = new SimpleHttpBuilder().setAsync(true).setConnectionTimeout(20000)
             .setConnectionRequestTimeout(20000).setSocketTimeout(20000).buildSyncHttpClient();
         Map<String, String> headers = new HashMap<>();
         headers.put("User-Agent", "Mozilla/5.0 (Linux; Android 6.0.1; Nexus 7 Build/MOB30X) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/72.0.3626.121 Safari/537.36");
         long t = System.currentTimeMillis();
         while (true) {
             Callback<Res> callback = (response, httpRequestBase) -> new Res(response, httpRequestBase);
-            Res res = HttpHelper.execute(closeableHttpClient, "https://movie.douban.com/subject/25984031/", new ReqConfig().setHeaders(headers)
+            Res res = HttpHelper.execute(closeableHttpClient, "https://movie.douban.com/j/new_search_subjects?sort=R&range=1,10&tags=%E7%94%B5%E5%BD%B1&start=720", new ReqConfig().setHeaders(headers)
                 .setProxy(httpHost).setProxyUserName("MRCAMELFCF3LO8P0").setProxyPassword("wPfm8o9d"), callback);
             System.out.println(res.getResponse().getStatusLine().getStatusCode());
-            //System.out.println(EntityUtils.toString(res.getResponse().getEntity(), "UTF-8"));
+            System.out.println(EntityUtils.toString(res.getResponse().getEntity(), "UTF-8"));
+            break;
             //System.out.println(System.currentTimeMillis() - t);
             //res.getHttpRequestBase().releaseConnection();
             //Thread.sleep(10);
         }
-        //closeableHttpClient.close();
+        closeableHttpClient.close();
     }
 }
