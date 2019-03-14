@@ -11,7 +11,6 @@ import com.abb.bye.utils.http.ReqConfig;
 import com.abb.bye.utils.http.SimpleHttpBuilder;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpResponse;
-import org.apache.http.HttpStatus;
 import org.apache.http.util.EntityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -40,7 +39,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 @Service("customDownloader")
 public class CustomDownloader extends AbstractDownloader {
     private static final Logger logger = LoggerFactory.getLogger(CustomDownloader.class);
-    private Closeable httpClient = new SimpleHttpBuilder().setConnectionKeepAliveStrategy(new SimpleHttpBuilder.DisableConnectionKeepAliveStrategy()).build();
+    private Closeable httpClient = new SimpleHttpBuilder().setAsync(true).setDisableKeepAlive(true).build();
     @Resource
     private ProxyService proxyService;
     private int thread;
@@ -126,15 +125,15 @@ public class CustomDownloader extends AbstractDownloader {
     }
 
     private synchronized void switchHttpClient() {
-        Closeable _httpClient = new SimpleHttpBuilder().setConnectionKeepAliveStrategy(new SimpleHttpBuilder.DisableConnectionKeepAliveStrategy()).build();
-        Closeable old = httpClient;
-        httpClient = _httpClient;
-        logger.warn("httpClientSwitch.....................");
-        try {
-            old.close();
-        } catch (IOException e) {
-            logger.warn("client-close-error");
-        }
+        //Closeable _httpClient = new SimpleHttpBuilder().build();
+        //Closeable old = httpClient;
+        //httpClient = _httpClient;
+        //logger.warn("httpClientSwitch.....................");
+        //try {
+        //    old.close();
+        //} catch (IOException e) {
+        //    logger.warn("client-close-error");
+        //}
     }
 
     protected Page handleResponse(Request request, String charset, HttpResponse httpResponse, Task task) throws IOException {
@@ -156,9 +155,9 @@ public class CustomDownloader extends AbstractDownloader {
         if (responseHeader) {
             page.setHeaders(HttpClientUtils.convertHeaders(httpResponse.getAllHeaders()));
         }
-        if (page.getStatusCode() != HttpStatus.SC_OK) {
-            logger.info("page status code error:" + page.getUrl() + "-->" + page.getRawText());
-        }
+        //if (page.getStatusCode() != HttpStatus.SC_OK) {
+        //    logger.info("page status code error:" + page.getUrl() + "-->" + page.getRawText());
+        //}
         return page;
     }
 

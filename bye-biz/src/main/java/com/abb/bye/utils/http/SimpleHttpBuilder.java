@@ -1,5 +1,6 @@
 package com.abb.bye.utils.http;
 
+import org.apache.http.ConnectionReuseStrategy;
 import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
 import org.apache.http.ProtocolException;
@@ -48,7 +49,10 @@ public class SimpleHttpBuilder {
     private boolean async = true;
     private String proxyUserName;
     private String proxyPassword;
+    private boolean disableKeepAlive = false;
     private ConnectionKeepAliveStrategy connectionKeepAliveStrategy;
+    private ConnectionReuseStrategy connectionReuseStrategy;
+    private static ConnectionReuseStrategy DISABLE_KEEP_ALIVE_STRATEGY = (response, context) -> false;
 
     public Closeable build() {
         return async ? buildAsyncHttpClient() : buildSyncHttpClient();
@@ -66,6 +70,7 @@ public class SimpleHttpBuilder {
             CloseableHttpAsyncClient closeableHttpAsyncClient = HttpAsyncClients.custom()
                 .setRedirectStrategy(redirectStrategy)
                 .setDefaultCredentialsProvider(credentialsProvider)
+                .setConnectionReuseStrategy(disableKeepAlive ? DISABLE_KEEP_ALIVE_STRATEGY : connectionReuseStrategy)
                 .setKeepAliveStrategy(connectionKeepAliveStrategy)
                 .setDefaultRequestConfig(RequestConfig.custom()
                     .setConnectionRequestTimeout(connectionRequestTimeout)
@@ -97,6 +102,7 @@ public class SimpleHttpBuilder {
             CloseableHttpClient closeableHttpAsyncClient = HttpClients.custom()
                 .setDefaultCredentialsProvider(credentialsProvider)
                 .setRedirectStrategy(redirectStrategy)
+                .setConnectionReuseStrategy(disableKeepAlive ? DISABLE_KEEP_ALIVE_STRATEGY : connectionReuseStrategy)
                 .setKeepAliveStrategy(connectionKeepAliveStrategy)
                 .setDefaultRequestConfig(RequestConfig.custom()
                     .setConnectionRequestTimeout(connectionRequestTimeout)
@@ -176,19 +182,30 @@ public class SimpleHttpBuilder {
         return this;
     }
 
-    public static class DisableConnectionKeepAliveStrategy implements ConnectionKeepAliveStrategy {
-        @Override
-        public long getKeepAliveDuration(final HttpResponse response, final HttpContext context) {
-            return -1;
-        }
-    }
-
     public ConnectionKeepAliveStrategy getConnectionKeepAliveStrategy() {
         return connectionKeepAliveStrategy;
     }
 
     public SimpleHttpBuilder setConnectionKeepAliveStrategy(ConnectionKeepAliveStrategy connectionKeepAliveStrategy) {
         this.connectionKeepAliveStrategy = connectionKeepAliveStrategy;
+        return this;
+    }
+
+    public ConnectionReuseStrategy getConnectionReuseStrategy() {
+        return connectionReuseStrategy;
+    }
+
+    public SimpleHttpBuilder setConnectionReuseStrategy(ConnectionReuseStrategy connectionReuseStrategy) {
+        this.connectionReuseStrategy = connectionReuseStrategy;
+        return this;
+    }
+
+    public boolean isDisableKeepAlive() {
+        return disableKeepAlive;
+    }
+
+    public SimpleHttpBuilder setDisableKeepAlive(boolean disableKeepAlive) {
+        this.disableKeepAlive = disableKeepAlive;
         return this;
     }
 
