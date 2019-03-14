@@ -1,8 +1,12 @@
 package com.abb.bye.test;
 
+import com.abb.bye.client.domain.ProxyDO;
+import com.alibaba.fastjson.JSON;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -27,20 +31,9 @@ public class Test {
     });
 
     public static void main(String[] args) throws InterruptedException {
-        for (int i = 0; i < 1000; i++) {
-            final int c = i;
-            EXECUTOR.submit(new Runnable() {
-                @Override
-                public void run() {
-                    try {
-                        Thread.sleep(1000);
-                        System.out.println(c + " done "+ queue.size());
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
-                }
-            });
-        }
-        Thread.sleep(1000000);
+        Map<String, Object> a = new HashMap<>();
+        a.put(ProxyDO.ATTR_SWITCH_IP_URL, "http://ip.dobel.cn/switch-ip");
+        a.put(ProxyDO.ATTR_SWITCH_IP_REQ_COUNT, 50);
+        System.out.println(JSON.toJSON(a));
     }
 }

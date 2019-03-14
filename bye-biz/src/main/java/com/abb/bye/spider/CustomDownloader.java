@@ -2,6 +2,7 @@ package com.abb.bye.spider;
 
 import com.abb.bye.client.domain.ProxyDO;
 import com.abb.bye.client.service.ProxyService;
+import com.abb.bye.utils.CommonUtils;
 import com.abb.bye.utils.LocalLimiter;
 import com.abb.bye.utils.SpiderHelper;
 import com.abb.bye.utils.http.HttpHelper;
@@ -27,6 +28,8 @@ import java.io.IOException;
 import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * @author cenpeng.lwm
@@ -45,6 +48,7 @@ public class CustomDownloader extends AbstractDownloader {
     private int thread;
     private LocalLimiter localLimiter = new LocalLimiter();
     private boolean responseHeader = true;
+    private Map<String, AtomicInteger> proxyMapping = new ConcurrentHashMap<>();
 
     @Override
     public Page download(Request request, Task task) {
@@ -52,15 +56,12 @@ public class CustomDownloader extends AbstractDownloader {
         Map<String, String> headers = new HashMap<>();
         headers.put("User-Agent", task.getSite().getUserAgent());
         ProxyDO proxy = proxyService.get();
+        switchIP(proxy);
         HttpResponse response = null;
         try {
             localLimiter.add(thread);
-            ReqConfig reqConfig = new ReqConfig()
-                .setHeaders(headers)
-                .setCharset(request.getCharset())
-                .setConnectionTimeout(10000)
-                .setConnectionRequestTimeout(10000)
-                .setSocketTimeout(10000);
+            ReqConfig reqConfig = new ReqConfig().setHeaders(headers).setCharset(request.getCharset())
+                .setConnectionTimeout(task.getSite().getTimeOut()).setConnectionRequestTimeout(task.getSite().getTimeOut()).setSocketTimeout(task.getSite().getTimeOut());
             if (proxy != null) {
                 reqConfig.setProxy(SpiderHelper.create(proxy)).setProxyUserName(proxy.getUserName()).setProxyPassword(proxy.getPassword());
             }
@@ -76,6 +77,26 @@ public class CustomDownloader extends AbstractDownloader {
             }
         }
         return page;
+    }
+
+    private void switchIP(ProxyDO proxy) {
+        AtomicInteger c = proxyMapping.get(proxy.getHost());
+        if (c == null) {
+            c = new AtomicInteger(1);
+            proxyMapping.put(proxy.getHost(), c);
+        }
+        Map<String, Object> config = CommonUtils.asMap(proxy.getAttributes());
+        Integer reqCount = (Integer)config.get(ProxyDO.ATTR_SWITCH_IP_REQ_COUNT);
+        String switchUrl = (String)config.get(ProxyDO.ATTR_SWITCH_IP_URL);
+        if (reqCount != null && switchUrl != null) {
+            ReqConfig reqConfig = new ReqConfig().setProxy(SpiderHelper.create(proxy)).setProxyUserName(proxy.getUserName()).setProxyPassword(proxy.getPassword());
+            try {
+                String content = HttpHelper.get(httpClient, switchUrl, reqConfig);
+                logger.info("switch-ip:" + content);
+            } catch (Exception e) {
+                logger.warn("switch-ip failed", e);
+            }
+        }
     }
 
     protected Page handleResponse(Request request, String charset, HttpResponse httpResponse, Task task) throws IOException {

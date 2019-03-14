@@ -114,7 +114,7 @@ public class HttpHelper {
         headers.put("User-Agent", "Mozilla/5.0 (Linux; Android 6.0.1; Nexus 7 Build/MOB30X) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/72.0.3626.121 Safari/537.36");
         long t = System.currentTimeMillis();
         for (int i = 0; i < 100; i++) {
-            HttpResponse content = HttpHelper.getResponse(closeableHttpClient, "https://movie.douban.com/j/new_search_subjects?sort=R&range=1,10&tags=%E7%94%B5%E8%A7%86%E5%89%A7&start=1840",
+            HttpResponse content = HttpHelper.getResponse(closeableHttpClient, "http://ip.dobel.cn/switch-ip",
                 new ReqConfig().setHeaders(headers).setProxy(httpHost).setProxyUserName("MRCAMELFCF3LO8P0").setProxyPassword("wPfm8o9d"));
             System.out.println(content.getStatusLine().getStatusCode());
             System.out.println(EntityUtils.toString(content.getEntity(), "UTF-8"));

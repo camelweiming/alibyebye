@@ -12,6 +12,8 @@ import java.util.Date;
  */
 public class ProxyDO implements Serializable {
     private static final long serialVersionUID = 248748345583631667L;
+    public static String ATTR_SWITCH_IP_URL = "switch-ip-url";
+    public static String ATTR_SWITCH_IP_REQ_COUNT = "switch-ip-req-count";
     private Long id;
     private Date gmtCreate;
     private Date gmtModified;
