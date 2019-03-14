@@ -71,7 +71,7 @@ public class DouBanProcessor implements SpiderProcessor {
 
         String year = CommonUtils.clean(content.select("h1 span.year").text());
         if (StringUtils.isBlank(year)) {
-            logger.warn("no-release-year:" + programme.getUrl());
+            logger.warn("no-release-year:" + programme.getUrl() + " " + page.getHtml());
             page.setSkip(true);
             return;
         }

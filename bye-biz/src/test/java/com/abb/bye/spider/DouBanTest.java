@@ -17,6 +17,6 @@ public class DouBanTest extends BaseSpiderTest {
 
     @Test
     public void test() {
-        run("https://movie.douban.com/subject/26928226/");
+        run("https://movie.douban.com/subject/25809395/");
     }
 }

@@ -106,7 +106,7 @@ public class SpiderHelper {
     }
 
     public static void main(String[] args) throws IOException, IllegalAccessException, NoSuchMethodException, InvocationTargetException {
-        List<String> list = splitPages("https://movie.douban.com/j/new_search_subjects?sort=R&range=1,10&tags=%E7%94%B5%E5%BD%B1&start=@page-split[99:20->100]");
+        List<String> list = splitPages("https://movie.douban.com/j/new_search_subjects?sort=R&range=1,10&tags=%E7%94%B5%E5%BD%B1&start=@page-split[199:20->100]");
         list.forEach(l->{System.out.println(l);});
     }
 }
