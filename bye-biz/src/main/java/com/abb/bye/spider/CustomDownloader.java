@@ -57,7 +57,7 @@ public class CustomDownloader extends AbstractDownloader {
         headers.put("User-Agent", task.getSite().getUserAgent());
         ProxyDO proxy = proxyService.get();
         switchIP(proxy);
-        HttpResponse response = null;
+        HttpHelper.Res res = null;
         try {
             localLimiter.add(thread);
             ReqConfig reqConfig = new ReqConfig().setHeaders(headers).setCharset(request.getCharset())
@@ -65,15 +65,21 @@ public class CustomDownloader extends AbstractDownloader {
             if (proxy != null) {
                 reqConfig.setProxy(SpiderHelper.create(proxy)).setProxyUserName(proxy.getUserName()).setProxyPassword(proxy.getPassword());
             }
-            response = HttpHelper.getResponse(httpClient, request.getUrl(), reqConfig);
-            page = handleResponse(request, request.getCharset() != null ? request.getCharset() : task.getSite().getCharset(), response, task);
+            HttpHelper.Callback<HttpHelper.Res> callback = (response, httpRequestBase) -> new HttpHelper.Res(response, httpRequestBase);
+            res = HttpHelper.execute(httpClient, request.getUrl(), reqConfig, callback);
+            page = handleResponse(request, request.getCharset() != null ? request.getCharset() : task.getSite().getCharset(), res.getResponse(), task);
             return page;
         } catch (Throwable e) {
             logger.warn("Error download (" + proxy + ") url:" + request.getUrl(), e);
         } finally {
             localLimiter.release();
-            if (response != null) {
-                EntityUtils.consumeQuietly(response.getEntity());
+            if (res != null) {
+                if (res.getResponse() != null) {
+                    EntityUtils.consumeQuietly(res.getResponse().getEntity());
+                }
+                if (res.getHttpRequestBase() != null && proxy != null) {
+                    res.getHttpRequestBase().releaseConnection();
+                }
             }
         }
         return page;
