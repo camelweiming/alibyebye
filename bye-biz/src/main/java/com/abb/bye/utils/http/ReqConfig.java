@@ -20,6 +20,16 @@ public class ReqConfig {
     private HttpHost proxy;
     private String proxyUserName;
     private String proxyPassword;
+    private Map<String, String> cookies;
+
+    public Map<String, String> getCookies() {
+        return cookies;
+    }
+
+    public ReqConfig setCookies(Map<String, String> cookies) {
+        this.cookies = cookies;
+        return this;
+    }
 
     public String getProxyUserName() {
         return proxyUserName;

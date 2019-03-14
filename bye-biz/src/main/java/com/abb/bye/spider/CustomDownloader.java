@@ -5,11 +5,13 @@ import com.abb.bye.client.service.ProxyService;
 import com.abb.bye.utils.CommonUtils;
 import com.abb.bye.utils.LocalLimiter;
 import com.abb.bye.utils.SpiderHelper;
+import com.abb.bye.utils.UserAgents;
 import com.abb.bye.utils.http.HttpHelper;
 import com.abb.bye.utils.http.ReqConfig;
 import com.abb.bye.utils.http.SimpleHttpBuilder;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpResponse;
+import org.apache.http.HttpStatus;
 import org.apache.http.util.EntityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,35 +40,53 @@ import java.util.concurrent.atomic.AtomicInteger;
 @Service("customDownloader")
 public class CustomDownloader extends AbstractDownloader {
     private static final Logger logger = LoggerFactory.getLogger(CustomDownloader.class);
-    private Closeable httpClient = new SimpleHttpBuilder()
-        .setProxyUserName("MRCAMELFCF3LO8P0")
-        .setProxyPassword("wPfm8o9d")
-        .setConnectionKeepAliveStrategy(new SimpleHttpBuilder.DisableConnectionKeepAliveStrategy())
-        .build();
+    private Closeable httpClient = new SimpleHttpBuilder().setConnectionKeepAliveStrategy(new SimpleHttpBuilder.DisableConnectionKeepAliveStrategy()).build();
     @Resource
     private ProxyService proxyService;
     private int thread;
     private LocalLimiter localLimiter = new LocalLimiter();
     private boolean responseHeader = true;
     private Map<String, AtomicInteger> proxyMapping = new ConcurrentHashMap<>();
+    private AtomicInteger error403 = new AtomicInteger();
 
     @Override
     public Page download(Request request, Task task) {
         Page page = Page.fail();
         Map<String, String> headers = new HashMap<>();
-        headers.put("User-Agent", task.getSite().getUserAgent());
+        headers.put("User-Agent", UserAgents.get().getOne());
+        headers.put("Connection", "close");
+        headers.put("Referer", "https://baidu.com");
+        Map<String, String> cookies = new HashMap<>();
+        cookies.put("__utmt", "1");
+        cookies.put("__utma", "30149281.495950855.1552547558.1552547558.1552547558.1");
+        cookies.put("__utmb", "30149281.4.10.1552547558");
+        cookies.put("__utmc", "30149281");
+        cookies.put("__utmz", "30149281.1552547558.1.1.utmcsr=(direct)|utmccn=(direct)|utmcmd=(none)");
         ProxyDO proxy = proxyService.get();
         switchIP(proxy);
         HttpHelper.Res res = null;
         try {
             localLimiter.add(thread);
-            ReqConfig reqConfig = new ReqConfig().setHeaders(headers).setCharset(request.getCharset())
-                .setConnectionTimeout(task.getSite().getTimeOut()).setConnectionRequestTimeout(task.getSite().getTimeOut()).setSocketTimeout(task.getSite().getTimeOut());
+            ReqConfig reqConfig = new ReqConfig()
+                .setHeaders(headers)
+                .setCookies(cookies)
+                .setCharset(request.getCharset())
+                .setConnectionTimeout(task.getSite().getTimeOut())
+                .setConnectionRequestTimeout(task.getSite().getTimeOut())
+                .setSocketTimeout(task.getSite().getTimeOut());
             if (proxy != null) {
-                reqConfig.setProxy(SpiderHelper.create(proxy)).setProxyUserName(proxy.getUserName()).setProxyPassword(proxy.getPassword());
+                reqConfig
+                    .setProxy(SpiderHelper.create(proxy))
+                    .setProxyUserName(proxy.getUserName())
+                    .setProxyPassword(proxy.getPassword());
             }
             HttpHelper.Callback<HttpHelper.Res> callback = (response, httpRequestBase) -> new HttpHelper.Res(response, httpRequestBase);
             res = HttpHelper.execute(httpClient, request.getUrl(), reqConfig, callback);
+            if (res.getResponse().getStatusLine().getStatusCode() == 403) {
+                if (error403.incrementAndGet() > 10) {
+                    switchHttpClient();
+                }
+            }
             page = handleResponse(request, request.getCharset() != null ? request.getCharset() : task.getSite().getCharset(), res.getResponse(), task);
             return page;
         } catch (Throwable e) {
@@ -105,6 +125,18 @@ public class CustomDownloader extends AbstractDownloader {
         }
     }
 
+    private synchronized void switchHttpClient() {
+        Closeable _httpClient = new SimpleHttpBuilder().setConnectionKeepAliveStrategy(new SimpleHttpBuilder.DisableConnectionKeepAliveStrategy()).build();
+        Closeable old = httpClient;
+        httpClient = _httpClient;
+        logger.warn("httpClientSwitch.....................");
+        try {
+            old.close();
+        } catch (IOException e) {
+            logger.warn("client-close-error");
+        }
+    }
+
     protected Page handleResponse(Request request, String charset, HttpResponse httpResponse, Task task) throws IOException {
         byte[] bytes = IOUtils.toByteArray(httpResponse.getEntity().getContent());
         String contentType = httpResponse.getEntity().getContentType() == null ? "" : httpResponse.getEntity().getContentType().getValue();
@@ -123,6 +155,9 @@ public class CustomDownloader extends AbstractDownloader {
         page.setDownloadSuccess(true);
         if (responseHeader) {
             page.setHeaders(HttpClientUtils.convertHeaders(httpResponse.getAllHeaders()));
+        }
+        if (page.getStatusCode() != HttpStatus.SC_OK) {
+            logger.info("page status code error:" + page.getUrl() + "-->" + page.getRawText());
         }
         return page;
     }

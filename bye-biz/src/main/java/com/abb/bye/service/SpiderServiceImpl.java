@@ -160,8 +160,7 @@ public class SpiderServiceImpl implements SpiderService, ApplicationContextAware
                 .setTimeOut(spiderConfig.getTimeOut())
                 .setCycleRetryTimes(spiderConfig.getCycleRetryTimes())
                 .setRetryTimes(spiderConfig.getRetryTimes())
-                .setSleepTime(spiderConfig.getSleepTime())
-                .setUserAgent(spiderConfig.getUserAgent() == null ? Constants.SPIDER_DEFAULT_USER_AGENT : spiderConfig.getUserAgent());
+                .setSleepTime(spiderConfig.getSleepTime());
             tracer.setEntityId(site);
         }
 

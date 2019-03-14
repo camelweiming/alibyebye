@@ -5,15 +5,18 @@ import org.apache.http.HttpResponse;
 import org.apache.http.auth.AuthState;
 import org.apache.http.auth.ChallengeState;
 import org.apache.http.auth.UsernamePasswordCredentials;
+import org.apache.http.client.CookieStore;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.client.protocol.HttpClientContext;
 import org.apache.http.impl.auth.BasicScheme;
+import org.apache.http.impl.client.BasicCookieStore;
 import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.cookie.BasicClientCookie;
 import org.apache.http.impl.nio.client.CloseableHttpAsyncClient;
-import org.apache.http.protocol.HttpContext;
 import org.apache.http.util.EntityUtils;
+import us.codecraft.webmagic.utils.UrlUtils;
 
 import java.io.Closeable;
 import java.util.HashMap;
@@ -79,7 +82,16 @@ public class HttpHelper {
                 reqConfig.getHeaders().forEach(request::setHeader);
             }
         }
-        HttpContext context = new HttpClientContext();
+        HttpClientContext context = new HttpClientContext();
+        if (reqConfig.getCookies() != null) {
+            CookieStore cookieStore = new BasicCookieStore();
+            for (Map.Entry<String, String> cookieEntry : reqConfig.getCookies().entrySet()) {
+                BasicClientCookie cookie1 = new BasicClientCookie(cookieEntry.getKey(), cookieEntry.getValue());
+                cookie1.setDomain(UrlUtils.removePort(UrlUtils.getDomain(url)));
+                cookieStore.addCookie(cookie1);
+            }
+            context.setCookieStore(cookieStore);
+        }
         if (reqConfig.getProxy() != null && reqConfig.getProxyUserName() != null) {
             AuthState authState = new AuthState();
             authState.update(new BasicScheme(ChallengeState.PROXY), new UsernamePasswordCredentials(reqConfig.getProxyUserName(), reqConfig.getProxyPassword()));
@@ -131,15 +143,16 @@ public class HttpHelper {
         Map<String, String> headers = new HashMap<>();
         headers.put("User-Agent", "Mozilla/5.0 (Linux; Android 6.0.1; Nexus 7 Build/MOB30X) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/72.0.3626.121 Safari/537.36");
         long t = System.currentTimeMillis();
-        for (int i = 0; i < 100; i++) {
+        while (true) {
             Callback<Res> callback = (response, httpRequestBase) -> new Res(response, httpRequestBase);
-            Res res = HttpHelper.execute(closeableHttpClient, "https://baidu.com", new ReqConfig().setHeaders(headers)
+            Res res = HttpHelper.execute(closeableHttpClient, "https://movie.douban.com/subject/25984031/", new ReqConfig().setHeaders(headers)
                 .setProxy(httpHost).setProxyUserName("MRCAMELFCF3LO8P0").setProxyPassword("wPfm8o9d"), callback);
             System.out.println(res.getResponse().getStatusLine().getStatusCode());
-            System.out.println(EntityUtils.toString(res.getResponse().getEntity(), "UTF-8"));
-            System.out.println(System.currentTimeMillis() - t);
-            res.getHttpRequestBase().releaseConnection();
+            //System.out.println(EntityUtils.toString(res.getResponse().getEntity(), "UTF-8"));
+            //System.out.println(System.currentTimeMillis() - t);
+            //res.getHttpRequestBase().releaseConnection();
+            //Thread.sleep(10);
         }
-        closeableHttpClient.close();
+        //closeableHttpClient.close();
     }
 }
