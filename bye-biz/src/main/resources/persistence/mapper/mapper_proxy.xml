@@ -34,7 +34,7 @@
     </insert>
 
     <select id="list" resultType="com.abb.bye.client.domain.ProxyDO">
-        select host,user_name,password from proxy where
+        select host,user_name,password,attributes from proxy where
         <![CDATA[ success_rate >= #{successRate} ]]>
         order by success_rate desc ,avg_cost asc ,failed_count asc
         limit #{length}

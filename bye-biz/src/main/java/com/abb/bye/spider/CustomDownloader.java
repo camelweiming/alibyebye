@@ -94,7 +94,7 @@ public class CustomDownloader extends AbstractDownloader {
         Map<String, Object> config = CommonUtils.asMap(proxy.getAttributes());
         Integer reqCount = (Integer)config.get(ProxyDO.ATTR_SWITCH_IP_REQ_COUNT);
         String switchUrl = (String)config.get(ProxyDO.ATTR_SWITCH_IP_URL);
-        if (reqCount != null && switchUrl != null) {
+        if (reqCount != null && switchUrl != null && c.incrementAndGet() % reqCount == 0) {
             ReqConfig reqConfig = new ReqConfig().setProxy(SpiderHelper.create(proxy)).setProxyUserName(proxy.getUserName()).setProxyPassword(proxy.getPassword());
             try {
                 String content = HttpHelper.get(httpClient, switchUrl, reqConfig);
