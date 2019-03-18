@@ -6,11 +6,13 @@ import com.abb.bye.utils.CommonUtils;
 import com.abb.bye.utils.LocalLimiter;
 import com.abb.bye.utils.SpiderHelper;
 import com.abb.bye.utils.UserAgents;
-import com.abb.bye.utils.http.HttpHelper;
+import com.abb.bye.utils.http.Callback;
 import com.abb.bye.utils.http.ReqConfig;
+import com.abb.bye.utils.http.SimpleHttp;
 import com.abb.bye.utils.http.SimpleHttpBuilder;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
+import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.entity.ContentType;
 import org.apache.http.protocol.HTTP;
 import org.apache.http.util.EntityUtils;
@@ -25,7 +27,6 @@ import us.codecraft.webmagic.selector.PlainText;
 import us.codecraft.webmagic.utils.HttpClientUtils;
 
 import javax.annotation.Resource;
-import java.io.Closeable;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
@@ -42,7 +43,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 @Service("customDownloader")
 public class CustomDownloader extends AbstractDownloader {
     private static final Logger logger = LoggerFactory.getLogger(CustomDownloader.class);
-    private Closeable httpClient = new SimpleHttpBuilder().setEnableCompress(false).setAsync(true).setDisableKeepAlive(true).build();
+    private SimpleHttp httpClient = new SimpleHttpBuilder().setEnableCompress(false).setAsync(true).setDisableKeepAlive(true).buildSimple();
     @Resource
     private ProxyService proxyService;
     private int thread;
@@ -65,7 +66,7 @@ public class CustomDownloader extends AbstractDownloader {
         cookies.put("__utmz", "30149281.1552547558.1.1.utmcsr=(direct)|utmccn=(direct)|utmcmd=(none)");
         ProxyDO proxy = proxyService.get();
         switchIP(proxy);
-        HttpHelper.Res res = null;
+        Res res = null;
         try {
             localLimiter.add(thread);
             ReqConfig reqConfig = new ReqConfig()
@@ -81,8 +82,8 @@ public class CustomDownloader extends AbstractDownloader {
                     .setProxyUserName(proxy.getUserName())
                     .setProxyPassword(proxy.getPassword());
             }
-            HttpHelper.Callback<HttpHelper.Res> callback = (response, httpRequestBase) -> new HttpHelper.Res(response, httpRequestBase);
-            res = HttpHelper.execute(httpClient, request.getUrl(), reqConfig, callback);
+            Callback<Res> callback = (response, httpRequestBase) -> new Res(response, httpRequestBase);
+            res = httpClient.execute(request.getUrl(), reqConfig, callback);
             page = handleResponse(request, request.getCharset() != null ? request.getCharset() : task.getSite().getCharset(), res.getResponse(), task);
             return page;
         } catch (Throwable e) {
@@ -113,7 +114,7 @@ public class CustomDownloader extends AbstractDownloader {
         if (reqCount != null && switchUrl != null && c.incrementAndGet() % reqCount == 0) {
             ReqConfig reqConfig = new ReqConfig().setProxy(SpiderHelper.create(proxy)).setProxyUserName(proxy.getUserName()).setProxyPassword(proxy.getPassword());
             try {
-                String content = HttpHelper.get(httpClient, switchUrl, reqConfig);
+                String content = httpClient.get(switchUrl, reqConfig);
                 logger.info("switch-ip:" + content);
             } catch (Exception e) {
                 logger.warn("switch-ip failed", e);
@@ -173,5 +174,23 @@ public class CustomDownloader extends AbstractDownloader {
     @Override
     public void setThread(int threadNum) {
         this.thread = threadNum;
+    }
+
+    public static class Res {
+        private final HttpResponse response;
+        private final HttpRequestBase httpRequestBase;
+
+        public Res(HttpResponse response, HttpRequestBase httpRequestBase) {
+            this.response = response;
+            this.httpRequestBase = httpRequestBase;
+        }
+
+        public HttpResponse getResponse() {
+            return response;
+        }
+
+        public HttpRequestBase getHttpRequestBase() {
+            return httpRequestBase;
+        }
     }
 }
