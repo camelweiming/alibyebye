@@ -156,7 +156,7 @@ CREATE TABLE `task_queue` (
   `gmt_create` datetime NOT NULL COMMENT '创建时间',
   `gmt_modified` datetime NOT NULL COMMENT '修改时间',
   `status` int(4) NOT NULL COMMENT '0:waiting,1:running,2:failed,3:success',
-  `attributes` VARCHAR(512) NOT NULL COMMENT '扩展属性',
+  `attributes` VARCHAR(512) DEFAULT NULL COMMENT '扩展属性',
   `type` int(11) NOT NULL COMMENT '类型',
   `version` int(11) NOT NULL COMMENT '版本',
   `unique_key` varchar(64) NOT NULL COMMENT '唯一key',

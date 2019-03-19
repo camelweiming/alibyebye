@@ -25,7 +25,29 @@ public class TaskQueueMapperTest extends BaseDAOTest {
         q.setExecuteTimeout(DateTime.now().plusMinutes(1).toDate());
         q.setOrigRetryCount(30);
         q.setExecuteIntervalSeconds(3);
+        q.setExecuteTimeout(DateTime.now().plusMinutes(1).toDate());
         q.setEnv("daily");
+        q.setStatus(TaskQueueDO.STATUS_WAITING);
         taskQueueMapper.insert(q);
+    }
+
+    @Test
+    public void testLock() {
+        taskQueueMapper.lock(1l, "localhost");
+    }
+
+    @Test
+    public void makeRetry() {
+        taskQueueMapper.makeRetry(1l, null, "xxxx");
+    }
+
+    @Test
+    public void makeFailed() {
+        taskQueueMapper.makeFailed(1l, "de4444");
+    }
+
+    @Test
+    public void makeSuccess() {
+        taskQueueMapper.makeSuccess(1l);
     }
 }

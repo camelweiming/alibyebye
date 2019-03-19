@@ -12,6 +12,10 @@ import java.util.Date;
  */
 public class TaskQueueDO implements Serializable {
     private static final long serialVersionUID = 684785351337804461L;
+    public static final Byte STATUS_WAITING = 0;
+    public static final Byte STATUS_RUNNING = 1;
+    public static final Byte STATUS_FAILED = 2;
+    public static final Byte STATUS_SUCCESS = 3;
     private Long id;
     private Date gmtCreate;
     private Date gmtModified;
@@ -31,6 +35,15 @@ public class TaskQueueDO implements Serializable {
     private String env;
     private Long parentId;
     private Integer childrenCount;
+    private String attributes;
+
+    public String getAttributes() {
+        return attributes;
+    }
+
+    public void setAttributes(String attributes) {
+        this.attributes = attributes;
+    }
 
     public Long getId() {
         return id;

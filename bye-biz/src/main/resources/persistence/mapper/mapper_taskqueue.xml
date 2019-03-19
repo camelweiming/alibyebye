@@ -2,7 +2,7 @@
 <!DOCTYPE mapper
         PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.abb.bye.mapper.CategoryMapper">
+<mapper namespace="com.abb.bye.mapper.TaskQueueMapper">
 
     <sql id="columns">
         id,
@@ -41,7 +41,9 @@
             alarm_threshold,
             env,
             parent_id,
-            children_count
+            children_count,
+            status,
+            execute_timeout
         )
         values
         (
@@ -59,7 +61,9 @@
             #{alarmThreshold},
             #{env},
             #{parentId},
-            #{childrenCount}
+            #{childrenCount},
+            #{status},
+            #{executeTimeout}
         )
     </insert>
 
