@@ -77,6 +77,16 @@
         where id = #{id} and status = 0
     </update>
 
+    <update id="release">
+        update task_queue
+        set
+        gmt_modified = now()
+        ,status = 0
+        ,version= version + 1
+        ,ip = null
+        where id = #{id} and status = 1
+    </update>
+
     <update id="makeRetry">
         update task_queue
         set
@@ -129,6 +139,12 @@
         AND env = #{env}
         order by id asc
         limit #{limit}
+    </select>
+
+    <select id="get" resultType="com.abb.bye.client.domain.TaskQueueDO">
+        select id,type,attributes,retry_count,execute_interval_seconds,alarm_threshold,env
+        from task_queue
+        where type=#{type} and unique_key=#{uniqueKey}
     </select>
 
     <update id="forceStop">

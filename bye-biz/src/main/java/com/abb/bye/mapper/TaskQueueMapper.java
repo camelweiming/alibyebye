@@ -28,6 +28,14 @@ public interface TaskQueueMapper {
     int lock(@Param("id") long id, @Param("ip") String ip);
 
     /**
+     * 释放
+     *
+     * @param id
+     * @return
+     */
+    int release(@Param("id") long id);
+
+    /**
      * 标记重试
      *
      * @param id
@@ -83,4 +91,13 @@ public interface TaskQueueMapper {
      * @param lastModified 上次更新之前的
      */
     void cleanSuccess(@Param("lastModified") Date lastModified);
+
+    /**
+     * 查询单个任务
+     *
+     * @param type
+     * @param uniqueKey
+     * @return
+     */
+    TaskQueueDO get(@Param("type") int type, @Param("uniqueKey") String uniqueKey);
 }

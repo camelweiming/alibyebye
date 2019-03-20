@@ -1,6 +1,7 @@
 package com.abb.bye.test;
 
 import com.abb.bye.client.domain.ProxyDO;
+import com.abb.bye.utils.Md5;
 import com.alibaba.fastjson.JSON;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,5 +36,7 @@ public class Test {
         a.put(ProxyDO.ATTR_SWITCH_IP_URL, "http://ip.dobel.cn/switch-ip");
         a.put(ProxyDO.ATTR_SWITCH_IP_REQ_COUNT, 50);
         System.out.println(JSON.toJSON(a));
+
+        System.out.println(Md5.getInstance().getMD5String("x地方都是g")+"_"+System.currentTimeMillis());
     }
 }
