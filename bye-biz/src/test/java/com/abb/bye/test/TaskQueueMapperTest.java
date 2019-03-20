@@ -6,6 +6,7 @@ import org.joda.time.DateTime;
 import org.junit.Test;
 
 import javax.annotation.Resource;
+import java.util.Date;
 
 /**
  * @author cenpeng.lwm
@@ -24,7 +25,7 @@ public class TaskQueueMapperTest extends BaseDAOTest {
         q.setTimeout(DateTime.now().plusMinutes(60).toDate());
         q.setExecuteTimeout(DateTime.now().plusMinutes(1).toDate());
         q.setOrigRetryCount(30);
-        q.setExecuteIntervalSeconds(3);
+        q.setExecuteIntervalSeconds(60);
         q.setExecuteTimeout(DateTime.now().plusMinutes(1).toDate());
         q.setEnv("daily");
         q.setStatus(TaskQueueDO.STATUS_WAITING);
@@ -49,5 +50,10 @@ public class TaskQueueMapperTest extends BaseDAOTest {
     @Test
     public void makeSuccess() {
         taskQueueMapper.makeSuccess(1l);
+    }
+
+    @Test
+    public void forceStop() {
+        taskQueueMapper.forceStop(new Date());
     }
 }

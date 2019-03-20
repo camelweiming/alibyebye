@@ -52,7 +52,7 @@
             #{attributes},
             #{type},
             0,
-            unique_key,
+            #{uniqueKey},
             #{startTime},
             #{timeout},
             #{origRetryCount},
@@ -133,8 +133,8 @@
         id,type,attributes,retry_count,execute_interval_seconds,alarm_threshold,env
         from task_queue
         where status = 0
-        <![CDATA[AND timeout < #{currentTime}]]>
-        <![CDATA[AND start_time <= #{currentTime}]]>
+        <![CDATA[AND timeout < now()]]>
+        <![CDATA[AND start_time <= now()]]>
         AND children_count = 0
         AND env = #{env}
         order by id asc
@@ -152,11 +152,11 @@
         gmt_modified = now()
         ,version = version + 1
         ,status = 0
-        where status = 1 and <![CDATA[execute_timeout < #currentTime#]]>
+        where status = 1 and <![CDATA[execute_timeout < #{currentTime}]]>
     </update>
 
     <delete id="cleanSuccess">
         delete from task_queue
-        where status = 3 and <![CDATA[last_modified < #lastModified#]]>
+        where status = 3 and <![CDATA[last_modified < #{lastModified}]]>
     </delete>
 </mapper>

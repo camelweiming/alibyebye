@@ -74,9 +74,10 @@ public interface TaskQueueMapper {
      * 取待执行任务
      *
      * @param limit
+     * @param env
      * @return
      */
-    List<TaskQueueDO> listWaiting(@Param("limit") int limit);
+    List<TaskQueueDO> listWaiting(@Param("limit") int limit, @Param("env") String env);
 
     /**
      * 重置超时任务,机器死掉之后死任务重置

@@ -19,7 +19,7 @@ public class TaskResult {
         return success;
     }
 
-    public void setSuccess(boolean success) {
+    public TaskResult(boolean success) {
         this.success = success;
     }
 
@@ -27,24 +27,27 @@ public class TaskResult {
         return errorMsg;
     }
 
-    public void setErrorMsg(String errorMsg) {
+    public TaskResult setErrorMsg(String errorMsg) {
         this.errorMsg = errorMsg;
+        return this;
     }
 
     public boolean isGiveUp() {
         return giveUp;
     }
 
-    public void setGiveUp(boolean giveUp) {
+    public TaskResult setGiveUp(boolean giveUp) {
         this.giveUp = giveUp;
+        return this;
     }
 
     public Date getNextExecuteTime() {
         return nextExecuteTime;
     }
 
-    public void setNextExecuteTime(Date nextExecuteTime) {
+    public TaskResult setNextExecuteTime(Date nextExecuteTime) {
         this.nextExecuteTime = nextExecuteTime;
+        return this;
     }
 
     @Override

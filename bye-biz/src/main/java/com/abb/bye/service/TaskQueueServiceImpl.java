@@ -56,6 +56,7 @@ public class TaskQueueServiceImpl implements TaskQueueService, InitializingBean,
         for (int i = 0; i < RETRY_COUNT; i++) {
             try {
                 taskQueueMapper.release(id);
+                logger.info("release lock:" + id);
                 return;
             } catch (Throwable e) {
                 logger.warn("release " + id + " failed:" + i);
@@ -64,19 +65,38 @@ public class TaskQueueServiceImpl implements TaskQueueService, InitializingBean,
         throw new IllegalStateException("Error release :" + id);
     }
 
+    @Override
+    public void releaseDieTask() {
+        taskQueueMapper.forceStop(new Date());
+    }
+
+    @Override
+    public void makeFail(TaskQueueDO taskQueueDO, Date nextTime, String msg, boolean forceFail) {
+        if (taskQueueDO.getRetryCount() == 1 || forceFail) {
+            taskQueueMapper.makeFailed(taskQueueDO.getId(), StringUtils.substring(msg, 200));
+        } else {
+            taskQueueMapper.makeRetry(taskQueueDO.getId(), nextTime, StringUtils.substring(msg, 200));
+        }
+    }
+
     void getJob() {
         if (!lock(lock.getId())) {
             return;
         }
         logger.info("get lock:" + lock.getId());
-        List<TaskQueueDO> list = taskQueueMapper.listWaiting(100);
-        for (TaskQueueDO taskQueueDO : list) {
-            if (!StringUtils.equals(taskQueueDO.getEnv(), systemEnv.current().name())) {
-                continue;
+        try {
+            List<TaskQueueDO> list = taskQueueMapper.listWaiting(100, systemEnv.current().name());
+            for (TaskQueueDO taskQueueDO : list) {
+                if (!StringUtils.equals(taskQueueDO.getEnv(), systemEnv.current().name())) {
+                    continue;
+                }
+                CommonThreadPool.getCommonExecutor().submit(() -> dispatch(taskQueueDO));
             }
-            CommonThreadPool.getCommonExecutor().submit(() -> dispatch(taskQueueDO));
+        } catch (Throwable e) {
+            logger.error("Error getJob", e);
+        } finally {
+            release(lock.getId());
         }
-        release(lock.getId());
     }
 
     void dispatch(TaskQueueDO q) {
@@ -88,24 +108,33 @@ public class TaskQueueServiceImpl implements TaskQueueService, InitializingBean,
         if (!lock(q.getId())) {
             return;
         }
-        TaskResult result = taskProcessor.process(q);
-        if (result.isSuccess()) {
-            taskQueueMapper.makeSuccess(q.getId());
-            return;
-        }
-        if (result.isGiveUp()) {
-            taskQueueMapper.makeFailed(q.getId(), StringUtils.substring(result.getErrorMsg(), 200));
-            return;
-        }
-        Date nextTime = result.getNextExecuteTime();
-        if (nextTime == null) {
-            if (q.getExecuteIntervalSeconds() != null) {
-                nextTime = new DateTime().plusSeconds(q.getExecuteIntervalSeconds()).toDate();
-            } else {
-                nextTime = new Date();
+        try {
+            TaskResult result = taskProcessor.process(q);
+            if (logger.isDebugEnabled()) {
+                logger.info("dispatch:" + result.getClass());
             }
+
+            if (result.isSuccess()) {
+                taskQueueMapper.makeSuccess(q.getId());
+                return;
+            }
+            if (result.isGiveUp()) {
+                makeFail(q, null, result.getErrorMsg(), true);
+                return;
+            }
+            Date nextTime = result.getNextExecuteTime();
+            if (nextTime == null) {
+                if (q.getExecuteIntervalSeconds() != null) {
+                    nextTime = new DateTime().plusSeconds(q.getExecuteIntervalSeconds()).toDate();
+                } else {
+                    nextTime = new Date();
+                }
+            }
+            makeFail(q, nextTime, result.getErrorMsg(), false);
+        } catch (Throwable e) {
+            logger.error("Error dispatch job:" + q.getId(), e);
+
         }
-        taskQueueMapper.makeRetry(q.getId(), nextTime, StringUtils.substring(result.getErrorMsg(), 200));
     }
 
     void checkAndInitLock() throws InterruptedException {
@@ -117,11 +146,11 @@ public class TaskQueueServiceImpl implements TaskQueueService, InitializingBean,
                 return;
             }
             try {
-                taskQueueMapper.insert(q);
+                taskQueueMapper.insert(lock);
             } catch (Throwable e) {
                 logger.error("Error checkAndInitLock", e);
             }
-            Thread.sleep(1000);
+            Thread.sleep(500);
         }
         logger.error("Give up initLock");
         throw new IllegalStateException("Give up initLock");
@@ -148,8 +177,20 @@ public class TaskQueueServiceImpl implements TaskQueueService, InitializingBean,
         lock.setEnv(systemEnv.current().name());
 
         checkAndInitLock();
-        CommonThreadPool.getScheduledExecutor().scheduleAtFixedRate(() -> getJob(), 0, 2, TimeUnit.SECONDS);
-        CommonThreadPool.getScheduledExecutor().scheduleAtFixedRate(() -> taskQueueMapper.forceStop(new Date()), 0, 1, TimeUnit.MINUTES);
+
+        CommonThreadPool.getScheduledExecutor().scheduleAtFixedRate(() -> {
+            try {
+                getJob();
+            } catch (Throwable e) {
+                logger.error("Error getJob", e);
+            }
+        }, 0, 2, TimeUnit.SECONDS);
+
+        CommonThreadPool.getScheduledExecutor().scheduleAtFixedRate(() -> {
+            try {releaseDieTask();} catch (Throwable e) {
+                logger.error("Error getJob", e);
+            }
+        }, 0, 1, TimeUnit.MINUTES);
     }
 
     @Override
