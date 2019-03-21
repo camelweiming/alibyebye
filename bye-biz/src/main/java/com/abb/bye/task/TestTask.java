@@ -18,7 +18,12 @@ public class TestTask implements TaskProcessor {
     @Override
     public TaskResult process(TaskQueueDO taskQueueDO) {
         logger.info("handle TestTask:" + taskQueueDO);
-        return new TaskResult(false);
+        return new TaskResult(false).setErrorMsg("error...");
+    }
+
+    @Override
+    public void notifyFailed(TaskQueueDO taskQueueDO) {
+        logger.info("Failed TestTask:" + taskQueueDO);
     }
 
     @Override

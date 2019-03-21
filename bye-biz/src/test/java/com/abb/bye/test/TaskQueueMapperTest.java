@@ -1,6 +1,7 @@
 package com.abb.bye.test;
 
 import com.abb.bye.client.domain.TaskQueueDO;
+import com.abb.bye.client.domain.enums.Env;
 import com.abb.bye.mapper.TaskQueueMapper;
 import org.joda.time.DateTime;
 import org.junit.Test;
@@ -20,15 +21,17 @@ public class TaskQueueMapperTest extends BaseDAOTest {
     public void insert() {
         TaskQueueDO q = new TaskQueueDO();
         q.setType(1);
-        q.setUniqueKey("test");
-        q.setStartTime(DateTime.now().plusMinutes(10).toDate());
-        q.setTimeout(DateTime.now().plusMinutes(60).toDate());
-        q.setExecuteTimeout(DateTime.now().plusMinutes(1).toDate());
-        q.setOrigRetryCount(30);
-        q.setExecuteIntervalSeconds(60);
-        q.setExecuteTimeout(DateTime.now().plusMinutes(1).toDate());
-        q.setEnv("daily");
+        q.setUniqueKey("test_3");
+        q.setStartTime(DateTime.now().plusMinutes(1).toDate());
+        q.setTimeout(DateTime.now().plusMinutes(10).toDate());
+        q.setExecuteTimeout(DateTime.now().plusSeconds(10).toDate());
+        q.setOrigRetryCount(10);
+        q.setExecuteIntervalSeconds(10);
+        q.setAlarmThreshold(0);
+        q.setExecuteTimeout(DateTime.now().plusSeconds(30).toDate());
+        q.setEnv(Env.DAILY.name());
         q.setStatus(TaskQueueDO.STATUS_WAITING);
+        q.setChildrenCount(0);
         taskQueueMapper.insert(q);
     }
 

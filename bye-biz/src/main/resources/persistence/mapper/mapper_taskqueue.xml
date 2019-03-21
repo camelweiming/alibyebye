@@ -130,10 +130,9 @@
 
     <select id="listWaiting" resultType="com.abb.bye.client.domain.TaskQueueDO">
         select
-        id,type,attributes,retry_count,execute_interval_seconds,alarm_threshold,env
+        id,type,attributes,retry_count,execute_interval_seconds,alarm_threshold,env,timeout
         from task_queue
         where status = 0
-        <![CDATA[AND timeout < now()]]>
         <![CDATA[AND start_time <= now()]]>
         AND children_count = 0
         AND env = #{env}

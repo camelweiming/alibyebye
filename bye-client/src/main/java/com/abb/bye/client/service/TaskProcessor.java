@@ -17,6 +17,13 @@ public interface TaskProcessor {
     TaskResult process(TaskQueueDO taskQueueDO);
 
     /**
+     * 置为失败通知
+     *
+     * @param taskQueueDO
+     */
+    void notifyFailed(TaskQueueDO taskQueueDO);
+
+    /**
      * 注册类型
      *
      * @return

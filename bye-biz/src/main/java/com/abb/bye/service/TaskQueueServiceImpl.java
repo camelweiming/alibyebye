@@ -43,6 +43,23 @@ public class TaskQueueServiceImpl implements TaskQueueService, InitializingBean,
 
     @Override
     public void apply(TaskQueueDO taskQueueDO) {
+        if (taskQueueDO.getUniqueKey() == null || taskQueueDO.getType() == null) {
+            throw new IllegalArgumentException("param error");
+        }
+        if (taskQueueDO.getStartTime() == null || taskQueueDO.getTimeout() == null) {
+            throw new IllegalArgumentException("miss startTime or timeout");
+        }
+        if (taskQueueDO.getTimeout().before(taskQueueDO.getStartTime())) {
+            throw new IllegalArgumentException("timeout before startTime");
+        }
+        if (taskQueueDO.getExecuteTimeout() == null) {
+            taskQueueDO.setExecuteTimeout(new DateTime(taskQueueDO.getStartTime()).plusSeconds(10).toDate());
+        }
+        if (taskQueueDO.getAlarmThreshold() == null) {
+            taskQueueDO.setAlarmThreshold(0);
+        }
+        taskQueueDO.setChildrenCount(0);
+        taskQueueDO.setParentId(null);
         taskQueueMapper.insert(taskQueueDO);
     }
 
@@ -109,11 +126,16 @@ public class TaskQueueServiceImpl implements TaskQueueService, InitializingBean,
             return;
         }
         try {
+            Date now = new Date();
             TaskResult result = taskProcessor.process(q);
             if (logger.isDebugEnabled()) {
                 logger.info("dispatch:" + result.getClass());
             }
-
+            if (now.after(q.getTimeout())) {
+                makeFail(q, null, "TIME_OUT", true);
+                taskProcessor.notifyFailed(q);
+                return;
+            }
             if (result.isSuccess()) {
                 taskQueueMapper.makeSuccess(q.getId());
                 return;
@@ -133,7 +155,7 @@ public class TaskQueueServiceImpl implements TaskQueueService, InitializingBean,
             makeFail(q, nextTime, result.getErrorMsg(), false);
         } catch (Throwable e) {
             logger.error("Error dispatch job:" + q.getId(), e);
-
+            release(q.getId());
         }
     }
 
@@ -146,7 +168,7 @@ public class TaskQueueServiceImpl implements TaskQueueService, InitializingBean,
                 return;
             }
             try {
-                taskQueueMapper.insert(lock);
+                apply(lock);
             } catch (Throwable e) {
                 logger.error("Error checkAndInitLock", e);
             }
