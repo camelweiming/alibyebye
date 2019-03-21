@@ -1,17 +1,18 @@
 package com.abb.bye.client.domain;
 
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * @author cenpeng.lwm
  * @since 2019/3/21
  */
 public class SequenceRange {
-    private final long min;
-    private final long max;
-
-    private final AtomicLong value;
-
+    private final Lock lock = new ReentrantLock();
+    private long min;
+    private long max;
+    private AtomicLong value;
     private volatile boolean over = false;
 
     public SequenceRange(long min, long max) {
@@ -88,6 +89,27 @@ public class SequenceRange {
 
     public void setOver(boolean over) {
         this.over = over;
+    }
+
+    /**
+     * 必须在加锁的情况下调用，reset完成之前不可读
+     *
+     * @param min
+     * @param max
+     */
+    public void reset(long min, long max) {
+        this.min = min;
+        this.max = max;
+        this.value = new AtomicLong(min);
+        this.over = false;
+    }
+
+    public void lock() {
+        lock.lock();
+    }
+
+    public void unlock() {
+        lock.unlock();
     }
 
     @Override

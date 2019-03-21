@@ -8,8 +8,8 @@ public interface SequenceService {
     /**
      * 取ID
      *
-     * @param key
+     * @param name
      * @return
      */
-    long next(final String key);
+    long next(final String name);
 }

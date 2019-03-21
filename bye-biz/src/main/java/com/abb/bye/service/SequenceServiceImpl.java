@@ -14,8 +14,6 @@ import javax.sql.DataSource;
 import java.sql.*;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * @author cenpeng.lwm
@@ -34,24 +32,26 @@ public class SequenceServiceImpl implements SequenceService, InitializingBean {
     private String valueColumnName = "value";
     private String modifiedColumnName = "gmt_modified";
     private String sequences;
-    private volatile Map<String, SequenceRange> sequenceRangeMap = new HashMap<>();
-    private volatile Map<String, Lock> sequenceRangeLock = new HashMap<>();
+    /**
+     * 初始化一次，无需扩容，不需要ConcurrentHashMap
+     */
+    private volatile Map<String, SequenceRange> sequenceRangeMapping = new HashMap<>();
 
     @Override
-    public long next(String key) {
-        SequenceRange sequenceRange = sequenceRangeMap.get(key);
+    public long next(String name) {
+        SequenceRange sequenceRange = sequenceRangeMapping.get(name);
         if (sequenceRange == null) {
-            throw new SequenceException("sequence not exist:" + key);
+            throw new SequenceException("sequence not exist:" + name);
         }
         long value = sequenceRange.getAndIncrement();
         if (value == -1) {
-            Lock lock = sequenceRangeLock.get(key);
-            lock.lock();
+            sequenceRange.lock();
             try {
                 for (; ; ) {
                     if (sequenceRange.isOver()) {
-                        sequenceRange = nextRange(key);
-                        sequenceRangeMap.put(key, sequenceRange);
+                        long[] values = nextRange(name);
+                        sequenceRange.reset(values[0], values[1]);
+                        logger.info("reset-sequence-rage:" + sequenceRange);
                     }
                     value = sequenceRange.getAndIncrement();
                     if (value == -1) {
@@ -60,13 +60,13 @@ public class SequenceServiceImpl implements SequenceService, InitializingBean {
                     break;
                 }
             } finally {
-                lock.unlock();
+                sequenceRange.unlock();
             }
         }
         return value;
     }
 
-    public SequenceRange nextRange(final String name) {
+    public long[] nextRange(final String name) {
         for (int i = 0; i < DEFAULT_RETRY_TIMES; i++) {
             try {
                 Long oldValue = getOldValue(name);
@@ -74,9 +74,7 @@ public class SequenceServiceImpl implements SequenceService, InitializingBean {
                 if (0 == updateNewValue(name, oldValue, newValue)) {
                     continue;
                 }
-                SequenceRange range = new SequenceRange(newValue + 1, newValue + innerStep);
-                logger.info("nextRange:" + range);
-                return range;
+                return new long[] {newValue + 1, newValue + innerStep};
             } catch (Throwable e) {
                 logger.warn("Error getNextRange:" + name, e);
             }
@@ -137,8 +135,10 @@ public class SequenceServiceImpl implements SequenceService, InitializingBean {
             try {
                 Long currentValue = getOldValue(name);
                 if (currentValue != null) {
-                    sequenceRangeMap.put(name, nextRange(name));
-                    sequenceRangeLock.put(name, new ReentrantLock());
+                    long[] values = nextRange(name);
+                    SequenceRange range = new SequenceRange(values[0], values[1]);
+                    sequenceRangeMapping.put(name, range);
+                    logger.info("load-sequence-rage:" + range);
                     return;
                 }
                 adjustInsert(0, name);
