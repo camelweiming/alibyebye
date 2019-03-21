@@ -194,7 +194,7 @@ public class TaskQueueServiceImpl implements TaskQueueService, InitializingBean,
         lock.setStartTime(new Date());
         lock.setTimeout(DateTime.now().plusYears(10).toDate());
         lock.setExecuteTimeout(DateTime.now().plusMinutes(3).toDate());
-        lock.setOrigRetryCount(9999999);
+        lock.setOrigRetryCount(Integer.MAX_VALUE);
         lock.setStatus(TaskQueueDO.STATUS_WAITING);
         lock.setEnv(systemEnv.current().name());
 
