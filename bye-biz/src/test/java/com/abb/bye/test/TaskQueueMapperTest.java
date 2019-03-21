@@ -36,6 +36,23 @@ public class TaskQueueMapperTest extends BaseDAOTest {
     }
 
     @Test
+    public void insertTimeout() {
+        TaskQueueDO q = new TaskQueueDO();
+        q.setType(1);
+        q.setUniqueKey("test_4");
+        q.setStartTime(DateTime.now().toDate());
+        q.setTimeout(DateTime.now().plusMinutes(10).toDate());
+        q.setExecuteTimeout(DateTime.now().plusSeconds(10).toDate());
+        q.setOrigRetryCount(10);
+        q.setExecuteIntervalSeconds(10);
+        q.setAlarmThreshold(0);
+        q.setEnv(Env.DAILY.name());
+        q.setStatus(TaskQueueDO.STATUS_RUNNING);
+        q.setChildrenCount(0);
+        taskQueueMapper.insert(q);
+    }
+
+    @Test
     public void testLock() {
         taskQueueMapper.lock(1l, "localhost");
     }
