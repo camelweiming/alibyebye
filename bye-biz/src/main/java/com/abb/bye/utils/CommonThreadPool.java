@@ -15,7 +15,7 @@ public class CommonThreadPool {
     /**
      * 公用线程池
      */
-    private static ThreadPoolExecutor COMMON_EXECUTOR = new ThreadPoolExecutor(10, 500, 30, TimeUnit.SECONDS, new ArrayBlockingQueue<>(1000), r -> {
+    private static ThreadPoolExecutor COMMON_EXECUTOR = new ThreadPoolExecutor(10, 500, 30, TimeUnit.SECONDS, new SynchronousQueue<>(), r -> {
         Thread t = new Thread(r, "COMMON_THREAD_POOL");
         t.setDaemon(true);
         return t;
