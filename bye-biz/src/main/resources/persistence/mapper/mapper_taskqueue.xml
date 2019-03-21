@@ -27,6 +27,7 @@
     <insert id="insert" parameterType="com.abb.bye.client.domain.TaskQueueDO">
         insert into task_queue
         (
+            id,
             gmt_create,
             gmt_modified,
             attributes,
@@ -47,6 +48,7 @@
         )
         values
         (
+            #{id},
             now(),
             now(),
             #{attributes},
@@ -125,12 +127,12 @@
         gmt_modified = now()
         ,version = version + 1
         ,children_count = children_count - 1
-        where id = #parentId#
+        where id = #{parentId}
     </update>
 
     <select id="listWaiting" resultType="com.abb.bye.client.domain.TaskQueueDO">
         select
-        id,type,attributes,retry_count,execute_interval_seconds,alarm_threshold,env,timeout
+        <include refid="columns"/>
         from task_queue
         where status = 0
         <![CDATA[AND start_time <= now()]]>

@@ -1,10 +1,11 @@
 package com.abb.bye.test;
 
 import com.abb.bye.client.service.SequenceService;
-import org.junit.Assert;
+import com.google.common.collect.Sets;
 import org.junit.Test;
 
 import javax.annotation.Resource;
+import java.util.Set;
 
 /**
  * @author cenpeng.lwm
@@ -15,14 +16,27 @@ public class SequenceTest extends BaseDAOTest {
     private SequenceService sequenceService;
 
     @Test
-    public void test() {
-        long current = 0;
-        for (int i = 0; i < 2000; i++) {
-            long value = sequenceService.next("task_queue");
-            if (current != 0) {
-                Assert.assertEquals(value, current + 1);
-            }
-            current = value;
+    public void test() throws InterruptedException {
+        Set<Long> set = Sets.newConcurrentHashSet();
+        for (int i = 0; i < 10; i++) {
+            new Thread(() -> {
+                while (true) {
+                    long value = sequenceService.next("task_queue");
+                    System.out.println(value);
+                    if (!set.add(value)) {
+                        throw new IllegalArgumentException("dup:" + value);
+                    }
+                }
+            }).start();
         }
+        Thread.sleep(3000);
+        //long current = 0;
+        //for (int i = 0; i < 2000; i++) {
+        //
+        //    if (current != 0) {
+        //        Assert.assertEquals(value, current + 1);
+        //    }
+        //    current = value;
+        //}
     }
 }

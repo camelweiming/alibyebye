@@ -132,7 +132,7 @@ public class SequenceServiceImpl implements SequenceService, InitializingBean {
         }
     }
 
-    protected void checkAndInit(String name) {
+    protected synchronized void checkAndInit(String name) {
         for (int i = 0; i < DEFAULT_RETRY_TIMES; i++) {
             try {
                 Long currentValue = getOldValue(name);

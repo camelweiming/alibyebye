@@ -5,6 +5,7 @@ import com.abb.bye.SystemEnv;
 import com.abb.bye.client.domain.TaskQueueDO;
 import com.abb.bye.client.domain.TaskResult;
 import com.abb.bye.client.domain.TreeNode;
+import com.abb.bye.client.service.SequenceService;
 import com.abb.bye.client.service.TaskProcessor;
 import com.abb.bye.client.service.TaskQueueService;
 import com.abb.bye.mapper.TaskQueueMapper;
@@ -24,10 +25,7 @@ import org.springframework.transaction.support.TransactionCallback;
 import org.springframework.transaction.support.TransactionTemplate;
 
 import javax.annotation.Resource;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -44,9 +42,12 @@ public class TaskQueueServiceImpl implements TaskQueueService, InitializingBean,
     private SystemEnv systemEnv;
     @Resource
     private PlatformTransactionManager transactionManager;
+    @Resource
+    private SequenceService sequenceService;
     private Map<Integer, TaskProcessor> mapping = new HashMap<>();
     private TaskQueueDO lock;
     private int RETRY_COUNT = 10;
+    private static String SEQUENCE_NAME = "task_queue";
 
     @Override
     public void apply(TaskQueueDO taskQueueDO) {
@@ -65,6 +66,10 @@ public class TaskQueueServiceImpl implements TaskQueueService, InitializingBean,
         if (taskQueueDO.getAlarmThreshold() == null) {
             taskQueueDO.setAlarmThreshold(0);
         }
+        taskQueueDO.setStatus(TaskQueueDO.STATUS_WAITING);
+        if (taskQueueDO.getId() != null) {
+            taskQueueDO.setId(sequenceService.next(SEQUENCE_NAME));
+        }
         taskQueueDO.setChildrenCount(0);
         taskQueueDO.setParentId(null);
         taskQueueMapper.insert(taskQueueDO);
@@ -72,21 +77,46 @@ public class TaskQueueServiceImpl implements TaskQueueService, InitializingBean,
 
     @Override
     public void apply(TreeNode<TaskQueueDO> node) {
-
+        List<TaskQueueDO> list = buildQueue(node);
+        TransactionTemplate transactionTemplate = new TransactionTemplate(transactionManager);
+        transactionTemplate.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
+        transactionTemplate.setIsolationLevel(TransactionDefinition.ISOLATION_READ_COMMITTED);
+        transactionTemplate.execute((TransactionCallback<Void>)transactionStatus -> {
+            try {
+                for (TaskQueueDO taskQueueDO : list) {
+                    apply(taskQueueDO);
+                }
+            } catch (Throwable e) {
+                transactionStatus.setRollbackOnly();
+                logger.error("Error applyNode:" + node, e);
+            }
+            return null;
+        });
     }
-    //private boolean processNode(TreeNode<TaskQueueDO> node, long parentId, List<TaskQueueDO> taskQueueDOs) {
-    //    TaskQueueDO taskDO = node.getData();
-    //    taskDO.setParentId(parentId);
-    //    taskDO.setChildrenCount(null == node.getChildren() ? 0 : node.getChildren().size());
-    //    taskQueueDOs.add(taskDO);
-    //    for (TreeNode<TaskQueueDO> child : node.getChildren()) {
-    //        boolean r = processNode(child, id, taskQueueDOs);
-    //        if (!r) {
-    //            return false;
-    //        }
-    //    }
-    //    return true;
-    //}
+
+    private List<TaskQueueDO> buildQueue(TreeNode<TaskQueueDO> node) {
+        List<TaskQueueDO> taskQueueDOs = new ArrayList<>();
+        boolean r = processNode(node, 0, taskQueueDOs);
+        if (!r) {
+            throw new RuntimeException("processNode failed");
+        }
+        return taskQueueDOs;
+    }
+
+    private boolean processNode(TreeNode<TaskQueueDO> node, long parentId, List<TaskQueueDO> taskQueueDOs) {
+        TaskQueueDO taskDO = node.getData();
+        taskDO.setParentId(parentId);
+        taskDO.setId(sequenceService.next(SEQUENCE_NAME));
+        taskDO.setChildrenCount(null == node.getChildren() ? 0 : node.getChildren().size());
+        taskQueueDOs.add(taskDO);
+        for (TreeNode<TaskQueueDO> child : node.getChildren()) {
+            boolean r = processNode(child, taskDO.getId(), taskQueueDOs);
+            if (!r) {
+                return false;
+            }
+        }
+        return true;
+    }
 
     @Override
     public boolean lock(long id) {
@@ -199,6 +229,7 @@ public class TaskQueueServiceImpl implements TaskQueueService, InitializingBean,
             }
             makeFail(q, nextTime, result.getErrorMsg(), false);
         } catch (Throwable e) {
+            release(q.getId());
             logger.error("Error dispatch job:" + q.getId(), e);
             release(q.getId());
         }
