@@ -5,6 +5,6 @@
        default-autowire="byName">
 
     <bean id="sequenceService" class="com.abb.bye.service.SequenceServiceImpl">
-        <property name="sequences" value="task_queue"/>
+        <property name="sequences" value="task_queue,programme"/>
     </bean>
 </beans>

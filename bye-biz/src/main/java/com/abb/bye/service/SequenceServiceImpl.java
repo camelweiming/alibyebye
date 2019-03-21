@@ -175,10 +175,6 @@ public class SequenceServiceImpl implements SequenceService, InitializingBean {
         }
     }
 
-    public void setSequences(String sequences) {
-        this.sequences = sequences;
-    }
-
     protected String getSelectSql() {
         StringBuilder buffer = new StringBuilder();
         buffer.append("select ").append(valueColumnName);
@@ -254,5 +250,13 @@ public class SequenceServiceImpl implements SequenceService, InitializingBean {
         for (String name : existNames) {
             checkAndInit(name);
         }
+    }
+
+    public void setInnerStep(int innerStep) {
+        this.innerStep = innerStep;
+    }
+
+    public void setSequences(String sequences) {
+        this.sequences = sequences;
     }
 }
