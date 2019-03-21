@@ -1,0 +1,29 @@
+server:
+  port: 8080
+  tomcat:
+    max-threads: 250
+    max-connections: 1000
+    accept-count: 500
+  error:
+    whitelabel:
+      enabled: true
+
+
+spring:
+  http:
+    encoding:
+      charset: UTF-8
+      enabled: true
+  resources:
+    add-mappings: true
+  mvc:
+    view:
+      suffix: .htm
+  velocity:
+    suffix: .vm
+    resource-loader-path: classpath:/velocity/templates
+    toolbox-config-location: /velocity/toolbox.xml
+    layout-url: /velocity/layout/default.vm
+
+
+
