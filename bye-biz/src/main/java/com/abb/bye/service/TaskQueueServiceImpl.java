@@ -4,6 +4,7 @@ import com.abb.bye.Constants;
 import com.abb.bye.SystemEnv;
 import com.abb.bye.client.domain.TaskQueueDO;
 import com.abb.bye.client.domain.TaskResult;
+import com.abb.bye.client.domain.TreeNode;
 import com.abb.bye.client.service.TaskProcessor;
 import com.abb.bye.client.service.TaskQueueService;
 import com.abb.bye.mapper.TaskQueueMapper;
@@ -17,6 +18,10 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.TransactionDefinition;
+import org.springframework.transaction.support.TransactionCallback;
+import org.springframework.transaction.support.TransactionTemplate;
 
 import javax.annotation.Resource;
 import java.util.Date;
@@ -37,6 +42,8 @@ public class TaskQueueServiceImpl implements TaskQueueService, InitializingBean,
     private TaskQueueMapper taskQueueMapper;
     @Resource
     private SystemEnv systemEnv;
+    @Resource
+    private PlatformTransactionManager transactionManager;
     private Map<Integer, TaskProcessor> mapping = new HashMap<>();
     private TaskQueueDO lock;
     private int RETRY_COUNT = 10;
@@ -62,6 +69,24 @@ public class TaskQueueServiceImpl implements TaskQueueService, InitializingBean,
         taskQueueDO.setParentId(null);
         taskQueueMapper.insert(taskQueueDO);
     }
+
+    @Override
+    public void apply(TreeNode<TaskQueueDO> node) {
+
+    }
+    //private boolean processNode(TreeNode<TaskQueueDO> node, long parentId, List<TaskQueueDO> taskQueueDOs) {
+    //    TaskQueueDO taskDO = node.getData();
+    //    taskDO.setParentId(parentId);
+    //    taskDO.setChildrenCount(null == node.getChildren() ? 0 : node.getChildren().size());
+    //    taskQueueDOs.add(taskDO);
+    //    for (TreeNode<TaskQueueDO> child : node.getChildren()) {
+    //        boolean r = processNode(child, id, taskQueueDOs);
+    //        if (!r) {
+    //            return false;
+    //        }
+    //    }
+    //    return true;
+    //}
 
     @Override
     public boolean lock(long id) {
@@ -94,6 +119,26 @@ public class TaskQueueServiceImpl implements TaskQueueService, InitializingBean,
         } else {
             taskQueueMapper.makeRetry(taskQueueDO.getId(), nextTime, StringUtils.substring(msg, 200));
         }
+    }
+
+    @Override
+    public void makeSuccess(TaskQueueDO taskQueueDO) {
+        TransactionTemplate transactionTemplate = new TransactionTemplate(transactionManager);
+        transactionTemplate.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
+        transactionTemplate.setIsolationLevel(TransactionDefinition.ISOLATION_READ_COMMITTED);
+        transactionTemplate.execute((TransactionCallback<Void>)transactionStatus -> {
+            try {
+                taskQueueMapper.makeSuccess(taskQueueDO.getId());
+                if (taskQueueDO.getParentId() != null) {
+                    taskQueueMapper.markChildFinish(taskQueueDO.getParentId());
+                }
+            } catch (Throwable e) {
+                transactionStatus.setRollbackOnly();
+                logger.error("Error makeSuccess:" + taskQueueDO.getId());
+            }
+            return null;
+        });
+
     }
 
     void getJob() {
@@ -137,7 +182,7 @@ public class TaskQueueServiceImpl implements TaskQueueService, InitializingBean,
                 return;
             }
             if (result.isSuccess()) {
-                taskQueueMapper.makeSuccess(q.getId());
+                makeSuccess(q);
                 return;
             }
             if (result.isGiveUp()) {

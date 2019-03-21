@@ -178,3 +178,15 @@ CREATE TABLE `task_queue` (
   KEY `idx_status` (`status`,`retry_count`,`start_time`,`env`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4 COMMENT='任务队列'
 ;
+
+
+CREATE TABLE `sequence` (
+    `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+    `name` VARCHAR(64) NOT NULL,
+    `value` BIGINT NOT NULL,
+    `gmt_create` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    `gmt_modified` TIMESTAMP NOT NULL,
+    PRIMARY KEY (`id`),
+    UNIQUE KEY `uk_unique_name` (`name`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='sequence'
+;
