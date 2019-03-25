@@ -4,7 +4,7 @@
     <appender name="STDOUT" class="ch.qos.logback.core.rolling.RollingFileAppender">
         <file>${log.root}/abb.log</file>
         <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-            <fileNamePattern>${loggingRoot}/dongle.log.%d{yyyy-MM-dd}
+            <fileNamePattern>${log.root}/abb.log.%d{yyyy-MM-dd}
             </fileNamePattern>
             <maxHistory>7</maxHistory>
         </rollingPolicy>
