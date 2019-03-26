@@ -24,9 +24,3 @@ spring:
     resource-loader-path: classpath:/velocity/templates
     toolbox-config-location: /velocity/toolbox.xml
     layout-url: /velocity/layout/default.vm
-
-
-security:
-  oauth2:
-    resource:
-      userInfoUri: http://localhost:8080/validateUser
