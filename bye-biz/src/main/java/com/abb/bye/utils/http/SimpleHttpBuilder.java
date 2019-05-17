@@ -38,6 +38,7 @@ import java.net.URI;
  * @since 2019/3/12
  */
 public class SimpleHttpBuilder {
+    private static Logger logger = LoggerFactory.getLogger(SimpleHttpBuilder.class);
     private int socketTimeout = 5000;
     private int connectionTimeout = 5000;
     private int connectionRequestTimeout = 5000;
@@ -86,8 +87,9 @@ public class SimpleHttpBuilder {
                 .setMaxConnTotal(totalConnPerRoute)
                 .setSSLStrategy(sslSessionStrategy);
             if (enableCompress) {
-                builder.addInterceptorFirst(new RequestAcceptEncoding());
-                builder.addInterceptorFirst(new ResponseContentEncoding());
+                //builder.addInterceptorFirst(new RequestAcceptEncoding());
+                //builder.addInterceptorFirst(new ResponseContentEncoding());
+                logger.warn("async-not-support-compress");
             }
             CloseableHttpAsyncClient closeableHttpAsyncClient = builder.build();
             if (autoStart) {
@@ -123,7 +125,7 @@ public class SimpleHttpBuilder {
                 .setSSLSocketFactory(sslConnectionSocketFactory);
             if (enableCompress) {
                 builder.addInterceptorFirst(new RequestAcceptEncoding());
-                builder.addInterceptorLast(new ResponseContentEncoding());
+                builder.addInterceptorFirst(new ResponseContentEncoding());
             }
             CloseableHttpClient closeableHttpAsyncClient = builder.build();
             return closeableHttpAsyncClient;
@@ -238,7 +240,7 @@ public class SimpleHttpBuilder {
         public HttpUriRequest getRedirect(HttpRequest request, HttpResponse response, HttpContext context) throws ProtocolException {
             URI uri = getLocationURI(request, response, context);
             String method = request.getRequestLine().getMethod();
-            if ("post".equalsIgnoreCase(method)) {
+            if (HttpPost.METHOD_NAME.equalsIgnoreCase(method)) {
                 try {
                     HttpRequestWrapper httpRequestWrapper = (HttpRequestWrapper)request;
                     httpRequestWrapper.setURI(uri);
