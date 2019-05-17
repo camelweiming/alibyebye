@@ -119,6 +119,7 @@ public class SequenceServiceImpl implements SequenceService, InitializingBean {
         ResultSet rs = null;
         try {
             conn = dataSource.getConnection();
+            conn.setAutoCommit(true);
             stmt = conn.prepareStatement(getUpdateSql());
             stmt.setLong(1, newValue);
             stmt.setTimestamp(2, new Timestamp(System.currentTimeMillis()));
