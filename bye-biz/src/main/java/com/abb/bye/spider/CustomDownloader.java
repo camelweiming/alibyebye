@@ -6,10 +6,7 @@ import com.abb.bye.utils.CommonUtils;
 import com.abb.bye.utils.LocalLimiter;
 import com.abb.bye.utils.SpiderHelper;
 import com.abb.bye.utils.UserAgents;
-import com.abb.bye.utils.http.Callback;
-import com.abb.bye.utils.http.ReqConfig;
-import com.abb.bye.utils.http.SimpleHttp;
-import com.abb.bye.utils.http.SimpleHttpBuilder;
+import com.abb.bye.utils.http.*;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpRequestBase;
@@ -43,7 +40,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 @Service("customDownloader")
 public class CustomDownloader extends AbstractDownloader {
     private static final Logger logger = LoggerFactory.getLogger(CustomDownloader.class);
-    private SimpleHttp httpClient = new SimpleHttpBuilder().setEnableCompress(false).setAsync(true).setDisableKeepAlive(true).buildSimple();
+    private IHttpClient httpClient = new SimpleHttpBuilder().setEnableCompress(false).setAsync(true).setDisableKeepAlive(true).buildHttpClient();
     @Resource
     private ProxyService proxyService;
     private int thread;

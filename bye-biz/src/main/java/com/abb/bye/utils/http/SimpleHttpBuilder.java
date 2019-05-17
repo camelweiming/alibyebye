@@ -55,8 +55,8 @@ public class SimpleHttpBuilder {
     private ConnectionReuseStrategy connectionReuseStrategy;
     private static ConnectionReuseStrategy DISABLE_KEEP_ALIVE_STRATEGY = (response, context) -> false;
 
-    public SimpleHttp buildSimple() {
-        return new SimpleHttp(build());
+    public IHttpClient buildHttpClient() {
+        return new SimpleHttpImpl(build());
     }
 
     public Closeable build() {

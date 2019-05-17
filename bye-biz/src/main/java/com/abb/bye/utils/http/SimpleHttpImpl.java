@@ -25,17 +25,19 @@ import java.util.concurrent.Future;
  * @author cenpeng.lwm
  * @since 2019/3/18
  */
-public class SimpleHttp {
+public class SimpleHttpImpl implements IHttpClient {
     private Closeable httpClient;
 
-    public SimpleHttp(Closeable httpClient) {
+    public SimpleHttpImpl(Closeable httpClient) {
         this.httpClient = httpClient;
     }
 
+    @Override
     public String get(String url) throws Exception {
         return get(url, null);
     }
 
+    @Override
     public int touch(String url, ReqConfig reqConfig) throws Exception {
         HttpResponse response = null;
         try {
@@ -48,6 +50,7 @@ public class SimpleHttp {
         }
     }
 
+    @Override
     public String get(String url, ReqConfig reqConfig) throws Exception {
         HttpResponse response = null;
         try {
@@ -65,11 +68,13 @@ public class SimpleHttp {
         }
     }
 
+    @Override
     public HttpResponse getResponse(String url, ReqConfig reqConfig) throws Exception {
         Callback<HttpResponse> callback = (response, httpRequestBase) -> response;
         return execute(url, reqConfig, callback);
     }
 
+    @Override
     public <T> T execute(String url, ReqConfig reqConfig, Callback<T> callback) throws Exception {
         final HttpGet request = new HttpGet(url);
         HttpClientContext context = new HttpClientContext();
@@ -111,12 +116,13 @@ public class SimpleHttp {
         throw new UnsupportedOperationException();
     }
 
+    @Override
     public void close() throws IOException {
         httpClient.close();
     }
 
     public static void main(String[] args) throws Exception {
-        SimpleHttp simpleHttp = new SimpleHttpBuilder().buildSimple();
+        IHttpClient simpleHttp = new SimpleHttpBuilder().buildHttpClient();
         String content = simpleHttp.get("https://baidu.com");
         System.out.println(content);
     }
