@@ -12,6 +12,7 @@
         <module>bye-client</module>
         <module>bye-biz</module>
         <module>bye-web</module>
+        <module>bye-process</module>
     </modules>
 
     <properties>
@@ -20,6 +21,7 @@
         <java.version>1.8</java.version>
         <client.version>1.0.0-SNAPSHOT</client.version>
         <main.basedir>${project.basedir}</main.basedir>
+        <activiti-dependencies.version>7.1.21</activiti-dependencies.version>
     </properties>
     <profiles>
         <profile>
@@ -178,7 +180,25 @@
                 <artifactId>scribejava-apis</artifactId>
                 <version>6.5.1</version>
             </dependency>
+            <dependency>
+                <groupId>org.activiti.dependencies</groupId>
+                <artifactId>activiti-dependencies</artifactId>
+                <version>${activiti-dependencies.version}</version>
+                <scope>import</scope>
+                <type>pom</type>
+            </dependency>
         </dependencies>
     </dependencyManagement>
+
+    <repositories>
+        <repository>
+            <id>alfresco</id>
+            <name>Activiti Releases</name>
+            <url>https://artifacts.alfresco.com/nexus/content/repositories/activiti-releases/</url>
+            <releases>
+                <enabled>true</enabled>
+            </releases>
+        </repository>
+    </repositories>
 
 </project>
