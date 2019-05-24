@@ -62,9 +62,33 @@
                     <fork>true</fork>
                 </configuration>
             </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <version>2.3.1</version>
+                <configuration>
+                    <archive>
+                        <index>true</index>
+                        <manifest>
+                            <addClasspath>false</addClasspath>
+                            <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
+                        </manifest>
+                        <manifestEntries>
+                            <ActivitiDesigner-Extension-Name>Retry</ActivitiDesigner-Extension-Name>
+                        </manifestEntries>
+                    </archive>
+                </configuration>
+            </plugin>
         </plugins>
     </build>
-
+	<dependencies>
+		<dependency>
+			<groupId>org.activiti.designer</groupId>
+	    	<artifactId>org.activiti.designer.integration</artifactId>
+	    	<version>5.18.0</version>
+	    	<scope>compile</scope>
+		</dependency>
+	</dependencies>
 
     <dependencyManagement>
         <dependencies>

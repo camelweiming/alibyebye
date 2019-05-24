@@ -8,7 +8,6 @@
     <serviceTask id="passReportTask" name="passReportTask" activiti:class="com.abb.bye.process.task.PassReportTask"></serviceTask>
     <sequenceFlow id="flow3" sourceRef="passReportTask" targetRef="endevent1"></sequenceFlow>
     <exclusiveGateway id="exclusivegateway1" name="Exclusive Gateway"></exclusiveGateway>
-    <sequenceFlow id="flow4" sourceRef="approvalReportTask" targetRef="exclusivegateway1"></sequenceFlow>
     <sequenceFlow id="flow5" name="pass" sourceRef="exclusivegateway1" targetRef="passReportTask">
       <conditionExpression xsi:type="tFormalExpression"><![CDATA[${pass == true}]]></conditionExpression>
     </sequenceFlow>
@@ -18,17 +17,24 @@
     <serviceTask id="rejectReportTask" name="rejectReportTask" activiti:class="com.abb.bye.process.task.RejectReportTask"></serviceTask>
     <endEvent id="endevent2" name="End"></endEvent>
     <sequenceFlow id="flow7" sourceRef="rejectReportTask" targetRef="endevent2"></sequenceFlow>
+    <userTask id="managerTask" name="managerTask" activiti:candidateGroups="admin">
+      <extensionElements>
+        <activiti:taskListener event="create" class="com.abb.bye.process.listeners.ManagerListener"></activiti:taskListener>
+      </extensionElements>
+    </userTask>
+    <sequenceFlow id="flow8" sourceRef="approvalReportTask" targetRef="managerTask"></sequenceFlow>
+    <sequenceFlow id="flow9" sourceRef="managerTask" targetRef="exclusivegateway1"></sequenceFlow>
   </process>
   <bpmndi:BPMNDiagram id="BPMNDiagram_myProcess">
     <bpmndi:BPMNPlane bpmnElement="myProcess" id="BPMNPlane_myProcess">
       <bpmndi:BPMNShape bpmnElement="startevent1" id="BPMNShape_startevent1">
-        <omgdc:Bounds height="35.0" width="35.0" x="120.0" y="130.0"></omgdc:Bounds>
+        <omgdc:Bounds height="35.0" width="35.0" x="48.0" y="60.0"></omgdc:Bounds>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape bpmnElement="endevent1" id="BPMNShape_endevent1">
         <omgdc:Bounds height="35.0" width="35.0" x="660.0" y="130.0"></omgdc:Bounds>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape bpmnElement="approvalReportTask" id="BPMNShape_approvalReportTask">
-        <omgdc:Bounds height="55.0" width="105.0" x="220.0" y="120.0"></omgdc:Bounds>
+        <omgdc:Bounds height="55.0" width="105.0" x="130.0" y="50.0"></omgdc:Bounds>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape bpmnElement="passReportTask" id="BPMNShape_passReportTask">
         <omgdc:Bounds height="55.0" width="105.0" x="486.0" y="120.0"></omgdc:Bounds>
@@ -42,17 +48,16 @@
       <bpmndi:BPMNShape bpmnElement="endevent2" id="BPMNShape_endevent2">
         <omgdc:Bounds height="35.0" width="35.0" x="660.0" y="240.0"></omgdc:Bounds>
       </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="managerTask" id="BPMNShape_managerTask">
+        <omgdc:Bounds height="55.0" width="105.0" x="270.0" y="50.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
       <bpmndi:BPMNEdge bpmnElement="flow1" id="BPMNEdge_flow1">
-        <omgdi:waypoint x="155.0" y="147.0"></omgdi:waypoint>
-        <omgdi:waypoint x="220.0" y="147.0"></omgdi:waypoint>
+        <omgdi:waypoint x="83.0" y="77.0"></omgdi:waypoint>
+        <omgdi:waypoint x="130.0" y="77.0"></omgdi:waypoint>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge bpmnElement="flow3" id="BPMNEdge_flow3">
         <omgdi:waypoint x="591.0" y="147.0"></omgdi:waypoint>
         <omgdi:waypoint x="660.0" y="147.0"></omgdi:waypoint>
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge bpmnElement="flow4" id="BPMNEdge_flow4">
-        <omgdi:waypoint x="325.0" y="147.0"></omgdi:waypoint>
-        <omgdi:waypoint x="380.0" y="147.0"></omgdi:waypoint>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge bpmnElement="flow5" id="BPMNEdge_flow5">
         <omgdi:waypoint x="420.0" y="147.0"></omgdi:waypoint>
@@ -71,6 +76,15 @@
       <bpmndi:BPMNEdge bpmnElement="flow7" id="BPMNEdge_flow7">
         <omgdi:waypoint x="453.0" y="257.0"></omgdi:waypoint>
         <omgdi:waypoint x="660.0" y="257.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow8" id="BPMNEdge_flow8">
+        <omgdi:waypoint x="235.0" y="77.0"></omgdi:waypoint>
+        <omgdi:waypoint x="270.0" y="77.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow9" id="BPMNEdge_flow9">
+        <omgdi:waypoint x="375.0" y="77.0"></omgdi:waypoint>
+        <omgdi:waypoint x="400.0" y="77.0"></omgdi:waypoint>
+        <omgdi:waypoint x="400.0" y="127.0"></omgdi:waypoint>
       </bpmndi:BPMNEdge>
     </bpmndi:BPMNPlane>
   </bpmndi:BPMNDiagram>

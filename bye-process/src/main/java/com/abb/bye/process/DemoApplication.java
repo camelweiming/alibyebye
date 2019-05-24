@@ -43,7 +43,7 @@ public class DemoApplication implements CommandLineRunner {
         logger.info(">>> Created Process Instance: " + processInstance);
     }
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws InterruptedException {
         SpringApplication.run(DemoApplication.class, args);
     }
 

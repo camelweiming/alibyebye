@@ -17,5 +17,6 @@ public class ApprovalReportTask implements JavaDelegate {
             delegateExecution.setVariable("pass", false);
         }
         System.out.println(getClass() + "" + delegateExecution);
+        //throw new RuntimeException("heiheihei");
     }
 }
