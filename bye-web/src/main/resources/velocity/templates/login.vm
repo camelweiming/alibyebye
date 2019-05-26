@@ -1,5 +1,5 @@
 <div class="container">
-    <form class="form-signin" action="signIn.htm" method="post">
+    <form class="form-signin" action="login.htm" method="post">
         #if($!errorMsg)
             <div class="alert alert-danger" role="alert">$!{errorMsg}</div>
         #end
@@ -9,6 +9,6 @@
         <input name="name" class="form-control" placeholder="name" required autofocus>
         <label for="inputPassword" class="sr-only">密码</label>
         <input name="password" type="password" class="form-control" placeholder="Password" required>
-        <button class="btn btn-lg btn-primary btn-block" type="submit">提交</button>
+        <button class="btn btn-lg btn-primary btn-block" type="submit">登陆</button>
     </form>
 </div>

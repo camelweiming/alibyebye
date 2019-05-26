@@ -2,8 +2,8 @@ package com.abb.bye.service;
 
 import com.abb.bye.client.domain.ResultDTO;
 import com.abb.bye.client.domain.UserAuthorityDO;
-import com.abb.bye.client.domain.UserDO;
 import com.abb.bye.client.domain.UserAuthorityDTO;
+import com.abb.bye.client.domain.UserDO;
 import com.abb.bye.client.service.UserAuthorityService;
 import com.abb.bye.mapper.UserAuthorityMapper;
 import com.abb.bye.mapper.UserMapper;
@@ -71,7 +71,7 @@ public class UserAuthorityServiceImpl implements UserAuthorityService {
     }
 
     @Override
-    public ResultDTO<Void> verify(UserAuthorityDTO userAuthorityDTO) {
+    public ResultDTO<Long> verify(UserAuthorityDTO userAuthorityDTO) {
         try {
             UserDO user = userMapper.getByName(userAuthorityDTO.getName());
             if (user == null) {
@@ -79,10 +79,11 @@ public class UserAuthorityServiceImpl implements UserAuthorityService {
             }
             String salt = userAuthorityMapper.getSalt(user.getId());
             String password = Md5.getInstance().getMD5String(userAuthorityDTO.getPassword() + salt);
-            if (userAuthorityMapper.verify(user.getId(), password) == null) {
+            Long userId = userAuthorityMapper.verify(user.getId(), password);
+            if (userId == null) {
                 return ResultDTO.buildError(ResultDTO.ERROR_CODE_USER_VALIDATE, "password error");
             }
-            return ResultDTO.buildSuccess(null);
+            return ResultDTO.buildSuccess(userId);
         } catch (Throwable e) {
             logger.error("Error verify user:" + userAuthorityDTO.getName(), e);
             return ResultDTO.buildError(ResultDTO.ERROR_CODE_SYSTEM_ERROR, e.getMessage());

@@ -62,6 +62,16 @@ public class LoginUtil {
         return null;
     }
 
+    public static void removeCookie(String domain, HttpServletRequest request, HttpServletResponse response) {
+        Cookie cookie = new Cookie(loginCookieName, null);
+        cookie.setMaxAge(0);
+        cookie.setPath(getCookiePath(request));
+        if (domain != null) {
+            cookie.setDomain(domain);
+        }
+        response.addCookie(cookie);
+    }
+
     public static void setLoginCookie(String domain, String value, int maxAge, HttpServletRequest request, HttpServletResponse response)
         throws IllegalBlockSizeException, BadPaddingException, InvalidKeyException, UnsupportedEncodingException {
         String cookieValue = encodeCookie(value);

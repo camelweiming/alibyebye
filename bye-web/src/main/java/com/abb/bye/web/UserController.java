@@ -64,4 +64,43 @@ public class UserController {
             return new ModelAndView(vm);
         }
     }
+
+    @RequestMapping(value = "login.htm", method = {RequestMethod.POST, RequestMethod.GET})
+    @VelocityLayout("/velocity/layout/layout_login.vm")
+    ModelAndView login(Model model, @RequestParam(required = false) String name, @RequestParam(required = false) String password, HttpServletRequest request, HttpServletResponse response) {
+        String vm = "login";
+        try {
+            model.addAttribute("name", name);
+            model.addAttribute("password", password);
+            if (StringUtils.isBlank(name)) {
+                return new ModelAndView(vm);
+            }
+            if (StringUtils.isBlank(password)) {
+                model.addAttribute("errorMsg", "密码不能为空");
+            }
+            UserAuthorityDTO userAuthorityDTO = new UserAuthorityDTO();
+            userAuthorityDTO.setName(name);
+            userAuthorityDTO.setPassword(password);
+            ResultDTO<Long> res = userAuthorityService.verify(userAuthorityDTO);
+            logger.info("register:" + userAuthorityDTO.getName() + " res:" + res);
+            if (!res.isSuccess()) {
+                model.addAttribute("errorMsg", res.getErrMsg());
+                return new ModelAndView(vm);
+            }
+            UserDTO user = userService.getById(res.getData()).getData();
+            LoginUtil.setLoginCookie(null, user.getUserName(), 3600, request, response);
+            return new ModelAndView("redirect:/");
+        } catch (Throwable e) {
+            logger.error("Error signIn", e);
+            model.addAttribute("errorMsg", "system error");
+            return new ModelAndView(vm);
+        }
+    }
+
+    @RequestMapping(value = "logout.htm", method = {RequestMethod.POST, RequestMethod.GET})
+    @VelocityLayout("/velocity/layout/layout_login.vm")
+    ModelAndView logout(Model model, @RequestParam(required = false) String name, @RequestParam(required = false) String password, HttpServletRequest request, HttpServletResponse response) {
+        LoginUtil.removeCookie(null, request, response);
+        return new ModelAndView("redirect:/");
+    }
 }

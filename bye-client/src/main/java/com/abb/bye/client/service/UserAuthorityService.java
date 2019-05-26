@@ -22,5 +22,5 @@ public interface UserAuthorityService {
      * @param userAuthorityDTO
      * @return
      */
-    ResultDTO<Void> verify(UserAuthorityDTO userAuthorityDTO);
+    ResultDTO<Long> verify(UserAuthorityDTO userAuthorityDTO);
 }

@@ -1,8 +1,8 @@
 package com.abb.bye.test.service;
 
 import com.abb.bye.client.domain.ResultDTO;
-import com.abb.bye.client.domain.UserDTO;
 import com.abb.bye.client.domain.UserAuthorityDTO;
+import com.abb.bye.client.domain.UserDTO;
 import com.abb.bye.client.service.UserAuthorityService;
 import com.abb.bye.client.service.UserService;
 import org.junit.Test;
@@ -46,7 +46,7 @@ public class UserServiceTest {
         UserAuthorityDTO u = new UserAuthorityDTO();
         u.setName("camel6");
         u.setPassword("ssss3");
-        ResultDTO<Void> res = userAuthorityService.verify(u);
+        ResultDTO<Long> res = userAuthorityService.verify(u);
         System.out.println(res);
     }
 }
