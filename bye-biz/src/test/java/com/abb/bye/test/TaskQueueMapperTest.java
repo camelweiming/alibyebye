@@ -5,6 +5,7 @@ import com.abb.bye.client.domain.TreeNode;
 import com.abb.bye.client.domain.enums.Env;
 import com.abb.bye.client.service.SequenceService;
 import com.abb.bye.mapper.TaskQueueMapper;
+import com.abb.bye.test.dao.BaseDAOTest;
 import org.joda.time.DateTime;
 import org.junit.Test;
 

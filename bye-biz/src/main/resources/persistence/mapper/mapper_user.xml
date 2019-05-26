@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.abb.bye.mapper.UserMapper">
+
+    <sql id="columns">
+        id,
+        name
+    </sql>
+
+    <insert id="insert" parameterType="com.abb.bye.client.domain.UserDO">
+        insert into user
+        ( id , gmt_create , gmt_modified , name)
+        values
+        ( #{id} , now() , now() , #{name})
+    </insert>
+
+    <select id="getByName" resultType="com.abb.bye.client.domain.UserDO">
+        select
+        <include refid="columns"/>
+        from user where name=#{name}
+    </select>
+
+    <select id="getById" resultType="com.abb.bye.client.domain.UserDO">
+        select
+        <include refid="columns"/>
+        from user where id=#{id}
+    </select>
+
+</mapper>

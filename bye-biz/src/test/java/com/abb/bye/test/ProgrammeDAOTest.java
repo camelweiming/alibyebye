@@ -2,6 +2,7 @@ package com.abb.bye.test;
 
 import com.abb.bye.client.domain.ProgrammeSourceDO;
 import com.abb.bye.mapper.ProgrammeSourceMapper;
+import com.abb.bye.test.dao.BaseDAOTest;
 import org.junit.Test;
 
 import javax.annotation.Resource;

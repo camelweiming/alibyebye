@@ -12,6 +12,9 @@ import java.io.Serializable;
 public class ResultDTO<T> implements Serializable {
     private static final long serialVersionUID = 4196449326985418273L;
     public static final int ERROR_CODE_SYSTEM_ERROR = 500;
+    public static final int ERROR_CODE_DUP_USER_ERROR = 600;
+    public static final int ERROR_CODE_USER_NOT_FOUND = 601;
+    public static final int ERROR_CODE_USER_VALIDATE = 602;
     private boolean success;
     private int errCode;
     private String errMsg;

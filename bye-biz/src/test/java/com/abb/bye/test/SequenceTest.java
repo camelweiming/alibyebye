@@ -1,6 +1,7 @@
 package com.abb.bye.test;
 
 import com.abb.bye.client.service.SequenceService;
+import com.abb.bye.test.dao.BaseDAOTest;
 import com.google.common.collect.Sets;
 import org.junit.Test;
 

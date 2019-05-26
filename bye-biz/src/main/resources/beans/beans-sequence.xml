@@ -7,4 +7,8 @@
     <bean id="sequenceService" class="com.abb.bye.service.SequenceServiceImpl">
         <property name="sequences" value="task_queue,programme"/>
     </bean>
+
+    <bean id="sequence" class="com.abb.bye.service.Sequence" init-method="init">
+        <property name="sequences" value="user"/>
+    </bean>
 </beans>

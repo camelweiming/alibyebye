@@ -2,6 +2,7 @@ package com.abb.bye.test;
 
 import com.abb.bye.client.domain.ProxyDO;
 import com.abb.bye.mapper.ProxyMapper;
+import com.abb.bye.test.dao.BaseDAOTest;
 import com.abb.bye.utils.http.SimpleHttpBuilder;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;

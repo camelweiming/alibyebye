@@ -1,0 +1,20 @@
+#if($!errorMsg)
+    <div class="alert alert-danger" role="alert">$!{errorMsg}</div>
+#end
+
+<form action="add_holiday.htm" class="form-horizontal" method="post">
+    $!csrfToken.hiddenField
+    <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
+
+    <div class="form-group">
+        <label>姓名</label>
+        <input class="form-control form-control-sm" name="name" value="$!{name}" required>
+    </div>
+    <div class="form-group">
+        <label>天数</label><input class="form-control form-control-sm" name="days" value="$!{days}">
+    </div>
+    <div class="form-group">
+        <label>理由</label><input class="form-control form-control-sm" name="description" value="$!{description}">
+    </div>
+    <button class="btn btn-danger btn-sm" type="submit">保存</button>
+</form>

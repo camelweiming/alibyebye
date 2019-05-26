@@ -5,8 +5,7 @@ server:
     max-connections: 1000
     accept-count: 500
   error:
-    whitelabel:
-      enabled: true
+    path: /error.vm
 
 
 spring:

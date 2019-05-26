@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <definitions xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:activiti="http://activiti.org/bpmn" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:omgdc="http://www.omg.org/spec/DD/20100524/DC" xmlns:omgdi="http://www.omg.org/spec/DD/20100524/DI" xmlns:flowable="http://flowable.org/bpmn" typeLanguage="http://www.w3.org/2001/XMLSchema" expressionLanguage="http://www.w3.org/1999/XPath" targetNamespace="http://www.flowable.org/processdef">
-  <process id="holidayRequest" name="Holiday Request" isExecutable="true">
+  <process id="holidayRequest2" name="Holiday Request2" isExecutable="true">
     <startEvent id="startEvent"></startEvent>
     <sequenceFlow id="sequenceFlow-780cdbb2-cb97-412d-ab81-1d048b220fc6" sourceRef="startEvent" targetRef="approveTask"></sequenceFlow>
-    <userTask id="approveTask" name="Approve or reject request" activiti:candidateGroups="managers" xmlns:flowable="http://flowable.org/bpmn" flowable:candidateGroups="managers"></userTask>
+    <userTask id="approveTask" name="请假" activiti:candidateGroups="managers" xmlns:flowable="http://flowable.org/bpmn" flowable:candidateGroups="managers"></userTask>
     <sequenceFlow id="sequenceFlow-4e1b0f19-040e-4f74-a7e2-84bd197700db" sourceRef="approveTask" targetRef="decision"></sequenceFlow>
     <exclusiveGateway id="decision"></exclusiveGateway>
     <sequenceFlow id="sequenceFlow-3c8bcfb0-50d2-4f1a-aa56-f0f651bec9fd" sourceRef="decision" targetRef="externalSystemCall">
@@ -12,17 +12,17 @@
     <sequenceFlow id="sequenceFlow-0e11f887-06a9-44bc-bf79-8b063843a8da" sourceRef="decision" targetRef="sendRejectionMail">
       <conditionExpression xsi:type="tFormalExpression"><![CDATA[${!approved}]]></conditionExpression>
     </sequenceFlow>
-    <serviceTask id="externalSystemCall" name="Enter holidays in external system" activiti:class="com.abb.flowable.CallExternalSystemDelegate"></serviceTask>
+    <serviceTask id="externalSystemCall" name="处理请假" activiti:class="com.abb.flowable.CallExternalSystemDelegate"></serviceTask>
     <sequenceFlow id="sequenceFlow-55fbd99f-2999-4f7d-a02a-f88abe990d07" sourceRef="externalSystemCall" targetRef="holidayApprovedTask"></sequenceFlow>
-    <userTask id="holidayApprovedTask" name="Holiday approved" xmlns:flowable="http://flowable.org/bpmn" flowable:assignee="${employee}"></userTask>
+    <userTask id="holidayApprovedTask" name="请假通过" xmlns:flowable="http://flowable.org/bpmn" flowable:assignee="${employee}"></userTask>
     <sequenceFlow id="sequenceFlow-a5b96d84-5409-40af-8b5b-9f722405f9a7" sourceRef="holidayApprovedTask" targetRef="approveEnd"></sequenceFlow>
-    <serviceTask id="sendRejectionMail" name="Send out rejection email" activiti:class="com.abb.flowable.SendRejectionMail"></serviceTask>
+    <serviceTask id="sendRejectionMail" name="驳回" activiti:class="com.abb.flowable.SendRejectionMail"></serviceTask>
     <sequenceFlow id="sequenceFlow-6ea5136a-3b87-435c-8861-de8f387c3061" sourceRef="sendRejectionMail" targetRef="rejectEnd"></sequenceFlow>
     <endEvent id="approveEnd"></endEvent>
     <endEvent id="rejectEnd"></endEvent>
   </process>
-  <bpmndi:BPMNDiagram id="BPMNDiagram_holidayRequest">
-    <bpmndi:BPMNPlane bpmnElement="holidayRequest" id="BPMNPlane_holidayRequest">
+  <bpmndi:BPMNDiagram id="BPMNDiagram_holidayRequest2">
+    <bpmndi:BPMNPlane bpmnElement="holidayRequest2" id="BPMNPlane_holidayRequest2">
       <bpmndi:BPMNShape bpmnElement="startEvent" id="BPMNShape_startEvent">
         <omgdc:Bounds height="35.0" width="35.0" x="0.0" y="95.0"></omgdc:Bounds>
       </bpmndi:BPMNShape>
