@@ -1,6 +1,5 @@
 package com.abb.bye.utils;
 
-import com.abb.bye.client.domain.SpiderConfig;
 import com.alibaba.fastjson.JSON;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
@@ -133,11 +132,5 @@ public class CommonUtils {
     public static Map<String, Object> asMap(String json) {
         Map<String, Object> attributeMap = StringUtils.isBlank(json) ? new HashMap<String, Object>() : (Map<String, Object>)JSON.parseObject(json, Map.class);
         return attributeMap;
-    }
-
-    public static void main(String[] args) {
-        SpiderConfig spiderConfig = new SpiderConfig();
-        copyFromProperties(spiderConfig, "retryTimes=13");
-        System.out.println(spiderConfig);
     }
 }

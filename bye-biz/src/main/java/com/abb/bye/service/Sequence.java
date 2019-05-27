@@ -17,7 +17,7 @@ import java.util.Map;
  * @since 2019/5/25
  */
 public class Sequence {
-    private static Logger logger = LoggerFactory.getLogger(SequenceServiceImpl.class);
+    private static Logger logger = LoggerFactory.getLogger(Sequence.class);
     @Resource
     private DataSource dataSource;
     protected static final int DEFAULT_INNER_STEP = 1000;

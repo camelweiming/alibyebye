@@ -1,6 +1,6 @@
 package com.abb.bye.test;
 
-import com.abb.bye.client.service.SequenceService;
+import com.abb.bye.service.Sequence;
 import com.abb.bye.test.dao.BaseDAOTest;
 import com.google.common.collect.Sets;
 import org.junit.Test;
@@ -14,7 +14,7 @@ import java.util.Set;
  */
 public class SequenceTest extends BaseDAOTest {
     @Resource
-    private SequenceService sequenceService;
+    private Sequence sequence;
 
     @Test
     public void test() throws InterruptedException {
@@ -22,7 +22,7 @@ public class SequenceTest extends BaseDAOTest {
         for (int i = 0; i < 10; i++) {
             new Thread(() -> {
                 while (true) {
-                    long value = sequenceService.next("task_queue");
+                    long value = sequence.next("task_queue");
                     System.out.println(value);
                     if (!set.add(value)) {
                         throw new IllegalArgumentException("dup:" + value);

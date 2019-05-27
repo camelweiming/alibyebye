@@ -5,7 +5,6 @@ import com.abb.bye.SystemEnv;
 import com.abb.bye.client.domain.TaskQueueDO;
 import com.abb.bye.client.domain.TaskResult;
 import com.abb.bye.client.domain.TreeNode;
-import com.abb.bye.client.service.SequenceService;
 import com.abb.bye.client.service.TaskProcessor;
 import com.abb.bye.client.service.TaskQueueService;
 import com.abb.bye.mapper.TaskQueueMapper;
@@ -43,7 +42,7 @@ public class TaskQueueServiceImpl implements TaskQueueService, InitializingBean,
     @Resource
     private PlatformTransactionManager transactionManager;
     @Resource
-    private SequenceService sequenceService;
+    private Sequence sequence;
     private Map<Integer, TaskProcessor> mapping = new HashMap<>();
     private TaskQueueDO lock;
     private int RETRY_COUNT = 10;
@@ -68,7 +67,7 @@ public class TaskQueueServiceImpl implements TaskQueueService, InitializingBean,
         }
         taskQueueDO.setStatus(TaskQueueDO.STATUS_WAITING);
         if (taskQueueDO.getId() != null) {
-            taskQueueDO.setId(sequenceService.next(SEQUENCE_NAME));
+            taskQueueDO.setId(sequence.next(SEQUENCE_NAME));
         }
         taskQueueDO.setChildrenCount(0);
         taskQueueDO.setParentId(null);
@@ -106,7 +105,7 @@ public class TaskQueueServiceImpl implements TaskQueueService, InitializingBean,
     private boolean processNode(TreeNode<TaskQueueDO> node, long parentId, List<TaskQueueDO> taskQueueDOs) {
         TaskQueueDO taskDO = node.getData();
         taskDO.setParentId(parentId);
-        taskDO.setId(sequenceService.next(SEQUENCE_NAME));
+        taskDO.setId(sequence.next(SEQUENCE_NAME));
         taskDO.setChildrenCount(null == node.getChildren() ? 0 : node.getChildren().size());
         taskQueueDOs.add(taskDO);
         for (TreeNode<TaskQueueDO> child : node.getChildren()) {

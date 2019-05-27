@@ -27,7 +27,7 @@ import javax.servlet.http.HttpServletResponse;
  */
 @Controller
 public class UserController {
-    private static final Logger logger = LoggerFactory.getLogger(AppController.class);
+    private static final Logger logger = LoggerFactory.getLogger(UserController.class);
     @Resource
     private UserAuthorityService userAuthorityService;
     @Resource
