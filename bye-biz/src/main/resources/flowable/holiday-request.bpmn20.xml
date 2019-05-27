@@ -6,20 +6,18 @@
     <userTask id="approveTask" name="Approve or reject request" activiti:assignee="${assignee}" xmlns:flowable="http://flowable.org/bpmn" flowable:candidateGroups="managers"></userTask>
     <sequenceFlow id="sequenceFlow-4e1b0f19-040e-4f74-a7e2-84bd197700db" sourceRef="approveTask" targetRef="decision"></sequenceFlow>
     <exclusiveGateway id="decision"></exclusiveGateway>
-    <sequenceFlow id="sequenceFlow-3c8bcfb0-50d2-4f1a-aa56-f0f651bec9fd" sourceRef="decision" targetRef="externalSystemCall">
+    <sequenceFlow id="sequenceFlow-3c8bcfb0-50d2-4f1a-aa56-f0f651bec9fd" sourceRef="decision" targetRef="holidayRejectTask">
       <conditionExpression xsi:type="tFormalExpression"><![CDATA[${approved}]]></conditionExpression>
     </sequenceFlow>
-    <sequenceFlow id="sequenceFlow-0e11f887-06a9-44bc-bf79-8b063843a8da" sourceRef="decision" targetRef="sendRejectionMail">
+    <sequenceFlow id="sequenceFlow-0e11f887-06a9-44bc-bf79-8b063843a8da" sourceRef="decision" targetRef="holidayApproveTask">
       <conditionExpression xsi:type="tFormalExpression"><![CDATA[${!approved}]]></conditionExpression>
     </sequenceFlow>
-    <serviceTask id="externalSystemCall" name="Enter holidays in external system" activiti:class="com.abb.flowable.CallExternalSystemDelegate"></serviceTask>
-    <sequenceFlow id="sequenceFlow-55fbd99f-2999-4f7d-a02a-f88abe990d07" sourceRef="externalSystemCall" targetRef="holidayApprovedTask"></sequenceFlow>
-    <userTask id="holidayApprovedTask" name="Holiday approved" xmlns:flowable="http://flowable.org/bpmn" flowable:assignee="${employee}"></userTask>
-    <sequenceFlow id="sequenceFlow-a5b96d84-5409-40af-8b5b-9f722405f9a7" sourceRef="holidayApprovedTask" targetRef="approveEnd"></sequenceFlow>
-    <serviceTask id="sendRejectionMail" name="Send out rejection email" activiti:class="com.abb.flowable.SendRejectionMail"></serviceTask>
-    <sequenceFlow id="sequenceFlow-6ea5136a-3b87-435c-8861-de8f387c3061" sourceRef="sendRejectionMail" targetRef="rejectEnd"></sequenceFlow>
+    <serviceTask id="holidayRejectTask" name="HolidayRejectTask" activiti:class="com.abb.bye.flowable.holiday.HolidayRejectTask"></serviceTask>
+    <serviceTask id="holidayApproveTask" name="HolidayApproveTask" activiti:class="com.abb.bye.flowable.holiday.HolidayApproveTask"></serviceTask>
+    <sequenceFlow id="sequenceFlow-6ea5136a-3b87-435c-8861-de8f387c3061" sourceRef="holidayApproveTask" targetRef="rejectEnd"></sequenceFlow>
     <endEvent id="approveEnd"></endEvent>
     <endEvent id="rejectEnd"></endEvent>
+    <sequenceFlow id="flow1" sourceRef="holidayRejectTask" targetRef="approveEnd"></sequenceFlow>
   </process>
   <bpmndi:BPMNDiagram id="BPMNDiagram_holidayRequest">
     <bpmndi:BPMNPlane bpmnElement="holidayRequest" id="BPMNPlane_holidayRequest">
@@ -32,17 +30,14 @@
       <bpmndi:BPMNShape bpmnElement="decision" id="BPMNShape_decision">
         <omgdc:Bounds height="40.0" width="40.0" x="230.0" y="90.0"></omgdc:Bounds>
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape bpmnElement="externalSystemCall" id="BPMNShape_externalSystemCall">
+      <bpmndi:BPMNShape bpmnElement="holidayRejectTask" id="BPMNShape_holidayRejectTask">
         <omgdc:Bounds height="60.0" width="100.0" x="320.0" y="160.0"></omgdc:Bounds>
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape bpmnElement="holidayApprovedTask" id="BPMNShape_holidayApprovedTask">
-        <omgdc:Bounds height="60.0" width="100.0" x="470.0" y="158.0"></omgdc:Bounds>
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape bpmnElement="sendRejectionMail" id="BPMNShape_sendRejectionMail">
+      <bpmndi:BPMNShape bpmnElement="holidayApproveTask" id="BPMNShape_holidayApproveTask">
         <omgdc:Bounds height="60.0" width="100.0" x="320.0" y="0.0"></omgdc:Bounds>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape bpmnElement="approveEnd" id="BPMNShape_approveEnd">
-        <omgdc:Bounds height="35.0" width="35.0" x="620.0" y="173.0"></omgdc:Bounds>
+        <omgdc:Bounds height="35.0" width="35.0" x="510.0" y="172.0"></omgdc:Bounds>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape bpmnElement="rejectEnd" id="BPMNShape_rejectEnd">
         <omgdc:Bounds height="35.0" width="35.0" x="505.0" y="15.0"></omgdc:Bounds>
@@ -67,21 +62,15 @@
         <omgdi:waypoint x="282.0" y="30.0"></omgdi:waypoint>
         <omgdi:waypoint x="320.0" y="30.0"></omgdi:waypoint>
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge bpmnElement="sequenceFlow-55fbd99f-2999-4f7d-a02a-f88abe990d07" id="BPMNEdge_sequenceFlow-55fbd99f-2999-4f7d-a02a-f88abe990d07">
-        <omgdi:waypoint x="420.0" y="190.0"></omgdi:waypoint>
-        <omgdi:waypoint x="432.0" y="190.0"></omgdi:waypoint>
-        <omgdi:waypoint x="432.0" y="188.0"></omgdi:waypoint>
-        <omgdi:waypoint x="470.0" y="188.0"></omgdi:waypoint>
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge bpmnElement="sequenceFlow-a5b96d84-5409-40af-8b5b-9f722405f9a7" id="BPMNEdge_sequenceFlow-a5b96d84-5409-40af-8b5b-9f722405f9a7">
-        <omgdi:waypoint x="570.0" y="188.0"></omgdi:waypoint>
-        <omgdi:waypoint x="620.0" y="190.0"></omgdi:waypoint>
-      </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge bpmnElement="sequenceFlow-6ea5136a-3b87-435c-8861-de8f387c3061" id="BPMNEdge_sequenceFlow-6ea5136a-3b87-435c-8861-de8f387c3061">
         <omgdi:waypoint x="420.0" y="30.0"></omgdi:waypoint>
         <omgdi:waypoint x="432.0" y="30.0"></omgdi:waypoint>
         <omgdi:waypoint x="432.0" y="30.0"></omgdi:waypoint>
         <omgdi:waypoint x="505.0" y="32.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow1" id="BPMNEdge_flow1">
+        <omgdi:waypoint x="420.0" y="190.0"></omgdi:waypoint>
+        <omgdi:waypoint x="510.0" y="189.0"></omgdi:waypoint>
       </bpmndi:BPMNEdge>
     </bpmndi:BPMNPlane>
   </bpmndi:BPMNDiagram>
