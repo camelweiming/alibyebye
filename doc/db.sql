@@ -60,3 +60,17 @@ CREATE TABLE `user_authority` (
     UNIQUE KEY `uk_unique_user_id` (`user_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='user_authority'
 ;
+
+CREATE TABLE `task` (
+    `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+    `gmt_create` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    `gmt_modified` TIMESTAMP NOT NULL,
+    `user_id` BIGINT UNSIGNED NOT NULL,
+    `task_id` VARCHAR(64) NOT NULL,
+    `type` int(11) NOT NULL COMMENT '类型',
+    `status` int(11) NOT NULL COMMENT '0,无效,3:结束,4:失败',
+    `attributes` VARCHAR(4096) NOT NULL,
+    PRIMARY KEY (`id`),
+    UNIQUE KEY `uk_unique_user_id` (`user_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='user_authority'
+;

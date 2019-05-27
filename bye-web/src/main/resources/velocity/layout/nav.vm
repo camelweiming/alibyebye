@@ -2,32 +2,21 @@
     <div class="sidebar-sticky">
         <ul class="nav flex-column">
             <h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted">
-                <span>站点</span><a class="d-flex align-items-center text-muted" href="#"><span data-feather="plus-circle"></span></a>
+                <span>任务</span><a class="d-flex align-items-center text-muted" href="#"><span data-feather="plus-circle"></span></a>
             </h6>
-
             <li class="nav-item">
-                <a class="nav-link" href="site.htm">
-                    <span data-feather="file"></span>站点管理
-                </a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" href="add_site.htm">
-                    <span data-feather="file"></span>添加站点
+                <a class="nav-link" href="add_holiday.htm">
+                    <span data-feather="file"></span>请假
                 </a>
             </li>
 
             <h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted">
-                <span>分类</span><a class="d-flex align-items-center text-muted" href="#"><span data-feather="plus-circle"></span></a>
+                <span>任务</span><a class="d-flex align-items-center text-muted" href="#"><span data-feather="plus-circle"></span></a>
             </h6>
 
             <li class="nav-item">
-                <a class="nav-link" href="category.htm">
-                    <span data-feather="file"></span>分类管理
-                </a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" href="add_category.htm">
-                    <span data-feather="file"></span>添加分类
+                <a class="nav-link" href="task_list.htm">
+                    <span data-feather="file"></span>我的任务
                 </a>
             </li>
     </div>

@@ -1,5 +1,5 @@
 <div class="container">
-    <form class="form-signin" action="signIn.htm" method="post">
+    <form class="form-signin" action="sign_in.htm" method="post">
         <h2 class="form-signin-heading">注册</h2>
         <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
         <label for="inputEmail" class="sr-only">用户名</label>

@@ -3,7 +3,7 @@
   <process id="holidayRequest" name="Holiday Request" isExecutable="true">
     <startEvent id="startEvent"></startEvent>
     <sequenceFlow id="sequenceFlow-780cdbb2-cb97-412d-ab81-1d048b220fc6" sourceRef="startEvent" targetRef="approveTask"></sequenceFlow>
-    <userTask id="approveTask" name="Approve or reject request" activiti:candidateGroups="managers" xmlns:flowable="http://flowable.org/bpmn" flowable:candidateGroups="managers"></userTask>
+    <userTask id="approveTask" name="Approve or reject request" activiti:assignee="${assignee}" xmlns:flowable="http://flowable.org/bpmn" flowable:candidateGroups="managers"></userTask>
     <sequenceFlow id="sequenceFlow-4e1b0f19-040e-4f74-a7e2-84bd197700db" sourceRef="approveTask" targetRef="decision"></sequenceFlow>
     <exclusiveGateway id="decision"></exclusiveGateway>
     <sequenceFlow id="sequenceFlow-3c8bcfb0-50d2-4f1a-aa56-f0f651bec9fd" sourceRef="decision" targetRef="externalSystemCall">
