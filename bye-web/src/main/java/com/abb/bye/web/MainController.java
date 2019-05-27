@@ -1,6 +1,5 @@
 package com.abb.bye.web;
 
-import com.alibaba.boot.velocity.annotation.VelocityLayout;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 
@@ -11,7 +10,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 @Controller
 public class MainController {
     @GetMapping("/")
-    @VelocityLayout("/velocity/layout/index.vm")
     public String root() {
         return "index";
     }

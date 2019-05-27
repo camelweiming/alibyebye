@@ -19,7 +19,7 @@ import java.util.Map;
 public class HolidayController {
 
     @RequestMapping(value = "add_holiday", method = {RequestMethod.POST, RequestMethod.GET})
-    @VelocityLayout("/velocity/layout/index.vm")
+    @VelocityLayout("/velocity/layout/default.vm")
     void holidayRequest(@RequestParam int days, @RequestParam String name, @RequestParam String description) {
         String vm = "holiday/holiday_list.vm";
         RuntimeService runtimeService = ProcessEngines.getDefaultProcessEngine().getRuntimeService();
