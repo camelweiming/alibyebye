@@ -7,10 +7,10 @@
     <sequenceFlow id="sequenceFlow-4e1b0f19-040e-4f74-a7e2-84bd197700db" sourceRef="approveTask" targetRef="decision"></sequenceFlow>
     <exclusiveGateway id="decision"></exclusiveGateway>
     <sequenceFlow id="sequenceFlow-3c8bcfb0-50d2-4f1a-aa56-f0f651bec9fd" sourceRef="decision" targetRef="holidayRejectTask">
-      <conditionExpression xsi:type="tFormalExpression"><![CDATA[${approved}]]></conditionExpression>
+      <conditionExpression xsi:type="tFormalExpression"><![CDATA[${!approved}]]></conditionExpression>
     </sequenceFlow>
     <sequenceFlow id="sequenceFlow-0e11f887-06a9-44bc-bf79-8b063843a8da" sourceRef="decision" targetRef="holidayApproveTask">
-      <conditionExpression xsi:type="tFormalExpression"><![CDATA[${!approved}]]></conditionExpression>
+      <conditionExpression xsi:type="tFormalExpression"><![CDATA[${approved}]]></conditionExpression>
     </sequenceFlow>
     <serviceTask id="holidayRejectTask" name="HolidayRejectTask" activiti:class="com.abb.bye.flowable.holiday.HolidayRejectTask"></serviceTask>
     <serviceTask id="holidayApproveTask" name="HolidayApproveTask" activiti:class="com.abb.bye.flowable.holiday.HolidayApproveTask"></serviceTask>
