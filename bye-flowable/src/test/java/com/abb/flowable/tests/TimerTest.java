@@ -2,7 +2,6 @@ package com.abb.flowable.tests;
 
 import org.apache.commons.lang3.time.DateUtils;
 import org.flowable.engine.ProcessEngines;
-import org.flowable.engine.RepositoryService;
 import org.flowable.engine.RuntimeService;
 import org.junit.Test;
 
@@ -17,10 +16,9 @@ import java.util.Map;
  * @since 2019/5/28
  */
 public class TimerTest extends BaseTest {
+
     @Test
     public void test() throws InterruptedException, IOException {
-        RepositoryService repositoryService = ProcessEngines.getDefaultProcessEngine().getRepositoryService();
-        repositoryService.createDeployment().addClasspathResource("flowable/timer.bpmn20.xml").deploy();
         RuntimeService runtimeService = ProcessEngines.getDefaultProcessEngine().getRuntimeService();
         Map<String, Object> variables = new HashMap<>(8);
         Date date = DateUtils.addSeconds(new Date(), 30);
