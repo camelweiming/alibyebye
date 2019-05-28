@@ -19,11 +19,6 @@ import java.util.Map;
 public class TimerTest extends BaseTest {
     @Test
     public void test() throws InterruptedException, IOException {
-
-
-        if (true) {
-            return;
-        }
         RepositoryService repositoryService = ProcessEngines.getDefaultProcessEngine().getRepositoryService();
         repositoryService.createDeployment().addClasspathResource("flowable/timer.bpmn20.xml").deploy();
         RuntimeService runtimeService = ProcessEngines.getDefaultProcessEngine().getRuntimeService();
