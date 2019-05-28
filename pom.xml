@@ -220,6 +220,11 @@
                 <artifactId>flowable-spring</artifactId>
                 <version>6.3.0</version>
             </dependency>
+            <dependency>
+                <groupId>org.codehaus.groovy</groupId>
+                <artifactId>groovy-all</artifactId>
+                <version>2.4.9</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 

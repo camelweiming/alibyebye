@@ -27,10 +27,13 @@ public class FlowService implements InitializingBean {
     public void afterPropertiesSet() throws Exception {
         ProcessEngineConfiguration processEngineConfiguration = new StandaloneProcessEngineConfiguration();
         processEngineConfiguration.setDataSource(dataSource);
+        processEngineConfiguration.setAsyncExecutorActivate(true);
         ProcessEngine processEngine = processEngineConfiguration.buildProcessEngine();
         RepositoryService repositoryService = processEngine.getRepositoryService();
         repositoryService.createDeployment()
             .addClasspathResource("flowable/holiday-request.bpmn20.xml")
+            .addClasspathResource("flowable/timer.bpmn20.xml")
+            //.addClasspathResource("flowable/BoundaryTimerEventRepeatWithDurationTest.testRepeatWithDuration.bpmn20.xml")
             .deploy();
 
         logger.info("processEngine init");

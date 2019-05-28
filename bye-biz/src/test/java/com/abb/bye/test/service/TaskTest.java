@@ -1,6 +1,7 @@
 package com.abb.bye.test.service;
 
 import org.flowable.engine.ProcessEngines;
+import org.flowable.engine.RuntimeService;
 import org.flowable.engine.TaskService;
 import org.flowable.task.api.Task;
 import org.junit.Test;
@@ -38,5 +39,13 @@ public class TaskTest {
         Map<String, Object> variables = new HashMap<>();
         variables.put("approved", approved);
         taskService.complete(taskId, variables);
+    }
+
+    @Test
+    public void testTimer() throws InterruptedException {
+        RuntimeService runtimeService = ProcessEngines.getDefaultProcessEngine().getRuntimeService();
+        Map<String,Object> variables = new HashMap<>(8);
+        runtimeService.startProcessInstanceByKey("Timer", variables);
+        Thread.sleep(100000);
     }
 }
