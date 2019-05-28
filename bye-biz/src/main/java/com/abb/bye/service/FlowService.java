@@ -1,6 +1,5 @@
 package com.abb.bye.service;
 
-import com.abb.flowable.ProcessEngineRunner;
 import org.flowable.engine.ProcessEngine;
 import org.flowable.engine.ProcessEngineConfiguration;
 import org.flowable.engine.RepositoryService;
@@ -22,7 +21,7 @@ import java.io.IOException;
  */
 @Service
 public class FlowService implements InitializingBean {
-    private Logger logger = LoggerFactory.getLogger(ProcessEngineRunner.class);
+    private Logger logger = LoggerFactory.getLogger(FlowService.class);
     @Resource
     private DataSource dataSource;
     private static String RESOURCES = "/flowable/*.xml";
