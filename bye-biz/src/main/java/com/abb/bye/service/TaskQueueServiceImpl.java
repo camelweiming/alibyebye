@@ -275,19 +275,19 @@ public class TaskQueueServiceImpl implements TaskQueueService, InitializingBean,
 
         checkAndInitLock();
 
-        //CommonThreadPool.getScheduledExecutor().scheduleAtFixedRate(() -> {
-        //    try {
-        //        getJob();
-        //    } catch (Throwable e) {
-        //        logger.error("Error getJob", e);
-        //    }
-        //}, 0, 2, TimeUnit.SECONDS);
-        //
-        //CommonThreadPool.getScheduledExecutor().scheduleAtFixedRate(() -> {
-        //    try {releaseDieTask();} catch (Throwable e) {
-        //        logger.error("Error getJob", e);
-        //    }
-        //}, 0, 1, TimeUnit.MINUTES);
+        CommonThreadPool.getScheduledExecutor().scheduleAtFixedRate(() -> {
+            try {
+                getJob();
+            } catch (Throwable e) {
+                logger.error("Error getJob", e);
+            }
+        }, 0, 2, TimeUnit.SECONDS);
+
+        CommonThreadPool.getScheduledExecutor().scheduleAtFixedRate(() -> {
+            try {releaseDieTask();} catch (Throwable e) {
+                logger.error("Error getJob", e);
+            }
+        }, 0, 1, TimeUnit.MINUTES);
     }
 
     @Override

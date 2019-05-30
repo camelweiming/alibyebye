@@ -19,9 +19,8 @@ public class TimerTest extends BaseTest {
 
     @Test
     public void test() throws InterruptedException, IOException {
-        RuntimeService runtimeService = ProcessEngines.getDefaultProcessEngine().getRuntimeService();
         Map<String, Object> variables = new HashMap<>(8);
-        Date date = DateUtils.addSeconds(new Date(), 30);
+        Date date = DateUtils.addSeconds(new Date(), 60);
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS");
         String time = simpleDateFormat.format(date);
         System.out.println("time:" + time);
