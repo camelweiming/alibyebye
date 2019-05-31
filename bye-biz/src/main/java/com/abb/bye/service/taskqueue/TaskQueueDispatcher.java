@@ -6,7 +6,6 @@ import com.abb.bye.client.domain.enums.TaskQueueType;
 import com.abb.bye.client.service.taskqueue.TaskDispatcher;
 import com.abb.bye.client.service.taskqueue.TaskQueueLock;
 import com.abb.bye.client.service.taskqueue.TaskQueueService;
-import com.abb.bye.mapper.TaskQueueMapper;
 import com.abb.bye.utils.CommonThreadPool;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -19,7 +18,7 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 /**
- * 任务派发
+ * 任务派发，最好使用分布式调度来处理，如果用分布式调度派发，不需要加lock
  *
  * @author cenpeng.lwm
  * @since 2019/5/31
@@ -29,8 +28,6 @@ public class TaskQueueDispatcher implements TaskDispatcher, InitializingBean {
     private static final Logger logger = LoggerFactory.getLogger(TaskQueueDispatcher.class);
     @Resource
     private TaskQueueLock taskQueueLock;
-    @Resource
-    private TaskQueueMapper taskQueueMapper;
     @Resource
     private SystemEnv systemEnv;
     @Resource
@@ -43,7 +40,7 @@ public class TaskQueueDispatcher implements TaskDispatcher, InitializingBean {
             return;
         }
         try {
-            List<TaskQueueDO> list = taskQueueMapper.listWaiting(size, systemEnv.current().name());
+            List<TaskQueueDO> list = taskQueueService.listWaiting(size, systemEnv.current());
             for (TaskQueueDO taskQueueDO : list) {
                 if (TaskQueueType.SYS_LOCK.getType() == taskQueueDO.getType()) {
                     continue;

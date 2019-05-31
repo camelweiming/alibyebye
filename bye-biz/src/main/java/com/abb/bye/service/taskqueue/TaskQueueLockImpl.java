@@ -1,11 +1,10 @@
 package com.abb.bye.service.taskqueue;
 
-import com.abb.bye.Constants;
 import com.abb.bye.SystemEnv;
 import com.abb.bye.client.domain.TaskQueueDO;
 import com.abb.bye.client.domain.enums.TaskQueueType;
 import com.abb.bye.client.service.taskqueue.TaskQueueLock;
-import com.abb.bye.mapper.TaskQueueMapper;
+import com.abb.bye.client.service.taskqueue.TaskQueueService;
 import com.abb.bye.service.Sequence;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
@@ -17,7 +16,7 @@ import javax.annotation.Resource;
 import java.util.Date;
 
 /**
- * 这是一个很低效的实现，尽量不要生产环境使用
+ * 这是一个基于DB的锁，很低效的实现，尽量不要生产环境使用，如果Dispatcher是分布式调度派发的，没必要加锁
  *
  * @author cenpeng.lwm
  * @since 2019/5/31
@@ -28,12 +27,11 @@ public class TaskQueueLockImpl implements TaskQueueLock {
     @Resource
     private SystemEnv systemEnv;
     @Resource
-    private TaskQueueMapper taskQueueMapper;
+    private TaskQueueService taskQueueService;
     @Resource
     private Sequence sequence;
     private static String SEQUENCE_NAME = "task_queue";
-    private static int RETRY_COUNT = 3;
-    private long lockId;
+    private TaskQueueDO lock = null;
 
     @PostConstruct
     void init() throws InterruptedException {
@@ -41,29 +39,28 @@ public class TaskQueueLockImpl implements TaskQueueLock {
     }
 
     void checkAndInitLock() throws InterruptedException {
-        TaskQueueDO lock = new TaskQueueDO();
-        lock.setType(TaskQueueType.SYS_LOCK.getType());
-        lock.setUniqueKey("TASK_LOCK_" + systemEnv.current().name());
-        lock.setStartTime(new Date());
-        lock.setTimeout(DateTime.now().plusYears(10).toDate());
-        lock.setOrigRetryCount(Integer.MAX_VALUE);
-        lock.setStatus(TaskQueueDO.STATUS_WAITING);
-        lock.setEnv(systemEnv.current().name());
-        lock.setChildrenCount(0);
-        lock.setParentId(null);
-        lock.setAlarmThreshold(0);
+        String uniqueName = "TASK_LOCK_" + systemEnv.current().name();
         for (int i = 0; i < 3; i++) {
-            TaskQueueDO q = taskQueueMapper.get(lock.getType(), lock.getUniqueKey());
-            if (q != null) {
-                lockId = q.getId();
-                logger.info("getLock:" + lockId);
+            lock = taskQueueService.get(TaskQueueType.SYS_LOCK, uniqueName);
+            if (lock != null) {
+                logger.info("getLock:" + lock.getId());
                 return;
             }
             try {
+                lock = new TaskQueueDO();
                 lock.setId(sequence.next(SEQUENCE_NAME));
-                taskQueueMapper.insert(lock);
-                logger.info("createLock:" + lockId);
-                lockId = lock.getId();
+                lock.setType(TaskQueueType.SYS_LOCK.getType());
+                lock.setUniqueKey(uniqueName);
+                lock.setStartTime(new Date());
+                lock.setTimeout(DateTime.now().plusYears(10).toDate());
+                lock.setOrigRetryCount(Integer.MAX_VALUE);
+                lock.setStatus(TaskQueueDO.STATUS_WAITING);
+                lock.setEnv(systemEnv.current().name());
+                lock.setChildrenCount(0);
+                lock.setParentId(null);
+                lock.setAlarmThreshold(0);
+                taskQueueService.apply(lock);
+                logger.info("createLock:" + lock.getId());
             } catch (Throwable e) {
                 logger.error("Error checkAndInitLock", e);
             }
@@ -75,22 +72,11 @@ public class TaskQueueLockImpl implements TaskQueueLock {
 
     @Override
     public boolean lock() {
-        boolean lock = taskQueueMapper.lock(lockId, Constants.SERVER_IP, DateTime.now().plusSeconds(TaskQueueType.SYS_LOCK.getExecuteTimeoutSeconds()).toDate()) > 0;
-        logger.debug("lock:" + lockId);
-        return lock;
+        return taskQueueService.lock(lock);
     }
 
     @Override
     public void release() {
-        for (int i = 0; i < RETRY_COUNT; i++) {
-            try {
-                taskQueueMapper.release(lockId);
-                logger.debug("release lock:" + lockId);
-                return;
-            } catch (Throwable e) {
-                logger.warn("release " + lockId + " failed:" + i);
-            }
-        }
-        throw new IllegalStateException("Error release :" + lockId);
+        taskQueueService.release(lock.getId());
     }
 }

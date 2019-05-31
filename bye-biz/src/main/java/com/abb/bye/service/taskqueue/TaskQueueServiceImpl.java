@@ -4,6 +4,7 @@ import com.abb.bye.Constants;
 import com.abb.bye.client.domain.TaskQueueDO;
 import com.abb.bye.client.domain.TaskResult;
 import com.abb.bye.client.domain.TreeNode;
+import com.abb.bye.client.domain.enums.Env;
 import com.abb.bye.client.domain.enums.TaskQueueType;
 import com.abb.bye.client.service.taskqueue.TaskProcessor;
 import com.abb.bye.client.service.taskqueue.TaskQueueService;
@@ -189,13 +190,15 @@ public class TaskQueueServiceImpl implements TaskQueueService, InitializingBean,
         }
     }
 
-    private boolean lock(TaskQueueDO q) {
+    @Override
+    public boolean lock(TaskQueueDO q) {
         boolean lock = taskQueueMapper.lock(q.getId(), Constants.SERVER_IP, DateTime.now().plusSeconds(TaskQueueType.getByType(q.getType()).getExecuteTimeoutSeconds()).toDate()) > 0;
         logger.debug("lock:" + q.getId());
         return lock;
     }
 
-    private void release(long lockId) {
+    @Override
+    public void release(long lockId) {
         for (int i = 0; i < RETRY_COUNT; i++) {
             try {
                 taskQueueMapper.release(lockId);
@@ -206,6 +209,21 @@ public class TaskQueueServiceImpl implements TaskQueueService, InitializingBean,
             }
         }
         throw new IllegalStateException("Error release :" + lockId);
+    }
+
+    @Override
+    public TaskQueueDO get(TaskQueueType taskQueueType, String uk) {
+        return taskQueueMapper.get(taskQueueType.getType(), uk);
+    }
+
+    @Override
+    public List<TaskQueueDO> listWaiting(int size, Env env) {
+        return taskQueueMapper.listWaiting(size, env.name());
+    }
+
+    @Override
+    public int forceStop(Date date) {
+        return taskQueueMapper.forceStop(new Date());
     }
 
     @Override
