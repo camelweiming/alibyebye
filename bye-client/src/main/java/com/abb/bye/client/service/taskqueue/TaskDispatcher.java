@@ -1,4 +1,4 @@
-package com.abb.bye.client.service;
+package com.abb.bye.client.service.taskqueue;
 
 /**
  * @author cenpeng.lwm

@@ -1,13 +1,14 @@
-package com.abb.bye.service;
+package com.abb.bye.service.taskqueue;
 
 import com.abb.bye.Constants;
 import com.abb.bye.client.domain.TaskQueueDO;
 import com.abb.bye.client.domain.TaskResult;
 import com.abb.bye.client.domain.TreeNode;
 import com.abb.bye.client.domain.enums.TaskQueueType;
-import com.abb.bye.client.service.TaskProcessor;
-import com.abb.bye.client.service.TaskQueueService;
+import com.abb.bye.client.service.taskqueue.TaskProcessor;
+import com.abb.bye.client.service.taskqueue.TaskQueueService;
 import com.abb.bye.mapper.TaskQueueMapper;
+import com.abb.bye.service.Sequence;
 import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;

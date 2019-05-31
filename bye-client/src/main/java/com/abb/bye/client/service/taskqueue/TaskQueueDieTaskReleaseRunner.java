@@ -1,4 +1,4 @@
-package com.abb.bye.client.service;
+package com.abb.bye.client.service.taskqueue;
 
 /**
  * 该方法只有一台机器执行即可

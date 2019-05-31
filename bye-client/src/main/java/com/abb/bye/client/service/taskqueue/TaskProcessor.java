@@ -1,4 +1,4 @@
-package com.abb.bye.client.service;
+package com.abb.bye.client.service.taskqueue;
 
 import com.abb.bye.client.domain.TaskQueueDO;
 import com.abb.bye.client.domain.TaskResult;

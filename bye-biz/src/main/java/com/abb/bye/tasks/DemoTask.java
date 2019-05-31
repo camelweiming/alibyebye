@@ -3,7 +3,7 @@ package com.abb.bye.tasks;
 import com.abb.bye.client.domain.TaskQueueDO;
 import com.abb.bye.client.domain.TaskResult;
 import com.abb.bye.client.domain.enums.TaskQueueType;
-import com.abb.bye.client.service.TaskProcessor;
+import com.abb.bye.client.service.taskqueue.TaskProcessor;
 import org.springframework.stereotype.Service;
 
 /**

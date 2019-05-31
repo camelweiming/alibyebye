@@ -1,6 +1,6 @@
-package com.abb.bye.service;
+package com.abb.bye.service.taskqueue;
 
-import com.abb.bye.client.service.TaskQueueDieTaskReleaseRunner;
+import com.abb.bye.client.service.taskqueue.TaskQueueDieTaskReleaseRunner;
 import com.abb.bye.mapper.TaskQueueMapper;
 import com.abb.bye.utils.CommonThreadPool;
 import org.slf4j.Logger;

@@ -1,11 +1,11 @@
-package com.abb.bye.service;
+package com.abb.bye.service.taskqueue;
 
 import com.abb.bye.SystemEnv;
 import com.abb.bye.client.domain.TaskQueueDO;
 import com.abb.bye.client.domain.enums.TaskQueueType;
-import com.abb.bye.client.service.TaskDispatcher;
-import com.abb.bye.client.service.TaskQueueLock;
-import com.abb.bye.client.service.TaskQueueService;
+import com.abb.bye.client.service.taskqueue.TaskDispatcher;
+import com.abb.bye.client.service.taskqueue.TaskQueueLock;
+import com.abb.bye.client.service.taskqueue.TaskQueueService;
 import com.abb.bye.mapper.TaskQueueMapper;
 import com.abb.bye.utils.CommonThreadPool;
 import org.apache.commons.lang3.StringUtils;

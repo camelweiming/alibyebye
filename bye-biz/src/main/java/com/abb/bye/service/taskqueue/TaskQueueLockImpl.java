@@ -1,11 +1,12 @@
-package com.abb.bye.service;
+package com.abb.bye.service.taskqueue;
 
 import com.abb.bye.Constants;
 import com.abb.bye.SystemEnv;
 import com.abb.bye.client.domain.TaskQueueDO;
 import com.abb.bye.client.domain.enums.TaskQueueType;
-import com.abb.bye.client.service.TaskQueueLock;
+import com.abb.bye.client.service.taskqueue.TaskQueueLock;
 import com.abb.bye.mapper.TaskQueueMapper;
+import com.abb.bye.service.Sequence;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
