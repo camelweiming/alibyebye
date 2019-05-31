@@ -3,7 +3,6 @@
 #end
 
 <form action="add_holiday.htm" class="form-horizontal" method="post">
-    $!csrfToken.hiddenField
     <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
     <div class="form-group">
         <label>天数</label><input class="form-control form-control-sm" name="days" value="$!{days}" required>

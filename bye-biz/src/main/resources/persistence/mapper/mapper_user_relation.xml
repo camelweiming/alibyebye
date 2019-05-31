@@ -38,4 +38,13 @@
         from user_relation where ref_type=#{refType} and user_id=#{userId} and status=1
     </select>
 
+
+    <update id="removeByRelationId">
+        update set status=0,gmt_modified=now() where ref_type=#{refType} and ref_id=#{refId} and status=1
+    </update>
+
+    <update id="removeByUserId">
+        update set status=0,gmt_modified=now() where user_id=#{userId} and ref_id=#{refId} and status=1
+    </update>
+
 </mapper>

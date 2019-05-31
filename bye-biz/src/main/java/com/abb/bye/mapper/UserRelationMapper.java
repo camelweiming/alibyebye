@@ -34,4 +34,22 @@ public interface UserRelationMapper {
      * @return
      */
     List<UserRelationDO> getByUserId(@Param("refType") int userRelationType, @Param("userId") long userId);
+
+    /**
+     * 通过关联id删除关系
+     *
+     * @param userRelationType
+     * @param refId
+     * @return
+     */
+    int removeByRelationId(@Param("refType") int userRelationType, @Param("refId") long refId);
+
+    /**
+     * 通过用户id删除关系
+     *
+     * @param userRelationType
+     * @param userId
+     * @return
+     */
+    int removeByUserId(@Param("refType") int userRelationType, @Param("userId") long userId);
 }

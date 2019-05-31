@@ -106,7 +106,7 @@ public class UserController {
     }
 
     @RequestMapping(value = "users.htm", method = {RequestMethod.POST, RequestMethod.GET})
-    String logout(Model model, @RequestParam(required = false) Integer page, @RequestParam(required = false) Integer pageSize, HttpServletRequest request, HttpServletResponse response) {
+    String users(Model model, @RequestParam(required = false) Integer page, @RequestParam(required = false) Integer pageSize, HttpServletRequest request, HttpServletResponse response) {
         if (page == null) {
             page = 1;
         }

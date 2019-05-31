@@ -19,6 +19,14 @@ public interface UserService {
     ResultDTO<UserDTO> getById(long id);
 
     /**
+     * 批量取
+     *
+     * @param ids
+     * @return
+     */
+    ResultDTO<List<UserDTO>> mGet(List<Long> ids);
+
+    /**
      * 通过用户查询
      *
      * @param name

@@ -6,6 +6,7 @@
         <tr>
             <th>ID</th>
             <th>用户名</th>
+            <th>组织架构维护</th>
         </tr>
         </thead>
         <tbody>
@@ -13,6 +14,7 @@
             <tr>
                 <td>$!{user.id}</td>
                 <td>$!{user.userName}</td>
+                <td><a href="edit_parent.htm?userId=$!{user.id}">修改</a> </td>
             </tr>
             #end
         </tbody>

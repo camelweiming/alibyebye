@@ -11,6 +11,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -32,6 +33,13 @@ public class UserServiceImpl implements UserService {
             logger.error("Error getById:" + id, e);
             return ResultDTO.buildError(ResultDTO.ERROR_CODE_SYSTEM_ERROR, e.getMessage());
         }
+    }
+
+    @Override
+    public ResultDTO<List<UserDTO>> mGet(List<Long> ids) {
+        List<UserDTO> userDTOS = new ArrayList<>();
+        ids.forEach(id -> userDTOS.add(getById(id).getData()));
+        return ResultDTO.buildSuccess(userDTOS);
     }
 
     @Override

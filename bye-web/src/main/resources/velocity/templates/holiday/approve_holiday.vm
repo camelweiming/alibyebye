@@ -3,7 +3,6 @@
 #end
 
 <form action="approve_holiday.htm" class="form-horizontal" method="post">
-    $!csrfToken.hiddenField
     <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
     <div class="form-group">
         <label>ID</label><input class="form-control form-control-sm" name="taskId" value="$!{taskId}" readonly>
