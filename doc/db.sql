@@ -12,7 +12,7 @@ CREATE TABLE `task_queue` (
   `execute_timeout` datetime  NOT NULL COMMENT '单次执行超时时间，超过会被重置状态',
   `msg` VARCHAR(128) DEFAULT NULL COMMENT '执行信息',
   `ip` VARCHAR(128) DEFAULT NULL COMMENT '执行机器',
-  `retry_count` int(11) NOT NULL COMMENT '重试次数',
+  `remain_retry_count` int(11) NOT NULL COMMENT '剩余重试次数',
   `orig_retry_count` int(11) NOT NULL COMMENT '最多重试次数',
   `execute_interval_seconds` int(8) DEFAULT NULL COMMENT '执行间隔',
   `alarm_threshold` int(8) NOT NULL DEFAULT '0' COMMENT '报警阈值',
@@ -22,7 +22,7 @@ CREATE TABLE `task_queue` (
 
   PRIMARY KEY (`id`),
   UNIQUE KEY `uk_uk` (`type`,`unique_key`),
-  KEY `idx_status` (`status`,`retry_count`,`start_time`,`env`)
+  KEY `idx_status` (`status`,`remain_retry_count`,`start_time`,`env`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4 COMMENT='任务队列'
 ;
 

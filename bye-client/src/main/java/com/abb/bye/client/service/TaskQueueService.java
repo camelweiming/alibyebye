@@ -25,24 +25,11 @@ public interface TaskQueueService {
     void apply(TreeNode<TaskQueueDO> node);
 
     /**
-     * 锁
+     * 执行任务
      *
-     * @param id
-     * @return
+     * @param q
      */
-    boolean lock(long id);
-
-    /**
-     * 释放
-     *
-     * @param id
-     */
-    void release(long id);
-
-    /**
-     * 释放死线程
-     */
-    void releaseDieTask();
+    void doJob(TaskQueueDO q);
 
     /**
      * 标记为失败

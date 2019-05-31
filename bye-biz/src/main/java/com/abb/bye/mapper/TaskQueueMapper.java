@@ -23,9 +23,10 @@ public interface TaskQueueMapper {
      *
      * @param id
      * @param ip
+     * @param executeTimeout
      * @return
      */
-    int lock(@Param("id") long id, @Param("ip") String ip);
+    int lock(@Param("id") long id, @Param("ip") String ip, @Param("executeTimeout") Date executeTimeout);
 
     /**
      * 释放
@@ -84,7 +85,7 @@ public interface TaskQueueMapper {
      *
      * @param currentTime
      */
-    void forceStop(@Param("currentTime") Date currentTime);
+    int forceStop(@Param("currentTime") Date currentTime);
 
     /**
      * 清理成功任务

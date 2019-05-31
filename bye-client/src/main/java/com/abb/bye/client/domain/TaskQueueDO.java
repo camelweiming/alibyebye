@@ -24,11 +24,17 @@ public class TaskQueueDO implements Serializable {
     private Integer version;
     private String uniqueKey;
     private Date startTime;
+    /**
+     * 整个任务的超时时间
+     */
     private Date timeout;
+    /**
+     * 单次执行的timeout，如执行任务超过10秒认为调用超时，下次重新执行 不需要设置,设置executeTimeoutSeconds即可
+     */
     private Date executeTimeout;
     private String msg;
     private String ip;
-    private Integer retryCount;
+    private Integer remainRetryCount;
     private Integer origRetryCount;
     private Integer executeIntervalSeconds;
     private Integer alarmThreshold;
@@ -133,12 +139,12 @@ public class TaskQueueDO implements Serializable {
         this.ip = ip;
     }
 
-    public Integer getRetryCount() {
-        return retryCount;
+    public Integer getRemainRetryCount() {
+        return remainRetryCount;
     }
 
-    public void setRetryCount(Integer retryCount) {
-        this.retryCount = retryCount;
+    public void setRemainRetryCount(Integer remainRetryCount) {
+        this.remainRetryCount = remainRetryCount;
     }
 
     public Integer getOrigRetryCount() {
@@ -195,6 +201,10 @@ public class TaskQueueDO implements Serializable {
 
     public void setExecuteTimeout(Date executeTimeout) {
         this.executeTimeout = executeTimeout;
+    }
+
+    public int getRetryCount() {
+        return origRetryCount - remainRetryCount;
     }
 
     @Override

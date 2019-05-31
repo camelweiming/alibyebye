@@ -2,6 +2,7 @@ package com.abb.bye.client.service;
 
 import com.abb.bye.client.domain.TaskQueueDO;
 import com.abb.bye.client.domain.TaskResult;
+import com.abb.bye.client.domain.enums.TaskQueueType;
 
 /**
  * @author cenpeng.lwm
@@ -21,12 +22,12 @@ public interface TaskProcessor {
      *
      * @param taskQueueDO
      */
-    void notifyFailed(TaskQueueDO taskQueueDO);
+    void notifyTimeout(TaskQueueDO taskQueueDO);
 
     /**
      * 注册类型
      *
      * @return
      */
-    int type();
+    TaskQueueType type();
 }
