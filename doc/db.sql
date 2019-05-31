@@ -61,6 +61,20 @@ CREATE TABLE `user_authority` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='user_authority'
 ;
 
+CREATE TABLE `user_relation` (
+  `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+  `user_id` BIGINT UNSIGNED NOT NULL,
+  `ref_type` INT(11) NOT NULL comment '类型',
+  `ref_id` BIGINT UNSIGNED NOT NULL comment '关联ID',
+  `attributes` VARCHAR(256) DEFAULT NULL,
+  `status` TINYINT NOT NULL comment '0:无效,1:有效',
+  `gmt_create` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  `gmt_modified` TIMESTAMP NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uk_unique_name` (`ref_id`,`ref_type`,`user_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='user_relation'
+;
+
 CREATE TABLE `task` (
     `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
     `gmt_create` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -68,7 +82,7 @@ CREATE TABLE `task` (
     `user_id` BIGINT UNSIGNED NOT NULL,
     `task_id` VARCHAR(64) NOT NULL,
     `type` int(11) NOT NULL COMMENT '类型',
-    `status` int(11) NOT NULL COMMENT '0,无效,3:结束,4:失败',
+    `status` int(11) NOT NULL COMMENT '0:无效,3:结束,4:失败',
     `attributes` VARCHAR(4096) NOT NULL,
     PRIMARY KEY (`id`),
     UNIQUE KEY `uk_unique_user_id` (`user_id`)
