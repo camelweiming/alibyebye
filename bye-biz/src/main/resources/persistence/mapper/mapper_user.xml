@@ -28,4 +28,16 @@
         from user where id=#{id}
     </select>
 
+    <select id="list" resultType="com.abb.bye.client.domain.UserDO">
+        select
+        <include refid="columns"/>
+        from user order by id desc limit #{start},#{limit}
+    </select>
+
+    <select id="count" resultType="int">
+        select
+        count(1)
+        from user
+    </select>
+
 </mapper>

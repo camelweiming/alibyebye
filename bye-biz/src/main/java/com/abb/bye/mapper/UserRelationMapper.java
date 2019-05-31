@@ -24,7 +24,7 @@ public interface UserRelationMapper {
      * @param refId
      * @return
      */
-    List<UserRelationDO> getByRelationId(@Param("refType") byte userRelationType, @Param("refId") long refId);
+    List<UserRelationDO> getByRelationId(@Param("refType") int userRelationType, @Param("refId") long refId);
 
     /**
      * 通过用户id查询
@@ -33,5 +33,5 @@ public interface UserRelationMapper {
      * @param userId
      * @return
      */
-    List<UserRelationDO> getByUserId(@Param("refType") byte userRelationType, @Param("userId") long userId);
+    List<UserRelationDO> getByUserId(@Param("refType") int userRelationType, @Param("userId") long userId);
 }

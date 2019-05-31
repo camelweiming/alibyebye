@@ -1,5 +1,6 @@
 package com.abb.bye.web;
 
+import com.abb.bye.client.domain.Paging;
 import com.abb.bye.client.domain.ResultDTO;
 import com.abb.bye.client.domain.UserAuthorityDTO;
 import com.abb.bye.client.domain.UserDTO;
@@ -15,11 +16,11 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.servlet.ModelAndView;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.util.List;
 
 /**
  * @author cenpeng.lwm
@@ -99,8 +100,22 @@ public class UserController {
 
     @RequestMapping(value = "logout.htm", method = {RequestMethod.POST, RequestMethod.GET})
     @VelocityLayout("/velocity/layout/layout_login.vm")
-    ModelAndView logout(Model model, @RequestParam(required = false) String name, @RequestParam(required = false) String password, HttpServletRequest request, HttpServletResponse response) {
+    String logout(Model model, @RequestParam(required = false) String name, @RequestParam(required = false) String password, HttpServletRequest request, HttpServletResponse response) {
         LoginUtil.removeCookie(null, request, response);
-        return new ModelAndView("redirect:/");
+        return "redirect:/";
+    }
+
+    @RequestMapping(value = "users.htm", method = {RequestMethod.POST, RequestMethod.GET})
+    String logout(Model model, @RequestParam(required = false) Integer page, @RequestParam(required = false) Integer pageSize, HttpServletRequest request, HttpServletResponse response) {
+        if (page == null) {
+            page = 1;
+        }
+        if (pageSize == null) {
+            pageSize = 20;
+        }
+        ResultDTO<List<UserDTO>> resultDTO = userService.list((page - 1) * pageSize, pageSize, true);
+        Paging<UserDTO> paging = new Paging().setCurrentPage(page).setPageSize(pageSize).setTotalData(resultDTO.getTotal()).setData(resultDTO.getData()).build();
+        model.addAttribute("paging", paging);
+        return "admin/users";
     }
 }

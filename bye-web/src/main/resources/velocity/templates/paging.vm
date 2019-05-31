@@ -14,8 +14,8 @@
                 <a class="page-link" href="#">$p</a>
             </li>
         #end
-        <li class="page-item">
-            <a class="page-link" href="#" #if(!$paging.next)disabled#end onclick="doPaging($next)">Next</a>
+        <li class="page-item #if(!$paging.next)disabled#end" >
+            <a class="page-link" href="#" onclick="doPaging($next)">Next</a>
         </li>
     </ul>
 </nav>

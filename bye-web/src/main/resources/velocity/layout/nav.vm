@@ -10,14 +10,21 @@
                 </a>
             </li>
 
-            <h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted">
-                <span>任务</span><a class="d-flex align-items-center text-muted" href="#"><span data-feather="plus-circle"></span></a>
-            </h6>
-
             <li class="nav-item">
                 <a class="nav-link" href="task_list.htm">
                     <span data-feather="file"></span>我的任务
                 </a>
             </li>
+        </ul>
+        <ul class="nav flex-column">
+            <h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted">
+                <span>ADMIN</span><a class="d-flex align-items-center text-muted" href="#"><span data-feather="plus-circle"></span></a>
+            </h6>
+            <li class="nav-item">
+                <a class="nav-link" href="users.htm">
+                    <span data-feather="file"></span>用户管理
+                </a>
+            </li>
+        </ul>
     </div>
 </nav>

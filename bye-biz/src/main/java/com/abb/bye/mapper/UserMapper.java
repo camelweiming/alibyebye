@@ -1,6 +1,9 @@
 package com.abb.bye.mapper;
 
 import com.abb.bye.client.domain.UserDO;
+import org.apache.ibatis.annotations.Param;
+
+import java.util.List;
 
 /**
  * @author cenpeng.lwm
@@ -16,6 +19,7 @@ public interface UserMapper {
 
     /**
      * 通过id查询
+     *
      * @param id
      * @return
      */
@@ -23,8 +27,25 @@ public interface UserMapper {
 
     /**
      * 通过用户查询
+     *
      * @param name
      * @return
      */
     UserDO getByName(String name);
+
+    /**
+     * 列表
+     *
+     * @param start
+     * @param limit
+     * @return
+     */
+    List<UserDO> list(@Param("start") int start, @Param("limit") int limit);
+
+    /**
+     * 总数
+     *
+     * @return
+     */
+    int count();
 }

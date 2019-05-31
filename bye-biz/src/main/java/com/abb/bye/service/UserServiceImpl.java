@@ -11,6 +11,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
+import java.util.List;
 
 /**
  * @author cenpeng.lwm
@@ -40,6 +41,21 @@ public class UserServiceImpl implements UserService {
             return ResultDTO.buildSuccess(Converter.convert(userDO));
         } catch (Throwable e) {
             logger.error("Error getByName:" + name, e);
+            return ResultDTO.buildError(ResultDTO.ERROR_CODE_SYSTEM_ERROR, e.getMessage());
+        }
+    }
+
+    @Override
+    public ResultDTO<List<UserDTO>> list(int start, int limit, boolean needTotal) {
+        try {
+            int total = 0;
+            List<UserDO> userDOS = userMapper.list(start, limit);
+            if (needTotal) {
+                total = userMapper.count();
+            }
+            return ResultDTO.buildSuccess(Converter.convert(userDOS), total);
+        } catch (Throwable e) {
+            logger.error("Error list", e);
             return ResultDTO.buildError(ResultDTO.ERROR_CODE_SYSTEM_ERROR, e.getMessage());
         }
     }

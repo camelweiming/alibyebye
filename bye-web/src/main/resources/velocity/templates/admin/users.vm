@@ -1,0 +1,22 @@
+<form action="users.htm" class="form-horizontal" method="get" id="paging-form"></form>
+
+<div class="table-responsive">
+    <table class="table table-striped table-sm">
+        <thead>
+        <tr>
+            <th>ID</th>
+            <th>用户名</th>
+        </tr>
+        </thead>
+        <tbody>
+            #foreach($user in $paging.data)
+            <tr>
+                <td>$!{user.id}</td>
+                <td>$!{user.userName}</td>
+            </tr>
+            #end
+        </tbody>
+    </table>
+</div>
+
+#parse('paging.vm')
