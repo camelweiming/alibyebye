@@ -1,5 +1,6 @@
 package com.abb.bye.service;
 
+import com.abb.bye.Switcher;
 import com.abb.bye.client.domain.ResultDTO;
 import com.abb.bye.client.domain.UserDO;
 import com.abb.bye.client.domain.UserDTO;
@@ -10,7 +11,6 @@ import com.abb.bye.client.service.UserRelationService;
 import com.abb.bye.client.service.UserService;
 import com.abb.bye.mapper.UserMapper;
 import com.abb.bye.utils.Converter;
-import com.abb.bye.utils.Switcher;
 import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
