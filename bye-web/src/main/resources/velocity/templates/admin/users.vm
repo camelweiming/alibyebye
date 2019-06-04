@@ -6,15 +6,20 @@
         <tr>
             <th>ID</th>
             <th>用户名</th>
+            <th>上级</th>
             <th>组织架构维护</th>
         </tr>
         </thead>
         <tbody>
             #foreach($user in $paging.data)
             <tr>
-                <td>$!{user.userId}</td>
-                <td>$!{user.userName}</td>
-                <td><a href="edit_parent.htm?userId=$!{user.userId}">修改</a> </td>
+                <td>$!{user.user.userId}</td>
+                <td>$!{user.user.userName}</td>
+                <td>#foreach($parent in $user.parents)
+                        <a href="edit_parent.htm?userId=${parent.userId}">${parent.userName}</a>
+                    #end
+                </td>
+                <td><a href="edit_parent.htm?userId=$!{user.user.userId}">修改</a> </td>
             </tr>
             #end
         </tbody>

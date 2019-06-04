@@ -25,7 +25,6 @@
         attributes=#{attributes}
     </insert>
 
-
     <select id="getByRelationId" resultType="com.abb.bye.client.domain.UserRelationDO">
         select
         <include refid="columns"/>
@@ -38,6 +37,13 @@
         from user_relation where ref_type=#{refType} and user_id=#{userId} and status=1
     </select>
 
+    <select id="mGetByUserIds" resultType="com.abb.bye.client.domain.UserRelationDO">
+        select
+        <include refid="columns"/>
+        from user_relation where ref_type=#{refType} and status=1
+        and user_id in
+        <foreach item="id" index="index" collection="userIds" open="(" separator="," close=")">#{id}</foreach>
+    </select>
 
     <update id="removeByRelationId">
         update user_relation set status=0,gmt_modified=now() where ref_type=#{refType} and ref_id=#{refId} and status=1

@@ -60,6 +60,17 @@ public class UserRelationServiceImpl implements UserRelationService {
     }
 
     @Override
+    public ResultDTO<List<UserRelationDO>> mGetByUserIds(UserRelationType userRelationType, List<Long> userIds) {
+        try {
+            List<UserRelationDO> list = userRelationMapper.mGetByUserIds(userRelationType.getType(), userIds);
+            return ResultDTO.buildSuccess(list);
+        } catch (Throwable e) {
+            logger.error("Error mGetByUserIds:" + userRelationType, e);
+            return ResultDTO.buildError(ResultDTO.ERROR_CODE_SYSTEM_ERROR, e.getMessage());
+        }
+    }
+
+    @Override
     public ResultDTO<Void> removeByIds(List<Long> ids) {
         try {
             userRelationMapper.removeByIds(ids);

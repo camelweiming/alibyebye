@@ -38,6 +38,15 @@ public interface UserRelationService {
     ResultDTO<List<UserRelationDO>> getByUserId(UserRelationType userRelationType, long userId);
 
     /**
+     * 批量获取
+     *
+     * @param userRelationType
+     * @param userIds
+     * @return
+     */
+    ResultDTO<List<UserRelationDO>> mGetByUserIds(UserRelationType userRelationType, List<Long> userIds);
+
+    /**
      * 批量删除
      *
      * @param ids
