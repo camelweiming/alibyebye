@@ -2,8 +2,11 @@ package com.abb.bye.web;
 
 import com.abb.bye.Constants;
 import com.abb.bye.client.domain.UserDTO;
+import com.abb.bye.client.domain.UserOptions;
 import com.abb.bye.client.domain.enums.TaskType;
 import com.abb.bye.client.exception.AuthException;
+import com.abb.bye.client.service.UserService;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.flowable.engine.ProcessEngines;
 import org.flowable.engine.RuntimeService;
@@ -17,6 +20,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import java.util.HashMap;
 import java.util.Map;
@@ -28,6 +32,8 @@ import java.util.Map;
 @Controller
 public class HolidayController extends BaseController {
     private static Logger logger = LoggerFactory.getLogger(HolidayController.class);
+    @Resource
+    private UserService userService;
 
     @RequestMapping(value = "add_holiday.htm", method = {RequestMethod.POST, RequestMethod.GET})
     String addHoliday(Model model, HttpServletRequest request, @RequestParam(required = false) Integer days, @RequestParam(required = false) String description) {
@@ -41,9 +47,16 @@ public class HolidayController extends BaseController {
         }
         try {
             RuntimeService runtimeService = ProcessEngines.getDefaultProcessEngine().getRuntimeService();
-            UserDTO userDTO = getLoginUser(request);
+            Long loginUserId = getLoginUser(request);
+            UserDTO userDTO = userService.getById(loginUserId, new UserOptions().setWithBoss(true)).getData();
+            Long assignee;
+            if (CollectionUtils.isNotEmpty(userDTO.getBosses())) {
+                assignee = userDTO.getBosses().get(0).getUserId();
+            } else {
+                assignee = loginUserId;
+            }
             Map<String, Object> variables = new HashMap<>(8);
-            variables.put(Constants.TASK_ASSIGNEE, "75001");
+            variables.put(Constants.TASK_ASSIGNEE, "" + assignee);
             variables.put(Constants.TASK_USER_ID, userDTO.getUserId());
             variables.put(Constants.TASK_USER_NAME, userDTO.getUserName());
             variables.put(Constants.TASK_TYPE, TaskType.HOLIDAY.getType());
@@ -67,8 +80,8 @@ public class HolidayController extends BaseController {
             if (task == null) {
                 throw new IllegalArgumentException("task not found!");
             }
-            UserDTO userDTO = getLoginUser(request);
-            if (!userDTO.getUserId().equals(NumberUtils.toLong(task.getAssignee(), 0))) {
+            Long loginUserId = getLoginUser(request);
+            if (!loginUserId.equals(NumberUtils.toLong(task.getAssignee(), 0))) {
                 throw new AuthException("permission deny");
             }
             model.addAttribute("taskId", taskId);

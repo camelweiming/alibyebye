@@ -21,7 +21,7 @@ import java.security.InvalidKeyException;
 public class LoginUtil {
     private static Logger logger = LoggerFactory.getLogger(LoginUtil.class);
     private static String clientKey = "bye";
-    private static String loginCookieName = "__login_user__";
+    private static String loginCookieName = "__login_user_id__";
     private static Boolean useSecureCookie = false;
     private static Method setHttpOnlyMethod;
     public static final String ENCODING_UTF8 = "UTF-8";
@@ -49,7 +49,7 @@ public class LoginUtil {
         return contextPath.length() > 0 ? contextPath : "/";
     }
 
-    public static String getLoginUserName(HttpServletRequest request) throws IllegalBlockSizeException, BadPaddingException, InvalidKeyException, UnsupportedEncodingException {
+    public static String getLoginUser(HttpServletRequest request) throws IllegalBlockSizeException, BadPaddingException, InvalidKeyException, UnsupportedEncodingException {
         Cookie[] cookies = request.getCookies();
         if ((cookies == null) || (cookies.length == 0)) {
             return null;

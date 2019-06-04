@@ -4,6 +4,7 @@ import com.abb.bye.client.domain.UserDTO;
 import com.abb.bye.client.domain.UserOptions;
 import com.abb.bye.client.service.UserService;
 import com.abb.bye.utils.LoginUtil;
+import org.apache.commons.lang3.math.NumberUtils;
 import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.ModelAndView;
@@ -25,12 +26,12 @@ public class LoginInterceptor extends HandlerInterceptorAdapter {
 
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
-        String loginUserName = LoginUtil.getLoginUserName(request);
-        if (loginUserName == null) {
+        long loginUserId = NumberUtils.toLong(LoginUtil.getLoginUser(request), -1);
+        if (loginUserId == -1) {
             response.sendRedirect("/login.htm");
             return false;
         }
-        UserDTO userDTO = userService.getByName(loginUserName, new UserOptions()).getData();
+        UserDTO userDTO = userService.getById(loginUserId, new UserOptions()).getData();
         if (userDTO == null) {
             response.sendRedirect("/login.htm");
             return false;

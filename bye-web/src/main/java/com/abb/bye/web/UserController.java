@@ -87,7 +87,7 @@ public class UserController {
                 return vm;
             }
             UserDTO user = userService.getById(res.getData(), new UserOptions()).getData();
-            LoginUtil.setLoginCookie(null, user.getUserName(), 3600, request, response);
+            LoginUtil.setLoginCookie(null, "" + user.getUserId(), 3600, request, response);
             return "redirect:/";
         } catch (Throwable e) {
             logger.error("Error signIn", e);

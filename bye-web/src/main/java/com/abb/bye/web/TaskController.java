@@ -1,14 +1,11 @@
 package com.abb.bye.web;
 
 import com.abb.bye.Constants;
-import com.abb.bye.client.domain.UserDTO;
 import com.abb.bye.client.domain.enums.TaskType;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import org.flowable.engine.ProcessEngines;
-import org.flowable.engine.RuntimeService;
 import org.flowable.engine.TaskService;
-import org.flowable.engine.runtime.ProcessInstance;
 import org.flowable.task.api.Task;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -18,7 +15,6 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import javax.servlet.http.HttpServletRequest;
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -32,12 +28,9 @@ public class TaskController extends BaseController {
     @RequestMapping(value = "task_list.htm", method = RequestMethod.GET)
     String taskList(HttpServletRequest request, Model model) {
         String vm = "task_list";
-        UserDTO userDTO = getLoginUser(request);
-        RuntimeService runtimeService = ProcessEngines.getDefaultProcessEngine().getRuntimeService();
-        Map<String,Object> variables2 = new HashMap<>(8);
-        ProcessInstance processInstance = runtimeService.startProcessInstanceByKey("Timer", variables2);
+        Long loginUserId = getLoginUser(request);
         TaskService taskService = ProcessEngines.getDefaultProcessEngine().getTaskService();
-        List<Task> tasks = taskService.createTaskQuery().taskCandidateOrAssigned(String.valueOf(userDTO.getUserId())).list();
+        List<Task> tasks = taskService.createTaskQuery().taskCandidateOrAssigned(String.valueOf(loginUserId)).list();
         List<TaskVO> list = new ArrayList<>();
         tasks.forEach(t -> {
             Map<String, Object> variables = taskService.getVariables(t.getId());

@@ -1,12 +1,8 @@
 package com.abb.bye.web;
 
-import com.abb.bye.client.domain.UserDTO;
-import com.abb.bye.client.domain.UserOptions;
 import com.abb.bye.client.exception.AuthException;
-import com.abb.bye.client.service.UserService;
 import com.abb.bye.utils.LoginUtil;
 
-import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 
 /**
@@ -14,20 +10,11 @@ import javax.servlet.http.HttpServletRequest;
  * @since 2019/5/27
  */
 public abstract class BaseController {
-    @Resource
-    private UserService userService;
 
-    protected UserDTO getLoginUser(HttpServletRequest request) {
+    protected Long getLoginUser(HttpServletRequest request) {
         try {
-            String userName = LoginUtil.getLoginUserName(request);
-            if (userName == null) {
-                throw new AuthException("user not login");
-            }
-            UserDTO userDTO = userService.getByName(userName, new UserOptions()).getData();
-            if (userDTO == null) {
-                throw new AuthException("user not exist");
-            }
-            return userDTO;
+            String userId = LoginUtil.getLoginUser(request);
+            return userId == null ? null : Long.valueOf(userId);
         } catch (Throwable e) {
             throw new AuthException(e);
         }
