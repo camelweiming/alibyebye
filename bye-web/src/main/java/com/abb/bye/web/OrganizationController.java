@@ -1,6 +1,7 @@
 package com.abb.bye.web;
 
 import com.abb.bye.client.domain.UserDTO;
+import com.abb.bye.client.domain.UserOptions;
 import com.abb.bye.client.domain.UserRelationDO;
 import com.abb.bye.client.domain.enums.UserRelationType;
 import com.abb.bye.client.service.UserRelationService;
@@ -30,13 +31,13 @@ public class OrganizationController {
     @Resource
     private UserRelationService userRelationService;
 
-    @RequestMapping(value = "edit_parent.htm", method = {RequestMethod.POST, RequestMethod.GET})
-    String parent(Model model, HttpServletRequest request, @RequestParam Long userId, @RequestParam(required = false) String parentName, @RequestParam(required = false) List<Long> delIds) {
-        String vm = "admin/edit_parent";
-        UserDTO userDTO = userService.getById(userId).getData();
+    @RequestMapping(value = "edit_boss.htm", method = {RequestMethod.POST, RequestMethod.GET})
+    String parent(Model model, HttpServletRequest request, @RequestParam Long userId, @RequestParam(required = false) String bossName, @RequestParam(required = false) List<Long> delIds) {
+        String vm = "admin/edit_boss";
+        UserDTO userDTO = userService.getById(userId, new UserOptions()).getData();
         model.addAttribute("user", userDTO);
-        if (StringUtils.isNotBlank(parentName)) {
-            UserDTO parent = userService.getByName(parentName).getData();
+        if (StringUtils.isNotBlank(bossName)) {
+            UserDTO parent = userService.getByName(bossName, new UserOptions()).getData();
             boolean validate = true;
             if (parent == null) {
                 model.addAttribute("errorMsg", "用户不存在");
@@ -62,8 +63,8 @@ public class OrganizationController {
         }
         List<UserRelationDO> relations = userRelationService.getByUserId(UserRelationType.PARENT, userId).getData();
         List<Long> userIds = relations.stream().map((Function<UserRelationDO, Long>)ur -> ur.getRefId()).collect(Collectors.toList());
-        List<UserDTO> userDTOS = userService.mGet(userIds).getData();
-        model.addAttribute("parents", userDTOS);
+        List<UserDTO> userDTOS = userService.mGet(userIds, new UserOptions()).getData();
+        model.addAttribute("bosses", userDTOS);
         return vm;
     }
 }

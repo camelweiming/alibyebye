@@ -1,15 +1,11 @@
 package com.abb.bye.web;
 
 import com.abb.bye.client.domain.*;
-import com.abb.bye.client.domain.enums.UserRelationType;
 import com.abb.bye.client.service.UserAuthorityService;
-import com.abb.bye.client.service.UserRelationService;
 import com.abb.bye.client.service.UserService;
 import com.abb.bye.utils.LoginUtil;
 import com.alibaba.boot.velocity.annotation.VelocityLayout;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.builder.ToStringBuilder;
-import org.apache.commons.lang3.builder.ToStringStyle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
@@ -21,7 +17,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.util.*;
+import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * @author cenpeng.lwm
@@ -34,8 +31,6 @@ public class UserController {
     private UserAuthorityService userAuthorityService;
     @Resource
     private UserService userService;
-    @Resource
-    private UserRelationService userRelationService;
 
     @RequestMapping(value = "sign_in.htm", method = {RequestMethod.POST, RequestMethod.GET})
     @VelocityLayout("/velocity/layout/layout_login.vm")
@@ -59,7 +54,7 @@ public class UserController {
                 model.addAttribute("errorMsg", res.getErrMsg());
                 return vm;
             }
-            UserDTO user = userService.getById(res.getData()).getData();
+            UserDTO user = userService.getById(res.getData(), new UserOptions()).getData();
             LoginUtil.setLoginCookie(null, user.getUserName(), 3600, request, response);
             return "redirect:/";
         } catch (Throwable e) {
@@ -91,7 +86,7 @@ public class UserController {
                 model.addAttribute("errorMsg", res.getErrMsg());
                 return vm;
             }
-            UserDTO user = userService.getById(res.getData()).getData();
+            UserDTO user = userService.getById(res.getData(), new UserOptions()).getData();
             LoginUtil.setLoginCookie(null, user.getUserName(), 3600, request, response);
             return "redirect:/";
         } catch (Throwable e) {
@@ -117,89 +112,10 @@ public class UserController {
             pageSize = 20;
         }
         ResultDTO<List<UserDTO>> resultDTO = userService.list((page - 1) * pageSize, pageSize, true);
-        Map<Long, UserVO> userMapping = new LinkedHashMap<>(32);
-        List<UserVO> userVOS = new ArrayList<>();
-        List<Long> userIds = new ArrayList<>();
-        resultDTO.getData().forEach(u -> {
-            UserVO uv = new UserVO(u);
-            userMapping.put(u.getUserId(), uv);
-            userIds.add(u.getUserId());
-            userVOS.add(uv);
-        });
-
-        List<UserRelationDO> relations = userRelationService.mGetByUserIds(UserRelationType.PARENT, userIds).getData();
-        Set<Long> refIds = new HashSet<>();
-        relations.forEach(r -> {
-            UserVO userVO = userMapping.get(r.getUserId());
-            userVO.addParentId(r.getRefId());
-            refIds.add(r.getRefId());
-        });
-        List<UserDTO> parents = userService.mGet(new ArrayList<>(refIds)).getData();
-        Map<Long, UserDTO> parentMapping = new HashMap<>(32);
-        parents.forEach(p -> parentMapping.put(p.getUserId(), p));
-
-        userMapping.forEach((userId, userVO) -> {
-            if (userVO.getParentIds() != null) {
-                userVO.getParentIds().forEach(pid -> {
-                    UserDTO parent = parentMapping.get(pid);
-                    if (parent != null) {
-                        userVO.addParent(parent);
-                    }
-                });
-            }
-        });
-
-        Paging<UserVO> paging = new Paging().setCurrentPage(page).setPageSize(pageSize).setTotalData(resultDTO.getTotal()).setData(userVOS).build();
+        List<Long> userIds = resultDTO.getData().stream().map(userDTO -> userDTO.getUserId()).collect(Collectors.toList());
+        List<UserDTO> userDTOS = userService.mGet(userIds, new UserOptions().setUseCache(false).setWithBoss(true)).getData();
+        Paging<UserDTO> paging = new Paging().setCurrentPage(page).setPageSize(pageSize).setTotalData(resultDTO.getTotal()).setData(userDTOS).build();
         model.addAttribute("paging", paging);
         return "admin/users";
-    }
-
-    public static class UserVO {
-        private UserDTO user;
-        private List<Long> parentIds;
-        private List<UserDTO> parents;
-
-        public List<Long> getParentIds() {
-            return parentIds;
-        }
-
-        public void setParentIds(List<Long> parentIds) {
-            this.parentIds = parentIds;
-        }
-
-        public UserVO(UserDTO user) {
-            this.user = user;
-        }
-
-        public UserDTO getUser() {
-            return user;
-        }
-
-        public List<UserDTO> getParents() {
-            return parents;
-        }
-
-        public void setParents(List<UserDTO> parents) {
-            this.parents = parents;
-        }
-
-        public void addParentId(long parentId) {
-            if (parentIds == null) {
-                parentIds = new ArrayList<>();
-            }
-            parentIds.add(parentId);
-        }
-
-        public void addParent(UserDTO userDTO) {
-            if (parents == null) {
-                parents = new ArrayList<>();
-            }
-            parents.add(userDTO);
-        }
-
-        @Override
-        public String toString() {
-            return ToStringBuilder.reflectionToString(this, ToStringStyle.SHORT_PREFIX_STYLE);
-        }
     }
 }

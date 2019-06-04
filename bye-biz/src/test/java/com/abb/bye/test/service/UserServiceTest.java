@@ -3,6 +3,7 @@ package com.abb.bye.test.service;
 import com.abb.bye.client.domain.ResultDTO;
 import com.abb.bye.client.domain.UserAuthorityDTO;
 import com.abb.bye.client.domain.UserDTO;
+import com.abb.bye.client.domain.UserOptions;
 import com.abb.bye.client.service.UserAuthorityService;
 import com.abb.bye.client.service.UserService;
 import org.junit.Test;
@@ -28,7 +29,7 @@ public class UserServiceTest {
 
     @Test
     public void testGet() {
-        ResultDTO<UserDTO> res = userService.getById(6001);
+        ResultDTO<UserDTO> res = userService.getById(6001, new UserOptions());
         System.out.println(res);
     }
 

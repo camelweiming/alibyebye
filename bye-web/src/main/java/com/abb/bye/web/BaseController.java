@@ -1,6 +1,7 @@
 package com.abb.bye.web;
 
 import com.abb.bye.client.domain.UserDTO;
+import com.abb.bye.client.domain.UserOptions;
 import com.abb.bye.client.exception.AuthException;
 import com.abb.bye.client.service.UserService;
 import com.abb.bye.utils.LoginUtil;
@@ -22,7 +23,7 @@ public abstract class BaseController {
             if (userName == null) {
                 throw new AuthException("user not login");
             }
-            UserDTO userDTO = userService.getByName(userName).getData();
+            UserDTO userDTO = userService.getByName(userName, new UserOptions()).getData();
             if (userDTO == null) {
                 throw new AuthException("user not exist");
             }

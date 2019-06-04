@@ -1,6 +1,7 @@
 package com.abb.bye.web.interceptors;
 
 import com.abb.bye.client.domain.UserDTO;
+import com.abb.bye.client.domain.UserOptions;
 import com.abb.bye.client.service.UserService;
 import com.abb.bye.utils.LoginUtil;
 import org.springframework.lang.Nullable;
@@ -29,7 +30,7 @@ public class LoginInterceptor extends HandlerInterceptorAdapter {
             response.sendRedirect("/login.htm");
             return false;
         }
-        UserDTO userDTO = userService.getByName(loginUserName).getData();
+        UserDTO userDTO = userService.getByName(loginUserName, new UserOptions()).getData();
         if (userDTO == null) {
             response.sendRedirect("/login.htm");
             return false;

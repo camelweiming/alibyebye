@@ -4,6 +4,7 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
 import java.io.Serializable;
+import java.util.List;
 
 /**
  * @author cenpeng.lwm
@@ -13,6 +14,15 @@ public class UserDTO implements Serializable {
     private static final long serialVersionUID = 7021782933274931573L;
     private Long userId;
     private String userName;
+    private List<UserDTO> bosses;
+
+    public List<UserDTO> getBosses() {
+        return bosses;
+    }
+
+    public void setBosses(List<UserDTO> bosses) {
+        this.bosses = bosses;
+    }
 
     public Long getUserId() {
         return userId;

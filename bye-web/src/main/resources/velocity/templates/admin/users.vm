@@ -13,13 +13,13 @@
         <tbody>
             #foreach($user in $paging.data)
             <tr>
-                <td>$!{user.user.userId}</td>
-                <td>$!{user.user.userName}</td>
-                <td>#foreach($parent in $user.parents)
-                        <a href="edit_parent.htm?userId=${parent.userId}">${parent.userName}</a>
+                <td>$!{user.userId}</td>
+                <td>$!{user.userName}</td>
+                <td>#foreach($boss in $user.bosses)
+                        <a href="edit_boss.htm?userId=${boss.userId}">${boss.userName}</a>
                     #end
                 </td>
-                <td><a href="edit_parent.htm?userId=$!{user.user.userId}">修改</a> </td>
+                <td><a href="edit_boss.htm?userId=$!{user.userId}">修改</a> </td>
             </tr>
             #end
         </tbody>

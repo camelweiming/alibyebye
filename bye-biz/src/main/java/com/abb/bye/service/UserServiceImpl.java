@@ -3,9 +3,13 @@ package com.abb.bye.service;
 import com.abb.bye.client.domain.ResultDTO;
 import com.abb.bye.client.domain.UserDO;
 import com.abb.bye.client.domain.UserDTO;
+import com.abb.bye.client.domain.UserOptions;
+import com.abb.bye.client.domain.enums.UserRelationType;
+import com.abb.bye.client.service.UserRelationService;
 import com.abb.bye.client.service.UserService;
 import com.abb.bye.mapper.UserMapper;
 import com.abb.bye.utils.Converter;
+import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -13,6 +17,7 @@ import org.springframework.stereotype.Service;
 import javax.annotation.Resource;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * @author cenpeng.lwm
@@ -23,12 +28,20 @@ public class UserServiceImpl implements UserService {
     private static Logger logger = LoggerFactory.getLogger(UserServiceImpl.class);
     @Resource
     private UserMapper userMapper;
+    @Resource
+    private UserRelationService userRelationService;
 
     @Override
-    public ResultDTO<UserDTO> getById(long id) {
+    public ResultDTO<UserDTO> getById(long id, UserOptions options) {
         try {
+            //todo cache
             UserDO userDO = userMapper.getById(id);
-            return ResultDTO.buildSuccess(Converter.convert(userDO));
+            if (userDO == null) {
+                return ResultDTO.buildSuccess(null);
+            }
+            UserDTO userDTO = Converter.convert(userDO);
+            withExtends(userDTO, options);
+            return ResultDTO.buildSuccess(userDTO);
         } catch (Throwable e) {
             logger.error("Error getById:" + id, e);
             return ResultDTO.buildError(ResultDTO.ERROR_CODE_SYSTEM_ERROR, e.getMessage());
@@ -36,17 +49,24 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public ResultDTO<List<UserDTO>> mGet(List<Long> ids) {
+    public ResultDTO<List<UserDTO>> mGet(List<Long> ids, UserOptions options) {
+        //todo cache
         List<UserDTO> userDTOS = new ArrayList<>();
-        ids.forEach(id -> userDTOS.add(getById(id).getData()));
+        ids.forEach(id -> userDTOS.add(getById(id, options).getData()));
         return ResultDTO.buildSuccess(userDTOS);
     }
 
     @Override
-    public ResultDTO<UserDTO> getByName(String name) {
+    public ResultDTO<UserDTO> getByName(String name, UserOptions options) {
         try {
+            //todo cache
             UserDO userDO = userMapper.getByName(name);
-            return ResultDTO.buildSuccess(Converter.convert(userDO));
+            if (userDO == null) {
+                return ResultDTO.buildSuccess(null);
+            }
+            UserDTO userDTO = Converter.convert(userDO);
+            withExtends(userDTO, options);
+            return ResultDTO.buildSuccess(userDTO);
         } catch (Throwable e) {
             logger.error("Error getByName:" + name, e);
             return ResultDTO.buildError(ResultDTO.ERROR_CODE_SYSTEM_ERROR, e.getMessage());
@@ -65,6 +85,21 @@ public class UserServiceImpl implements UserService {
         } catch (Throwable e) {
             logger.error("Error list", e);
             return ResultDTO.buildError(ResultDTO.ERROR_CODE_SYSTEM_ERROR, e.getMessage());
+        }
+    }
+
+    private void withExtends(UserDTO userDTO, UserOptions options) {
+        if (options.isWithBoss() || options.isWithAllBosses()) {
+            withBoss(userDTO, options.isWithAllBosses());
+        }
+    }
+
+    private void withBoss(UserDTO userDTO, boolean all) {
+        List<Long> bossIds = userRelationService.getByUserId(UserRelationType.PARENT, userDTO.getUserId()).getData().stream().map(userRelationDO -> userRelationDO.getRefId()).collect(
+            Collectors.toList());
+        if (CollectionUtils.isNotEmpty(bossIds)) {
+            List<UserDTO> userDTOS = mGet(bossIds, new UserOptions().setWithBoss(all)).getData();
+            userDTO.setBosses(userDTOS);
         }
     }
 }
