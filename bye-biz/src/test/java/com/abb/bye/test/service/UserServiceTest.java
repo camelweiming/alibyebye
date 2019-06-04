@@ -29,7 +29,7 @@ public class UserServiceTest {
 
     @Test
     public void testGet() {
-        ResultDTO<UserDTO> res = userService.getById(6001, new UserOptions());
+        ResultDTO<UserDTO> res = userService.getById(75001, new UserOptions().setWithAllBosses(true));
         System.out.println(res);
     }
 

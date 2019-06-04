@@ -16,6 +16,7 @@
     <import resource="classpath:beans/beans-persistence.xml"/>
     <import resource="classpath:beans/beans-sequence.xml"/>
     <bean name="userAuthorityService" class="com.abb.bye.service.UserAuthorityServiceImpl"/>
+    <bean name="userRelationService" class="com.abb.bye.service.UserRelationServiceImpl"/>
     <bean name="userService" class="com.abb.bye.service.UserServiceImpl"/>
     <aop:aspectj-autoproxy/>
 </beans>
