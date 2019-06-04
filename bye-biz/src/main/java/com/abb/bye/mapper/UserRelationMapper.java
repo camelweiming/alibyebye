@@ -52,4 +52,22 @@ public interface UserRelationMapper {
      * @return
      */
     int removeByUserId(@Param("refType") int userRelationType, @Param("userId") long userId);
+
+    /**
+     * 删除
+     *
+     * @param userRelationType
+     * @param userId
+     * @param refId
+     * @return
+     */
+    int remove(@Param("refType") int userRelationType, @Param("userId") long userId, @Param("refId") long refId);
+
+    /**
+     * 删除
+     *
+     * @param ids
+     * @return
+     */
+    int removeByIds(@Param("ids") List<Long> ids);
 }

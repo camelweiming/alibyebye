@@ -12,9 +12,9 @@
         <tbody>
             #foreach($user in $paging.data)
             <tr>
-                <td>$!{user.id}</td>
+                <td>$!{user.userId}</td>
                 <td>$!{user.userName}</td>
-                <td><a href="edit_parent.htm?userId=$!{user.id}">修改</a> </td>
+                <td><a href="edit_parent.htm?userId=$!{user.userId}">修改</a> </td>
             </tr>
             #end
         </tbody>

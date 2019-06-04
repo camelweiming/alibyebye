@@ -40,11 +40,21 @@
 
 
     <update id="removeByRelationId">
-        update set status=0,gmt_modified=now() where ref_type=#{refType} and ref_id=#{refId} and status=1
+        update user_relation set status=0,gmt_modified=now() where ref_type=#{refType} and ref_id=#{refId} and status=1
     </update>
 
     <update id="removeByUserId">
-        update set status=0,gmt_modified=now() where user_id=#{userId} and ref_id=#{refId} and status=1
+        update user_relation set status=0,gmt_modified=now() where ref_type=#{refType} and user_id=#{userId} and status=1
+    </update>
+
+    <update id="remove">
+        update user_relation set status=0,gmt_modified=now() where ref_type=#{refType} and user_id=#{userId} and ref_id=#{refId}
+    </update>
+
+    <update id="removeByIds">
+        update set status=0,gmt_modified=now()
+        where id in
+        <foreach item="id" index="index" collection="ids" open="(" separator="," close=")">#{id}</foreach>
     </update>
 
 </mapper>

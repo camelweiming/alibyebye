@@ -36,4 +36,22 @@ public interface UserRelationService {
      * @return
      */
     ResultDTO<List<UserRelationDO>> getByUserId(UserRelationType userRelationType, long userId);
+
+    /**
+     * 批量删除
+     *
+     * @param ids
+     * @return
+     */
+    ResultDTO<Void> removeByIds(List<Long> ids);
+
+    /**
+     * 删除
+     *
+     * @param userRelationType
+     * @param userId
+     * @param refId
+     * @return
+     */
+    ResultDTO<Void> remove(UserRelationType userRelationType, long userId, long refId);
 }

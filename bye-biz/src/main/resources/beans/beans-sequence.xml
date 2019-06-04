@@ -5,6 +5,6 @@
        default-autowire="byName">
 
     <bean id="sequence" class="com.abb.bye.service.Sequence" init-method="init">
-        <property name="sequences" value="user,task_queue"/>
+        <property name="sequences" value="user,task_queue,user_relation"/>
     </bean>
 </beans>
