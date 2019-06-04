@@ -31,7 +31,7 @@ public interface UserMapper {
      * @param name
      * @return
      */
-    UserDO getByName(String name);
+    Long getByName(String name);
 
     /**
      * 列表

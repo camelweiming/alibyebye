@@ -5,10 +5,12 @@ import com.abb.bye.client.domain.UserDO;
 import com.abb.bye.client.domain.UserDTO;
 import com.abb.bye.client.domain.UserOptions;
 import com.abb.bye.client.domain.enums.UserRelationType;
+import com.abb.bye.client.service.SimpleCache;
 import com.abb.bye.client.service.UserRelationService;
 import com.abb.bye.client.service.UserService;
 import com.abb.bye.mapper.UserMapper;
 import com.abb.bye.utils.Converter;
+import com.abb.bye.utils.Switcher;
 import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,16 +32,22 @@ public class UserServiceImpl implements UserService {
     private UserMapper userMapper;
     @Resource
     private UserRelationService userRelationService;
+    @Resource
+    private SimpleCache simpleCache;
 
     @Override
     public ResultDTO<UserDTO> getById(long id, UserOptions options) {
         try {
-            //todo cache
-            UserDO userDO = userMapper.getById(id);
-            if (userDO == null) {
-                return ResultDTO.buildSuccess(null);
+            UserDTO userDTO = (UserDTO)simpleCache.get(Switcher.getUserCacheKeyPrefix() + id);
+            if (userDTO == null) {
+                UserDO userDO = userMapper.getById(id);
+                if (userDO == null) {
+                    return ResultDTO.buildSuccess(null);
+                }
+                userDTO = Converter.convert(userDO);
+                logger.trace("getById from db");
+                simpleCache.put(Switcher.getUserCacheKeyPrefix() + id, userDTO, Switcher.getUserCacheExpiredSeconds());
             }
-            UserDTO userDTO = Converter.convert(userDO);
             withExtends(userDTO, options);
             return ResultDTO.buildSuccess(userDTO);
         } catch (Throwable e) {
@@ -50,7 +58,6 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public ResultDTO<List<UserDTO>> mGet(List<Long> ids, UserOptions options) {
-        //todo cache
         List<UserDTO> userDTOS = new ArrayList<>();
         ids.forEach(id -> userDTOS.add(getById(id, options).getData()));
         return ResultDTO.buildSuccess(userDTOS);
@@ -59,14 +66,16 @@ public class UserServiceImpl implements UserService {
     @Override
     public ResultDTO<UserDTO> getByName(String name, UserOptions options) {
         try {
-            //todo cache
-            UserDO userDO = userMapper.getByName(name);
-            if (userDO == null) {
-                return ResultDTO.buildSuccess(null);
+            Long userId = (Long)simpleCache.get(Switcher.getUserNameCacheKeyPrefix() + name);
+            if (userId == null) {
+                userId = userMapper.getByName(name);
+                if (userId == null) {
+                    return ResultDTO.buildSuccess(null);
+                }
+                logger.trace("getByName from db:" + name);
+                simpleCache.put(Switcher.getUserNameCacheKeyPrefix() + name, userId, Switcher.getUserNameCacheExpiredSeconds());
             }
-            UserDTO userDTO = Converter.convert(userDO);
-            withExtends(userDTO, options);
-            return ResultDTO.buildSuccess(userDTO);
+            return getById(userId, options);
         } catch (Throwable e) {
             logger.error("Error getByName:" + name, e);
             return ResultDTO.buildError(ResultDTO.ERROR_CODE_SYSTEM_ERROR, e.getMessage());

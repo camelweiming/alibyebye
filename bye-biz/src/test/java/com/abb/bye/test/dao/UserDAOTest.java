@@ -29,7 +29,7 @@ public class UserDAOTest extends BaseDAOTest {
 
     @Test
     public void testGetByName() {
-        UserDO userDO = userMapper.getByName("camel");
+        Long userDO = userMapper.getByName("camel");
         System.out.println(userDO);
     }
 }

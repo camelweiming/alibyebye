@@ -39,8 +39,8 @@ public class UserAuthorityServiceImpl implements UserAuthorityService {
     @Override
     public ResultDTO<Long> register(UserAuthorityDTO userAuthorityDTO) {
         try {
-            UserDO u = userMapper.getByName(userAuthorityDTO.getName());
-            if (u != null) {
+            Long userId = userMapper.getByName(userAuthorityDTO.getName());
+            if (userId != null) {
                 return ResultDTO.buildError(ResultDTO.ERROR_CODE_DUP_USER_ERROR, "dup user");
             }
             UserDO user = new UserDO();
@@ -73,13 +73,13 @@ public class UserAuthorityServiceImpl implements UserAuthorityService {
     @Override
     public ResultDTO<Long> verify(UserAuthorityDTO userAuthorityDTO) {
         try {
-            UserDO user = userMapper.getByName(userAuthorityDTO.getName());
-            if (user == null) {
+            Long userId = userMapper.getByName(userAuthorityDTO.getName());
+            if (userId == null) {
                 return ResultDTO.buildError(ResultDTO.ERROR_CODE_USER_NOT_FOUND, "user not found");
             }
-            String salt = userAuthorityMapper.getSalt(user.getId());
+            String salt = userAuthorityMapper.getSalt(userId);
             String password = Md5.getInstance().getMD5String(userAuthorityDTO.getPassword() + salt);
-            Long userId = userAuthorityMapper.verify(user.getId(), password);
+            userId = userAuthorityMapper.verify(userId, password);
             if (userId == null) {
                 return ResultDTO.buildError(ResultDTO.ERROR_CODE_USER_VALIDATE, "password error");
             }

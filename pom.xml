@@ -230,6 +230,11 @@
                 <artifactId>flowable-engine-common-api</artifactId>
                 <version>6.3.0</version>
             </dependency>
+            <dependency>
+                <groupId>com.caucho</groupId>
+                <artifactId>hessian</artifactId>
+                <version>3.1.5</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 

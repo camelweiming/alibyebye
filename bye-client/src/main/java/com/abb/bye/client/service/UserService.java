@@ -33,7 +33,7 @@ public interface UserService {
      * 通过用户查询
      *
      * @param name
-     * @param options
+     * @param name
      * @return
      */
     ResultDTO<UserDTO> getByName(String name, UserOptions options);

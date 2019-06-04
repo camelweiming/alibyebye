@@ -16,9 +16,9 @@
         ( #{id} , now() , now() , #{name})
     </insert>
 
-    <select id="getByName" resultType="com.abb.bye.client.domain.UserDO">
+    <select id="getByName" resultType="long">
         select
-        <include refid="columns"/>
+        id
         from user where name=#{name}
     </select>
 
