@@ -91,6 +91,8 @@ public class UserServiceImpl implements UserService {
     private void withExtends(UserDTO userDTO, UserOptions options) {
         if (options.isWithBoss() || options.isWithAllBosses()) {
             withBoss(userDTO, options.isWithAllBosses());
+        } else {
+            userDTO.setBosses(null);
         }
     }
 
