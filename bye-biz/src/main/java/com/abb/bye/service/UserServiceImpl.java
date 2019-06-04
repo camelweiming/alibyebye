@@ -38,7 +38,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public ResultDTO<UserDTO> getById(long id, UserOptions options) {
         try {
-            UserDTO userDTO = (UserDTO)simpleCache.get(Switcher.getUserCacheKeyPrefix() + id);
+            UserDTO userDTO = options.isUseCache() ? (UserDTO)simpleCache.get(Switcher.getUserCacheKeyPrefix() + id) : null;
             if (userDTO == null) {
                 UserDO userDO = userMapper.getById(id);
                 if (userDO == null) {
@@ -66,7 +66,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public ResultDTO<UserDTO> getByName(String name, UserOptions options) {
         try {
-            Long userId = (Long)simpleCache.get(Switcher.getUserNameCacheKeyPrefix() + name);
+            Long userId = options.isUseCache() ? (Long)simpleCache.get(Switcher.getUserNameCacheKeyPrefix() + name) : null;
             if (userId == null) {
                 userId = userMapper.getByName(name);
                 if (userId == null) {
