@@ -41,8 +41,13 @@
         <appender-ref ref="ASYNC_TRACE"/>
     </logger>
 
+    <logger level="DEBUG" name="org.apache.ibatis" additivity="false">
+        <appender-ref ref="STDOUT"/>
+    </logger>
+
+
     <root>
-        <level value="INFO"/>
+        <level value="DEBUG"/>
         <appender-ref ref="STDOUT"/>
     </root>
 </configuration>

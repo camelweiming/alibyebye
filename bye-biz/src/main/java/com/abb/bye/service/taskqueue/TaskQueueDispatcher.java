@@ -59,13 +59,13 @@ public class TaskQueueDispatcher implements TaskDispatcher, InitializingBean {
 
     @Override
     public void afterPropertiesSet() throws Exception {
-        CommonThreadPool.getScheduledExecutor().scheduleAtFixedRate(() -> {
-            try {
-                doDispatcher(GET_JOB_COUNT);
-            } catch (Throwable e) {
-                logger.error("Error getJob", e);
-            }
-        }, 0, 2, TimeUnit.SECONDS);
+        //CommonThreadPool.getScheduledExecutor().scheduleAtFixedRate(() -> {
+        //    try {
+        //        doDispatcher(GET_JOB_COUNT);
+        //    } catch (Throwable e) {
+        //        logger.error("Error getJob", e);
+        //    }
+        //}, 0, 2, TimeUnit.SECONDS);
     }
 
 }
