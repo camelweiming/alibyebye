@@ -52,12 +52,6 @@ public class HolidayController extends BaseController {
             if (CollectionUtils.isNotEmpty(userDTO.getBosses())) {
                 leader = userDTO.getBosses().get(0);
             }
-            Long assignee;
-            if (CollectionUtils.isNotEmpty(userDTO.getBosses())) {
-                assignee = userDTO.getBosses().get(0).getUserId();
-            } else {
-                assignee = loginUserId;
-            }
             Map<String, Object> variables = new HashMap<>(8);
             if (leader == null) {
                 variables.put(Constants.TASK_SKIP, true);
@@ -66,7 +60,7 @@ public class HolidayController extends BaseController {
             } else {
                 variables.put(Constants.TASK_ASSIGNEE, "" + leader.getUserId());
             }
-            variables.put(Constants.TASK_ASSIGNEE, "" + assignee);
+            variables.put(Constants.TASK_ASSIGNEE, "" + leader.getUserId());
             variables.put(Constants.TASK_USER_ID, userDTO.getUserId());
             variables.put(Constants.TASK_TITLE, String.format("%s申请休假%s天", userDTO.getUserName(), days));
             variables.put("days", days);
