@@ -64,6 +64,7 @@ public class HolidayController extends BaseController {
                 variables.put(Constants.TASK_ASSIGNEE, "" + leader.getUserId());
             }
             variables.put(Constants.TASK_USER_ID, userDTO.getUserId());
+            variables.put(Constants.TASK_USER_NAME, userDTO.getUserName());
             variables.put(Constants.TASK_TITLE, String.format("%s申请休假%s天", userDTO.getUserName(), days));
             variables.put("days", days);
             variables.put("description", description);
@@ -76,7 +77,7 @@ public class HolidayController extends BaseController {
     }
 
     @RequestMapping(value = "approve_holiday.htm", method = {RequestMethod.POST, RequestMethod.GET})
-    String approveHoliday(Model model, HttpServletRequest request, @RequestParam String taskId, @RequestParam(required = false) Integer approve) {
+    String approveHoliday(Model model, HttpServletRequest request, @RequestParam String taskId, @RequestParam(required = false) Integer approve, @RequestParam(required = false) Long confirmUser) {
         String vm = "holiday/approve_holiday";
         try {
             TaskService taskService = ProcessEngines.getDefaultProcessEngine().getTaskService();
@@ -88,28 +89,30 @@ public class HolidayController extends BaseController {
             if (!loginUserId.equals(NumberUtils.toLong(task.getAssignee(), 0))) {
                 throw new AuthException("permission deny");
             }
+            if (confirmUser != null && confirmUser < 0) {
+                confirmUser = null;
+            }
+            UserDTO userDTO = userService.getById(loginUserId, new UserOptions().setWithBoss(true)).getData();
+            model.addAttribute("leaders", userDTO.getBosses());
+            model.addAttribute("confirmUser", confirmUser);
             model.addAttribute("taskId", taskId);
             Map<String, Object> variables = taskService.getVariables(taskId);
             model.addAttribute("days", variables.get("days"));
             model.addAttribute("description", variables.get("description"));
             model.addAttribute("userId", variables.get(Constants.TASK_USER_ID));
+            model.addAttribute("userName", variables.get(Constants.TASK_USER_NAME));
             model.addAttribute(Constants.TASK_PASS, approve);
             if (approve != null) {
                 variables = new HashMap<>(8);
                 boolean pass = approve == 1;
-                UserDTO userDTO = userService.getById(loginUserId, new UserOptions().setWithBoss(true)).getData();
-                UserDTO leader = null;
-                if (CollectionUtils.isNotEmpty(userDTO.getBosses())) {
-                    leader = userDTO.getBosses().get(0);
-                }
                 /**
-                 * 如果驳回或没有上级，则跳过其余审批节点
+                 * 如果驳回或没有加签，则跳过其余审批节点
                  */
-                if (!pass || leader == null) {
+                if (!pass || confirmUser == null) {
                     variables.put(Constants.TASK_SKIP, true);
                     variables.put(Constants.TASK_SKIP_ENABLE, true);
                 } else {
-                    variables.put(Constants.TASK_ASSIGNEE, "" + leader.getUserId());
+                    variables.put(Constants.TASK_ASSIGNEE, "" + confirmUser);
                 }
                 variables.put(Constants.TASK_PASS, pass);
                 taskService.complete(taskId, variables);

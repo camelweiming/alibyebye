@@ -16,6 +16,17 @@
     <div class="form-group">
         <label>理由</label><input class="form-control form-control-sm" value="$!{description}" readonly>
     </div>
+    #if($leaders)
+        <div class="form-group">
+            <label>加签</label>
+            <select class="form-control form-control-sm" name="confirmUser" required>
+                <option value="-1">请选择</option>
+                #foreach($leader in $leaders)
+                    <option value="${leader.userId}" #if($confirmUser==$leader.userId) selected #end>${leader.userName}</option>
+                #end
+            </select>
+        </div>
+    #end
     <div class="form-group">
         <label>审批</label>
         <select class="form-control form-control-sm" name="approve" required>

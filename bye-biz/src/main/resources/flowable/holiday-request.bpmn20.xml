@@ -23,7 +23,7 @@
     <endEvent id="approveEnd"></endEvent>
     <endEvent id="rejectEnd"></endEvent>
     <sequenceFlow id="flow1" sourceRef="holidayRejectTask" targetRef="approveEnd"></sequenceFlow>
-    <userTask id="usertask1" name="老板审批" activiti:assignee="${assignee}" activiti:formKey="approve_holiday.htm" activiti:skipExpression="${skip}"></userTask>
+    <userTask id="usertask1" name="加签" activiti:assignee="${assignee}" activiti:formKey="approve_holiday.htm" activiti:skipExpression="${skip}"></userTask>
     <sequenceFlow id="flow2" sourceRef="holidayApproveTask" targetRef="rejectEnd"></sequenceFlow>
     <userTask id="usertask2" name="主管审批" activiti:assignee="${assignee}" activiti:formKey="approve_holiday.htm" activiti:skipExpression="${skip}"></userTask>
     <sequenceFlow id="flow3" sourceRef="startEvent" targetRef="usertask2"></sequenceFlow>
