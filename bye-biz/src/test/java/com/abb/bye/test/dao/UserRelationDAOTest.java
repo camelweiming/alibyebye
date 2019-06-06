@@ -30,7 +30,7 @@ public class UserRelationDAOTest extends BaseDAOTest {
     public void testList() {
         List<UserRelationDO> relationDOS = userRelationMapper.getByRelationId((byte)0, 2l);
         System.out.println(relationDOS);
-        relationDOS = userRelationMapper.getByUserId((byte)0,1);
+        relationDOS = userRelationMapper.getByUserId((byte)0, 1);
         System.out.println(relationDOS);
     }
 }

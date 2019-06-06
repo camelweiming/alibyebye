@@ -11,6 +11,7 @@ import org.slf4j.LoggerFactory;
  */
 public class HolidayApproveTask implements JavaDelegate {
     private static final Logger logger = LoggerFactory.getLogger(HolidayApproveTask.class);
+
     @Override
     public void execute(DelegateExecution execution) {
         logger.info("##### holiday is pass #####");

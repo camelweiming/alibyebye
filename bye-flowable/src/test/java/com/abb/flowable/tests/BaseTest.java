@@ -43,6 +43,7 @@ public class BaseTest {
             .setJdbcDriver("org.h2.Driver")
             .setDatabaseSchemaUpdate(ProcessEngineConfiguration.DB_SCHEMA_UPDATE_TRUE)
             .setAsyncExecutorActivate(true);
+
         processEngine = cfg.buildProcessEngine();
         repositoryService = processEngine.getRepositoryService();
         DeploymentBuilder builder = repositoryService.createDeployment();

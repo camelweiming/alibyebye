@@ -44,7 +44,7 @@ public class TaskTest {
     @Test
     public void testTimer() throws InterruptedException {
         RuntimeService runtimeService = ProcessEngines.getDefaultProcessEngine().getRuntimeService();
-        Map<String,Object> variables = new HashMap<>(8);
+        Map<String, Object> variables = new HashMap<>(8);
         runtimeService.startProcessInstanceByKey("Timer", variables);
         Thread.sleep(100000);
     }

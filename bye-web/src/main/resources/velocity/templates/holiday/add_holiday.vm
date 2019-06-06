@@ -1,5 +1,5 @@
 #if($!errorMsg)
-    <div class="alert alert-warning" role="alert"><strong>Warning!</strong> $!{errorMsg}</div>
+<div class="alert alert-warning" role="alert"><strong>Warning!</strong> $!{errorMsg}</div>
 #end
 
 <form action="add_holiday.htm" class="form-horizontal" method="post">

@@ -1,8 +1,6 @@
 package com.abb.flowable.tests;
 
 import org.apache.commons.lang3.time.DateUtils;
-import org.flowable.engine.ProcessEngines;
-import org.flowable.engine.RuntimeService;
 import org.junit.Test;
 
 import java.io.IOException;

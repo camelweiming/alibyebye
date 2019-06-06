@@ -1,7 +1,8 @@
 package com.abb.bye.web;
 
 import com.abb.bye.Constants;
-import com.abb.bye.client.domain.enums.TaskType;
+import com.abb.bye.utils.CommonUtils;
+import com.google.common.collect.Maps;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import org.flowable.engine.HistoryService;
@@ -38,12 +39,10 @@ public class TaskController extends BaseController {
         List<TaskVO> list = new ArrayList<>();
         tasks.forEach(t -> {
             Map<String, Object> variables = taskService.getVariables(t.getId());
-            TaskType taskType = TaskType.getByType((Integer)variables.get(Constants.TASK_TYPE));
             TaskVO vo = new TaskVO();
             vo.setId(t.getId());
             vo.setTitle((String)variables.get(Constants.TASK_TITLE));
-            vo.setLink(buildLink(taskType, t));
-            vo.setType(taskType.getName());
+            vo.setLink(buildLink(t));
             list.add(vo);
         });
         model.addAttribute("tasks", list);
@@ -61,24 +60,35 @@ public class TaskController extends BaseController {
             List<HistoricVariableInstance> histories = taskService.createHistoricVariableInstanceQuery().processInstanceId(t.getProcessInstanceId()).list();
             Map<String, Object> variables = new HashMap<>();
             histories.forEach(his -> variables.put(his.getVariableName(), his.getValue()));
-            TaskType taskType = TaskType.getByType((Integer)variables.get(Constants.TASK_TYPE));
             TaskVO vo = new TaskVO();
             vo.setId(t.getId());
             vo.setTitle((String)variables.get(Constants.TASK_TITLE));
-            vo.setLink(buildLink(taskType, t));
-            vo.setType(taskType.getName());
+            vo.setLink(buildLink(t));
             list.add(vo);
         });
         model.addAttribute("tasks", list);
         return vm;
     }
 
-    private static String buildLink(TaskType taskType, Task task) {
-        return new StringBuilder(taskType.getApproveLink()).append(taskType.getApproveLink().lastIndexOf("?") > 0 ? "&" : "?").append("taskId=").append(task.getId()).toString();
+    //@RequestMapping(value = "task_form.htm", method = RequestMethod.GET)
+    //String form(HttpServletRequest request, Model model, @RequestParam(required = false) String processKey) {
+    //    String processDefinitionId = ProcessEngines.getDefaultProcessEngine().getRepositoryService()
+    //        .createProcessDefinitionQuery().processDefinitionKey(processKey).latestVersion().singleResult().getId();
+    //    StartFormData startFormData = ProcessEngines.getDefaultProcessEngine().getFormService().getStartFormData(processDefinitionId);
+    //    List<FormProperty> properties = startFormData.getFormProperties();
+    //    return "task_form";
+    //}
+
+    private static String buildLink(Task task) {
+        Map<String, String> replaceValue = Maps.newHashMap();
+        replaceValue.put("taskId", task.getId());
+        return CommonUtils.formatText(task.getFormKey(), replaceValue);
     }
 
-    private static String buildLink(TaskType taskType, HistoricTaskInstance task) {
-        return new StringBuilder(taskType.getApproveLink()).append(taskType.getApproveLink().lastIndexOf("?") > 0 ? "&" : "?").append("taskId=").append(task.getId()).toString();
+    private static String buildLink(HistoricTaskInstance task) {
+        Map<String, String> replaceValue = Maps.newHashMap();
+        replaceValue.put("taskId", task.getId());
+        return CommonUtils.formatText(task.getFormKey(), replaceValue);
     }
 
     public static class TaskVO implements Serializable {

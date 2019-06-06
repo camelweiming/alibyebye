@@ -16,10 +16,10 @@
                 <td>$!{user.userId}</td>
                 <td>$!{user.userName}</td>
                 <td>#foreach($boss in $user.bosses)
-                        <a href="edit_boss.htm?userId=${boss.userId}">${boss.userName}</a>
-                    #end
+                    <a href="edit_boss.htm?userId=${boss.userId}">${boss.userName}</a>
+                #end
                 </td>
-                <td><a href="edit_boss.htm?userId=$!{user.userId}">修改</a> </td>
+                <td><a href="edit_boss.htm?userId=$!{user.userId}">修改</a></td>
             </tr>
             #end
         </tbody>

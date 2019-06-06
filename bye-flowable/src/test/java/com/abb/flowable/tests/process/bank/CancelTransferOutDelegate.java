@@ -10,6 +10,6 @@ import org.flowable.engine.delegate.JavaDelegate;
 public class CancelTransferOutDelegate implements JavaDelegate {
     @Override
     public void execute(DelegateExecution execution) {
-        System.out.println("转出银行取消："+execution);
+        System.out.println("转出银行取消：" + execution);
     }
 }

@@ -2,6 +2,7 @@ package com.abb.bye.utils;
 
 import com.alibaba.fastjson.JSON;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.text.StrSubstitutor;
 import org.springframework.beans.BeanUtils;
 
 import java.io.ByteArrayInputStream;
@@ -132,5 +133,16 @@ public class CommonUtils {
     public static Map<String, Object> asMap(String json) {
         Map<String, Object> attributeMap = StringUtils.isBlank(json) ? new HashMap<String, Object>() : (Map<String, Object>)JSON.parseObject(json, Map.class);
         return attributeMap;
+    }
+
+    public static String formatText(String tpl, Map<String, String> params) {
+        StrSubstitutor strSubstitutor = new StrSubstitutor(params);
+        return strSubstitutor.replace(tpl);
+    }
+
+    public static void main(String[] args) {
+        Map<String, String> params = new HashMap<>();
+        params.put("taskId", "22222");
+        System.out.println(formatText("approve_holiday.htm?taskId=${taskId}", params));
     }
 }

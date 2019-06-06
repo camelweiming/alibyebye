@@ -1,7 +1,5 @@
 package com.abb.flowable.tests;
 
-import org.flowable.engine.ProcessEngines;
-import org.flowable.engine.RuntimeService;
 import org.flowable.engine.runtime.ProcessInstance;
 import org.flowable.task.api.Task;
 import org.junit.Test;

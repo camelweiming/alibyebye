@@ -10,13 +10,12 @@ import java.net.UnknownHostException;
 public class Constants {
     public static String SERVER_IP;
     public static String SERVER_NAME;
+    public static String TASK_SKIP_ENABLE = "_FLOWABLE_SKIP_EXPRESSION_ENABLED";
     public static String TASK_ASSIGNEE = "assignee";
-    public static String TASK_USER_NAME = "user_id";
-    public static String TASK_USER_ID = "user_name";
-    public static String TASK_TYPE = "task_type";
-    public static String TASK_DESCRIPTION = "description";
+    public static String TASK_USER_ID = "user_id";
+    public static String TASK_SKIP = "skip";
+    public static String TASK_PASS = "pass";
     public static String TASK_TITLE = "title";
-    public static String TASK_APPROVE = "approved";
 
     static {
         try {

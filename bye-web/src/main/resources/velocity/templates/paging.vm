@@ -14,7 +14,7 @@
                 <a class="page-link" href="#">$p</a>
             </li>
         #end
-        <li class="page-item #if(!$paging.next)disabled#end" >
+        <li class="page-item #if(!$paging.next)disabled#end">
             <a class="page-link" href="#" onclick="doPaging($next)">Next</a>
         </li>
     </ul>
@@ -23,7 +23,7 @@
 
 <script type="text/javascript">
     function doPaging(page) {
-        $("#paging-form").append("<input type='hidden' name='page' value='"+page+"'>");
+        $("#paging-form").append("<input type='hidden' name='page' value='" + page + "'>");
         $("#paging-form").submit();
     };
 </script>

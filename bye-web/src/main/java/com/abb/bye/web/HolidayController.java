@@ -3,7 +3,6 @@ package com.abb.bye.web;
 import com.abb.bye.Constants;
 import com.abb.bye.client.domain.UserDTO;
 import com.abb.bye.client.domain.UserOptions;
-import com.abb.bye.client.domain.enums.TaskType;
 import com.abb.bye.client.exception.AuthException;
 import com.abb.bye.client.service.UserService;
 import org.apache.commons.collections.CollectionUtils;
@@ -49,6 +48,10 @@ public class HolidayController extends BaseController {
             RuntimeService runtimeService = ProcessEngines.getDefaultProcessEngine().getRuntimeService();
             Long loginUserId = getLoginUser(request);
             UserDTO userDTO = userService.getById(loginUserId, new UserOptions().setWithBoss(true)).getData();
+            UserDTO leader = null;
+            if (CollectionUtils.isNotEmpty(userDTO.getBosses())) {
+                leader = userDTO.getBosses().get(0);
+            }
             Long assignee;
             if (CollectionUtils.isNotEmpty(userDTO.getBosses())) {
                 assignee = userDTO.getBosses().get(0).getUserId();
@@ -56,13 +59,18 @@ public class HolidayController extends BaseController {
                 assignee = loginUserId;
             }
             Map<String, Object> variables = new HashMap<>(8);
+            if (leader == null) {
+                variables.put(Constants.TASK_SKIP, true);
+                variables.put(Constants.TASK_SKIP_ENABLE, true);
+                variables.put(Constants.TASK_PASS, true);
+            } else {
+                variables.put(Constants.TASK_ASSIGNEE, "" + leader.getUserId());
+            }
             variables.put(Constants.TASK_ASSIGNEE, "" + assignee);
             variables.put(Constants.TASK_USER_ID, userDTO.getUserId());
-            variables.put(Constants.TASK_USER_NAME, userDTO.getUserName());
-            variables.put(Constants.TASK_TYPE, TaskType.HOLIDAY.getType());
-            variables.put(Constants.TASK_DESCRIPTION, description);
             variables.put(Constants.TASK_TITLE, String.format("%s申请休假%s天", userDTO.getUserName(), days));
             variables.put("days", days);
+            variables.put("description", description);
             runtimeService.startProcessInstanceByKey("holidayRequest", variables);
         } catch (Throwable e) {
             logger.error("Error addHoliday", e);
@@ -88,12 +96,22 @@ public class HolidayController extends BaseController {
             Map<String, Object> variables = taskService.getVariables(taskId);
             model.addAttribute("days", variables.get("days"));
             model.addAttribute("description", variables.get("description"));
-            model.addAttribute("userName", variables.get(Constants.TASK_USER_NAME));
             model.addAttribute("userId", variables.get(Constants.TASK_USER_ID));
-            model.addAttribute("approve", approve);
+            model.addAttribute(Constants.TASK_PASS, approve);
             if (approve != null) {
                 variables = new HashMap<>(8);
-                variables.put(Constants.TASK_APPROVE, approve == 1);
+                UserDTO userDTO = userService.getById(loginUserId, new UserOptions().setWithBoss(true)).getData();
+                UserDTO leader = null;
+                if (CollectionUtils.isNotEmpty(userDTO.getBosses())) {
+                    leader = userDTO.getBosses().get(0);
+                }
+                if (leader == null) {
+                    variables.put(Constants.TASK_SKIP, true);
+                    variables.put(Constants.TASK_SKIP_ENABLE, true);
+                } else {
+                    variables.put(Constants.TASK_ASSIGNEE, "" + leader.getUserId());
+                }
+                variables.put(Constants.TASK_PASS, approve == 1);
                 taskService.complete(taskId, variables);
                 return "redirect:/task_list.htm";
             }
