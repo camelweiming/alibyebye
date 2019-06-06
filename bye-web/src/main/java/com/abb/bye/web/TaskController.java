@@ -1,8 +1,6 @@
 package com.abb.bye.web;
 
 import com.abb.bye.Constants;
-import com.abb.bye.utils.CommonUtils;
-import com.google.common.collect.Maps;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import org.flowable.engine.HistoryService;
@@ -80,15 +78,11 @@ public class TaskController extends BaseController {
     //}
 
     private static String buildLink(Task task) {
-        Map<String, String> replaceValue = Maps.newHashMap();
-        replaceValue.put("taskId", task.getId());
-        return CommonUtils.formatText(task.getFormKey(), replaceValue);
+        return task.getFormKey() + "?taskId=" + task.getId();
     }
 
     private static String buildLink(HistoricTaskInstance task) {
-        Map<String, String> replaceValue = Maps.newHashMap();
-        replaceValue.put("taskId", task.getId());
-        return CommonUtils.formatText(task.getFormKey(), replaceValue);
+        return task.getFormKey() + "?taskId=" + task.getId();
     }
 
     public static class TaskVO implements Serializable {

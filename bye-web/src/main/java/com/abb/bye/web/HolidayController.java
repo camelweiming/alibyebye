@@ -53,6 +53,9 @@ public class HolidayController extends BaseController {
                 leader = userDTO.getBosses().get(0);
             }
             Map<String, Object> variables = new HashMap<>(8);
+            /**
+             * 没有上级则跳过其余审批节点
+             */
             if (leader == null) {
                 variables.put(Constants.TASK_SKIP, true);
                 variables.put(Constants.TASK_SKIP_ENABLE, true);
@@ -60,7 +63,6 @@ public class HolidayController extends BaseController {
             } else {
                 variables.put(Constants.TASK_ASSIGNEE, "" + leader.getUserId());
             }
-            variables.put(Constants.TASK_ASSIGNEE, "" + leader.getUserId());
             variables.put(Constants.TASK_USER_ID, userDTO.getUserId());
             variables.put(Constants.TASK_TITLE, String.format("%s申请休假%s天", userDTO.getUserName(), days));
             variables.put("days", days);
@@ -94,18 +96,22 @@ public class HolidayController extends BaseController {
             model.addAttribute(Constants.TASK_PASS, approve);
             if (approve != null) {
                 variables = new HashMap<>(8);
+                boolean pass = approve == 1;
                 UserDTO userDTO = userService.getById(loginUserId, new UserOptions().setWithBoss(true)).getData();
                 UserDTO leader = null;
                 if (CollectionUtils.isNotEmpty(userDTO.getBosses())) {
                     leader = userDTO.getBosses().get(0);
                 }
-                if (leader == null) {
+                /**
+                 * 如果驳回或没有上级，则跳过其余审批节点
+                 */
+                if (!pass || leader == null) {
                     variables.put(Constants.TASK_SKIP, true);
                     variables.put(Constants.TASK_SKIP_ENABLE, true);
                 } else {
                     variables.put(Constants.TASK_ASSIGNEE, "" + leader.getUserId());
                 }
-                variables.put(Constants.TASK_PASS, approve == 1);
+                variables.put(Constants.TASK_PASS, pass);
                 taskService.complete(taskId, variables);
                 return "redirect:/task_list.htm";
             }
