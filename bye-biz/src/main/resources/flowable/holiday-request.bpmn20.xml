@@ -5,10 +5,6 @@
       <extensionElements>
         <activiti:formProperty id="days" name="请假天数"></activiti:formProperty>
         <activiti:formProperty id="description" name="请假原因"></activiti:formProperty>
-        <activiti:formProperty id="test" name="test">
-          <activiti:value id="a" name="a"></activiti:value>
-          <activiti:value id="a" name="b"></activiti:value>
-        </activiti:formProperty>
       </extensionElements>
     </startEvent>
     <exclusiveGateway id="decision"></exclusiveGateway>

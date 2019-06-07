@@ -12,10 +12,13 @@
 
             <li class="nav-item">
                 <a class="nav-link" href="task_list.htm">
-                    <span data-feather="file"></span>我的任务
+                    <span data-feather="file"></span>待办任务
                 </a>
                 <a class="nav-link" href="his_task_list.htm">
-                    <span data-feather="file"></span>我处理过的任务
+                    <span data-feather="file"></span>已办任务
+                </a>
+                <a class="nav-link" href="my_task_list.htm">
+                    <span data-feather="file"></span>我提交的任务
                 </a>
             </li>
         </ul>

@@ -36,13 +36,13 @@ public class BaseTest {
 
     @BeforeClass
     public static void init() throws IOException {
-        ProcessEngineConfiguration cfg = new StandaloneProcessEngineConfiguration()
-            .setJdbcUrl("jdbc:h2:mem:flowable;DB_CLOSE_DELAY=-1")
-            .setJdbcUsername("sa")
-            .setJdbcPassword("")
-            .setJdbcDriver("org.h2.Driver")
-            .setDatabaseSchemaUpdate(ProcessEngineConfiguration.DB_SCHEMA_UPDATE_TRUE)
-            .setAsyncExecutorActivate(true);
+        StandaloneProcessEngineConfiguration cfg = new StandaloneProcessEngineConfiguration();
+        cfg.setJdbcUrl("jdbc:h2:mem:flowable;DB_CLOSE_DELAY=-1");
+        cfg.setJdbcUsername("sa");
+        cfg.setJdbcPassword("");
+        cfg.setJdbcDriver("org.h2.Driver");
+        cfg.setDatabaseSchemaUpdate(ProcessEngineConfiguration.DB_SCHEMA_UPDATE_TRUE);
+        cfg.setAsyncExecutorActivate(true);
 
         processEngine = cfg.buildProcessEngine();
         repositoryService = processEngine.getRepositoryService();

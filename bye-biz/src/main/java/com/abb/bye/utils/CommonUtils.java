@@ -3,6 +3,7 @@ package com.abb.bye.utils;
 import com.alibaba.fastjson.JSON;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.text.StrSubstitutor;
+import org.joda.time.DateTime;
 import org.springframework.beans.BeanUtils;
 
 import java.io.ByteArrayInputStream;
@@ -133,6 +134,10 @@ public class CommonUtils {
     public static Map<String, Object> asMap(String json) {
         Map<String, Object> attributeMap = StringUtils.isBlank(json) ? new HashMap<String, Object>() : (Map<String, Object>)JSON.parseObject(json, Map.class);
         return attributeMap;
+    }
+
+    public String formatDate(Date date) {
+        return new DateTime(date).toString("yyyy-MM-dd HH:mm:ss");
     }
 
     public static String formatText(String tpl, Map<String, String> params) {

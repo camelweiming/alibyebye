@@ -17,6 +17,7 @@ public class Constants {
     public static String TASK_SKIP = "skip";
     public static String TASK_PASS = "pass";
     public static String TASK_TITLE = "title";
+    public static String TASK_DESCRIPTION = "description";
 
     static {
         try {
