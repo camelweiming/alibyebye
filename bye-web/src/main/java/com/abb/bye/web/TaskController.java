@@ -6,6 +6,9 @@ import org.apache.commons.lang3.builder.ToStringStyle;
 import org.flowable.engine.HistoryService;
 import org.flowable.engine.ProcessEngines;
 import org.flowable.engine.TaskService;
+import org.flowable.engine.impl.RepositoryServiceImpl;
+import org.flowable.engine.impl.persistence.entity.ExecutionEntity;
+import org.flowable.engine.impl.persistence.entity.ProcessDefinitionEntity;
 import org.flowable.task.api.Task;
 import org.flowable.task.api.history.HistoricTaskInstance;
 import org.flowable.variable.api.history.HistoricVariableInstance;
@@ -13,6 +16,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import javax.servlet.http.HttpServletRequest;
 import java.io.Serializable;
@@ -56,7 +60,7 @@ public class TaskController extends BaseController {
         List<TaskVO> list = new ArrayList<>();
         tasks.forEach(t -> {
             List<HistoricVariableInstance> histories = taskService.createHistoricVariableInstanceQuery().processInstanceId(t.getProcessInstanceId()).list();
-            Map<String, Object> variables = new HashMap<>();
+            Map<String, Object> variables = new HashMap<>(8);
             histories.forEach(his -> variables.put(his.getVariableName(), his.getValue()));
             TaskVO vo = new TaskVO();
             vo.setId(t.getId());
@@ -68,14 +72,24 @@ public class TaskController extends BaseController {
         return vm;
     }
 
-    //@RequestMapping(value = "task_form.htm", method = RequestMethod.GET)
-    //String form(HttpServletRequest request, Model model, @RequestParam(required = false) String processKey) {
-    //    String processDefinitionId = ProcessEngines.getDefaultProcessEngine().getRepositoryService()
-    //        .createProcessDefinitionQuery().processDefinitionKey(processKey).latestVersion().singleResult().getId();
-    //    StartFormData startFormData = ProcessEngines.getDefaultProcessEngine().getFormService().getStartFormData(processDefinitionId);
-    //    List<FormProperty> properties = startFormData.getFormProperties();
-    //    return "task_form";
-    //}
+    @RequestMapping(value = "task.htm", method = RequestMethod.GET)
+    String form(HttpServletRequest request, Model model, @RequestParam(required = false) String taskId) {
+        TaskService taskService = ProcessEngines.getDefaultProcessEngine().getTaskService();
+        Task task = taskService.createTaskQuery().taskId(taskId).singleResult();
+        //获取流程实例Id信息
+        String processInstanceId = taskService.createTaskQuery().taskId(taskId).singleResult().getProcessInstanceId();
+        //获取流程发布Id信息
+        String definitionId = ProcessEngines.getDefaultProcessEngine().getRuntimeService().createProcessInstanceQuery().processInstanceId(processInstanceId).singleResult().getProcessDefinitionId();
+        ProcessDefinitionEntity processDefinitionEntity = (ProcessDefinitionEntity)((RepositoryServiceImpl)ProcessEngines.getDefaultProcessEngine().getRepositoryService())
+            .getDeployedProcessDefinition(definitionId);
+        ExecutionEntity execution = (ExecutionEntity)ProcessEngines.getDefaultProcessEngine().getRuntimeService().createProcessInstanceQuery().processInstanceId(processInstanceId).singleResult();
+        //当前流程节点Id信息
+        String activitiId = execution.getActivityId();
+
+        //获取流程所有节点信息
+        //List<ActivityImpl> activitiList = processDefinitionEntity.
+        return "task_form";
+    }
 
     private static String buildLink(Task task) {
         return task.getFormKey() + "?taskId=" + task.getId();
