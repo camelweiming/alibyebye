@@ -31,10 +31,10 @@ public interface FlowService {
      * 完成节点
      *
      * @param taskId
-     * @param flowSubmitDTO
+     * @param flowCompleteDTO
      * @return
      */
-    ResultDTO<Void> complete(String taskId, FlowSubmitDTO flowSubmitDTO);
+    ResultDTO<Void> complete(String taskId, FlowCompleteDTO flowCompleteDTO);
 
     /**
      * 通过processInstanceId获取节点信息

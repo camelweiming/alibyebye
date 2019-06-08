@@ -11,6 +11,16 @@ import java.io.Serializable;
  */
 public class FlowOptions implements Serializable {
     private boolean withVariables;
+    private boolean replaceLocalVariables = true;
+
+    public boolean isReplaceLocalVariables() {
+        return replaceLocalVariables;
+    }
+
+    public FlowOptions setReplaceLocalVariables(boolean replaceLocalVariables) {
+        this.replaceLocalVariables = replaceLocalVariables;
+        return this;
+    }
 
     public boolean isWithVariables() {
         return withVariables;

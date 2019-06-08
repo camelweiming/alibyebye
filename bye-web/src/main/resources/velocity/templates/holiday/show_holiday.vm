@@ -33,7 +33,9 @@
             #foreach($node in $nodes)
             <tr>
                 <td>$!{node.activityName}</td>
-                <td>#if(!$node.assignee)待指派#else${node.assigneeName}#end</td>
+                <td>
+                    #if(!$node.assignee)待指派#else${node.assigneeName}#end
+                </td>
                 <td>
                     #if($node.state==0)
                         未开始

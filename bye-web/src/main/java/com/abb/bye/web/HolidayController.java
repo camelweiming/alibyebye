@@ -102,7 +102,9 @@ public class HolidayController extends BaseController {
             model.addAttribute("userName", flowTaskDTO.getUserName());
             model.addAttribute(Constants.TASK_PASS, approve);
             if (approve != null) {
-                FlowSubmitDTO submitDTO = new FlowSubmitDTO();
+                FlowCompleteDTO submitDTO = new FlowCompleteDTO();
+                submitDTO.setUserId(userDTO.getUserId());
+                submitDTO.setUserName(userDTO.getUserName());
                 boolean pass = approve == 1;
                 /**
                  * 如果驳回或没有加签，则跳过其余审批节点

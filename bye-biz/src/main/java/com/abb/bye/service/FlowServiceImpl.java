@@ -126,28 +126,40 @@ public class FlowServiceImpl implements FlowService, InitializingBean {
     }
 
     @Override
-    public ResultDTO<Void> complete(String taskId, FlowSubmitDTO flowSubmitDTO) {
-        if (flowSubmitDTO.getAssignee() != null && flowSubmitDTO.getAssigneeName() == null) {
+    public ResultDTO<Void> complete(String taskId, FlowCompleteDTO flowCompleteDTO) {
+        if (flowCompleteDTO.getUserId() == null || flowCompleteDTO.getUserName() == null) {
+            return ResultDTO.buildError(ResultDTO.ERROR_CODE_SYSTEM_ERROR, "miss user");
+        }
+        if (flowCompleteDTO.getAssignee() != null && flowCompleteDTO.getAssigneeName() == null) {
             return ResultDTO.buildError(ResultDTO.ERROR_CODE_SYSTEM_ERROR, "miss assignee");
         }
         try {
-            Map<String, Object> variables = new HashMap<>(8);
-            variables.put(Constants.TASK_ASSIGNEE, flowSubmitDTO.getAssignee());
-            variables.put(Constants.TASK_ASSIGNEE_NAME, flowSubmitDTO.getAssigneeName());
-            if (flowSubmitDTO.getSkip() != null && flowSubmitDTO.getSkip()) {
+            Map<String, Object> variables = flowCompleteDTO.getTaskVariables() == null ? new HashMap<>(8) : flowCompleteDTO.getVariables();
+            Map<String, Object> taskVariables = flowCompleteDTO.getTaskVariables() == null ? new HashMap<>(8) : flowCompleteDTO.getTaskVariables();
+            if (flowCompleteDTO.getAssignee() != null) {
+                variables.put(Constants.TASK_ASSIGNEE, flowCompleteDTO.getAssignee());
+                variables.put(Constants.TASK_ASSIGNEE_NAME, flowCompleteDTO.getAssigneeName());
+            }
+            if (flowCompleteDTO.getSkip() != null && flowCompleteDTO.getSkip()) {
                 variables.put(Constants.TASK_SKIP, true);
                 variables.put(Constants.TASK_SKIP_ENABLE, true);
             }
-            if (flowSubmitDTO.getPass() != null) {
+            if (flowCompleteDTO.getPass() != null) {
                 variables.put(Constants.TASK_PASS, true);
             }
-            if (flowSubmitDTO.getVariables() != null) {
-                variables.putAll(flowSubmitDTO.getVariables());
+            if (flowCompleteDTO.getVariables() != null) {
+                variables.putAll(flowCompleteDTO.getVariables());
             }
+            taskVariables.putAll(variables);
+            taskVariables.put(Constants.TASK_USER_ID, flowCompleteDTO.getUserId());
+            taskVariables.put(Constants.TASK_USER_NAME, flowCompleteDTO.getUserName());
+            taskVariables.put(Constants.TASK_ASSIGNEE, flowCompleteDTO.getUserId());
+            taskVariables.put(Constants.TASK_ASSIGNEE_NAME, flowCompleteDTO.getUserName());
+            taskService.setVariablesLocal(taskId, taskVariables);
             taskService.complete(taskId, variables);
             return ResultDTO.buildSuccess(null);
         } catch (Throwable e) {
-            logger.error("Error complete taskId:" + taskId + " " + flowSubmitDTO, e);
+            logger.error("Error complete taskId:" + taskId + " " + flowCompleteDTO, e);
             return ResultDTO.buildError(ResultDTO.ERROR_CODE_SYSTEM_ERROR, e.getMessage());
         }
     }
@@ -165,15 +177,34 @@ public class FlowServiceImpl implements FlowService, InitializingBean {
     public ResultDTO<List<ProcessNodeDTO>> getByInstanceId(String processInstanceId, FlowOptions options) {
         try {
             List<HistoricActivityInstance> tasks = historyService.createHistoricActivityInstanceQuery().processInstanceId(processInstanceId).list();
+            List<HistoricVariableInstance> histories = historyService.createHistoricVariableInstanceQuery().processInstanceId(processInstanceId).list();
+            Map<String, Map<String, Object>> mapping = new HashMap<>();
+            histories.forEach(historicVariableInstance -> {
+                String taskId = historicVariableInstance.getTaskId() == null ? "#" : historicVariableInstance.getTaskId();
+                Map<String, Object> variables = mapping.get(taskId);
+                if (variables == null) {
+                    variables = new HashMap<>(8);
+                    mapping.put(taskId, variables);
+                }
+                variables.put(historicVariableInstance.getVariableName(), historicVariableInstance.getValue());
+            });
             List<ProcessNodeDTO> list = new ArrayList<>(tasks.size());
             int i = 0;
             for (HistoricActivityInstance t : tasks) {
                 ProcessNodeDTO node = Converter.convert(t);
                 node.setStartEvent(i++ == 0);
                 if (options.isWithVariables()) {
-                    List<HistoricVariableInstance> histories = historyService.createHistoricVariableInstanceQuery().processInstanceId(processInstanceId).list();
                     Map<String, Object> variables = new HashMap<>(16);
-                    histories.forEach(h -> variables.put(h.getVariableName(), h.getValue()));
+                    Map<String, Object> processVariables = mapping.get("#");
+                    if (processVariables != null) {
+                        variables.putAll(processVariables);
+                    }
+                    if (options.isReplaceLocalVariables() && t.getTaskId() != null) {
+                        Map<String, Object> taskVariables = mapping.get(t.getTaskId());
+                        if (taskVariables != null) {
+                            variables.putAll(taskVariables);
+                        }
+                    }
                     Converter.setVariables(node, variables);
                 }
                 list.add(node);
