@@ -11,16 +11,6 @@ import java.io.Serializable;
  */
 public class FlowOptions implements Serializable {
     private boolean withVariables;
-    private boolean withAssigneeInfo;
-
-    public boolean isWithAssigneeInfo() {
-        return withAssigneeInfo;
-    }
-
-    public FlowOptions setWithAssigneeInfo(boolean withAssigneeInfo) {
-        this.withAssigneeInfo = withAssigneeInfo;
-        return this;
-    }
 
     public boolean isWithVariables() {
         return withVariables;

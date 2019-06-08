@@ -63,6 +63,7 @@ public class HolidayController extends BaseController {
                 flowSubmitDTO.setPass(true);
             } else {
                 flowSubmitDTO.setAssignee(String.valueOf(leader.getUserId()));
+                flowSubmitDTO.setAssigneeName(leader.getUserName());
             }
             ResultDTO<ProcessInstanceDTO> result = flowService.submitProcessor(PROCESS_DEFINITION_KEY, flowSubmitDTO);
             if (!result.isSuccess()) {
@@ -110,6 +111,7 @@ public class HolidayController extends BaseController {
                     submitDTO.setSkip(true);
                 } else {
                     submitDTO.setAssignee(String.valueOf(confirmUser));
+                    submitDTO.setAssigneeName(userService.getById(confirmUser, new UserOptions()).getData().getUserName());
                 }
                 submitDTO.setPass(true);
                 ResultDTO<Void> result = flowService.complete(taskId, submitDTO);
@@ -130,7 +132,7 @@ public class HolidayController extends BaseController {
     String showHoliday(Model model, HttpServletRequest request, @RequestParam String processInstanceId) {
         String vm = "holiday/show_holiday";
         try {
-            List<ProcessNodeDTO> processNodes = flowService.getByInstanceId(processInstanceId, new FlowOptions().setWithVariables(true).setWithAssigneeInfo(true)).getData();
+            List<ProcessNodeDTO> processNodes = flowService.getByInstanceId(processInstanceId, new FlowOptions().setWithVariables(true)).getData();
             ProcessNodeDTO processNodeDTO = processNodes.get(0);
             model.addAttribute("taskId", processInstanceId);
             model.addAttribute("days", processNodeDTO.getVariables().get("days"));

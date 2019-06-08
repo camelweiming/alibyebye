@@ -60,6 +60,7 @@ public class Converter {
     }
 
     public static void setVariables(FlowBaseDTO flowBaseDTO, Map<String, Object> variables) {
+        flowBaseDTO.setAssigneeName((String)variables.get(Constants.TASK_ASSIGNEE_NAME));
         flowBaseDTO.setUserId((Long)variables.get(Constants.TASK_USER_ID));
         flowBaseDTO.setUserName((String)variables.get(Constants.TASK_USER_NAME));
         flowBaseDTO.setTitle((String)variables.get(Constants.TASK_TITLE));

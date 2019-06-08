@@ -12,6 +12,7 @@ public class Constants {
     public static String SERVER_NAME;
     public static String TASK_SKIP_ENABLE = "_FLOWABLE_SKIP_EXPRESSION_ENABLED";
     public static String TASK_ASSIGNEE = "assignee";
+    public static String TASK_ASSIGNEE_NAME = "assignee_name";
     public static String TASK_USER_ID = "user_id";
     public static String TASK_USER_NAME = "user_name";
     public static String TASK_SKIP = "skip";

@@ -3,7 +3,6 @@ package com.abb.bye.service;
 import com.abb.bye.Constants;
 import com.abb.bye.client.domain.*;
 import com.abb.bye.client.service.FlowService;
-import com.abb.bye.client.service.UserService;
 import com.abb.bye.flowable.form.CustomFormTypes;
 import com.abb.bye.utils.Converter;
 import org.flowable.engine.*;
@@ -38,9 +37,6 @@ public class FlowServiceImpl implements FlowService, InitializingBean {
     private Logger logger = LoggerFactory.getLogger(FlowServiceImpl.class);
     @Resource
     private DataSource dataSource;
-    @Resource
-    private UserService userService;
-
     private RuntimeService runtimeService;
     private ProcessEngine processEngine;
     private ProcessEngineConfigurationImpl processEngineConfiguration;
@@ -82,14 +78,10 @@ public class FlowServiceImpl implements FlowService, InitializingBean {
             if (task == null) {
                 return ResultDTO.buildSuccess(null);
             }
-            FlowTaskDTO flowTaskDTO = new FlowTaskDTO();
-            flowTaskDTO.setAssignee(task.getAssignee());
+            FlowTaskDTO flowTaskDTO = Converter.convert(task);
             if (options.isWithVariables()) {
                 Map<String, Object> variables = taskService.getVariables(taskId);
                 Converter.setVariables(flowTaskDTO, variables);
-            }
-            if (options.isWithAssigneeInfo()) {
-                flowTaskDTO.setAssigneeInfo(userService.getById(Long.valueOf(flowTaskDTO.getAssignee()), new UserOptions()).getData());
             }
             return ResultDTO.buildSuccess(flowTaskDTO);
         } catch (Throwable e) {
@@ -100,23 +92,19 @@ public class FlowServiceImpl implements FlowService, InitializingBean {
 
     @Override
     public ResultDTO<ProcessInstanceDTO> submitProcessor(String processDefinitionKey, FlowSubmitDTO flowSubmitDTO) {
-        if (flowSubmitDTO.getUserId() == null || flowSubmitDTO.getAssignee() == null || processDefinitionKey == null) {
-            return ResultDTO.buildError(ResultDTO.ERROR_CODE_SYSTEM_ERROR, "param error");
+        if (flowSubmitDTO.getUserId() == null || flowSubmitDTO.getUserName() == null) {
+            return ResultDTO.buildError(ResultDTO.ERROR_CODE_SYSTEM_ERROR, "miss user");
+        }
+        if (flowSubmitDTO.getAssignee() != null && flowSubmitDTO.getAssigneeName() == null) {
+            return ResultDTO.buildError(ResultDTO.ERROR_CODE_SYSTEM_ERROR, "miss assignee");
         }
         try {
             Map<String, Object> variables = new HashMap<>(8);
             variables.put(Constants.TASK_USER_ID, flowSubmitDTO.getUserId());
             variables.put(Constants.TASK_ASSIGNEE, flowSubmitDTO.getAssignee());
             variables.put(Constants.TASK_DESCRIPTION, flowSubmitDTO.getDescription());
-            if (flowSubmitDTO.getUserName() == null) {
-                UserDTO user = userService.getById(flowSubmitDTO.getUserId(), new UserOptions()).getData();
-                if (user == null) {
-                    return ResultDTO.buildError(ResultDTO.ERROR_CODE_USER_NOT_FOUND, "user not found");
-                }
-                variables.put(Constants.TASK_USER_NAME, user.getUserName());
-            } else {
-                variables.put(Constants.TASK_USER_NAME, flowSubmitDTO.getUserName());
-            }
+            variables.put(Constants.TASK_ASSIGNEE_NAME, flowSubmitDTO.getAssigneeName());
+            variables.put(Constants.TASK_USER_NAME, flowSubmitDTO.getUserName());
             Authentication.setAuthenticatedUserId("" + flowSubmitDTO.getUserId());
             if (flowSubmitDTO.getSkip() != null && flowSubmitDTO.getSkip()) {
                 variables.put(Constants.TASK_SKIP, true);
@@ -139,9 +127,13 @@ public class FlowServiceImpl implements FlowService, InitializingBean {
 
     @Override
     public ResultDTO<Void> complete(String taskId, FlowSubmitDTO flowSubmitDTO) {
+        if (flowSubmitDTO.getAssignee() != null && flowSubmitDTO.getAssigneeName() == null) {
+            return ResultDTO.buildError(ResultDTO.ERROR_CODE_SYSTEM_ERROR, "miss assignee");
+        }
         try {
             Map<String, Object> variables = new HashMap<>(8);
             variables.put(Constants.TASK_ASSIGNEE, flowSubmitDTO.getAssignee());
+            variables.put(Constants.TASK_ASSIGNEE_NAME, flowSubmitDTO.getAssigneeName());
             if (flowSubmitDTO.getSkip() != null && flowSubmitDTO.getSkip()) {
                 variables.put(Constants.TASK_SKIP, true);
                 variables.put(Constants.TASK_SKIP_ENABLE, true);
@@ -183,9 +175,6 @@ public class FlowServiceImpl implements FlowService, InitializingBean {
                     Map<String, Object> variables = new HashMap<>(16);
                     histories.forEach(h -> variables.put(h.getVariableName(), h.getValue()));
                     Converter.setVariables(node, variables);
-                }
-                if (options.isWithAssigneeInfo() && node.getAssignee() != null) {
-                    node.setAssigneeInfo(userService.getById(Long.valueOf(node.getAssignee()), new UserOptions()).getData());
                 }
                 list.add(node);
             }

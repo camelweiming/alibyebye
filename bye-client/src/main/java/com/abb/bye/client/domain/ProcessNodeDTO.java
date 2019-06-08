@@ -11,6 +11,9 @@ import java.util.Date;
  */
 public class ProcessNodeDTO extends FlowBaseDTO {
     private static final long serialVersionUID = 4196449326985418273L;
+    public static byte STATE_WAITING = 0;
+    public static byte STATE_PROCESSING = 1;
+    public static byte STATE_END = 2;
     private String id;
     private String activityId;
     private String activityName;
@@ -142,6 +145,16 @@ public class ProcessNodeDTO extends FlowBaseDTO {
 
     public void setInitiator(String initiator) {
         this.initiator = initiator;
+    }
+
+    public byte getState() {
+        if (startTime == null) {
+            return STATE_WAITING;
+        }
+        if (endTime != null) {
+            return STATE_END;
+        }
+        return STATE_PROCESSING;
     }
 
     @Override

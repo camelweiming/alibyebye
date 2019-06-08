@@ -9,19 +9,19 @@ import java.util.Map;
  */
 public abstract class FlowBaseDTO implements Serializable {
     protected String assignee;
+    protected String assigneeName;
     protected Long userId;
     protected String userName;
     protected String title;
     protected String description;
     protected Map<String, Object> variables;
-    protected UserDTO assigneeInfo;
 
-    public UserDTO getAssigneeInfo() {
-        return assigneeInfo;
+    public String getAssigneeName() {
+        return assigneeName;
     }
 
-    public void setAssigneeInfo(UserDTO assigneeInfo) {
-        this.assigneeInfo = assigneeInfo;
+    public void setAssigneeName(String assigneeName) {
+        this.assigneeName = assigneeName;
     }
 
     public Map<String, Object> getVariables() {

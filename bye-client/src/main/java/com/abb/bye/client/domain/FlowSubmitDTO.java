@@ -14,6 +14,7 @@ import java.util.Map;
 public class FlowSubmitDTO implements Serializable {
     private static final long serialVersionUID = 4196449326985418273L;
     private String assignee;
+    private String assigneeName;
     private Long userId;
     private String userName;
     private String title;
@@ -98,6 +99,14 @@ public class FlowSubmitDTO implements Serializable {
 
     public void setVariables(Map<String, Object> variables) {
         this.variables = variables;
+    }
+
+    public String getAssigneeName() {
+        return assigneeName;
+    }
+
+    public void setAssigneeName(String assigneeName) {
+        this.assigneeName = assigneeName;
     }
 
     @Override

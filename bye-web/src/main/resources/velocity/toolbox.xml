@@ -34,6 +34,7 @@
         -->
         <!-- move this to request scope -->
         <tool class="org.apache.velocity.tools.generic.ResourceTool"/>
+        <tool class="com.abb.bye.web.tools.CommonTools"/>
         <!--
         This is not useful in its default form.
         But, if it were, it'd be request-scoped.
