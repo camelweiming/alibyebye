@@ -4,7 +4,6 @@
         <thead>
         <tr>
             <th>ID</th>
-            <th>类型</th>
             <th>标题</th>
             <th>审批</th>
         </tr>
@@ -12,8 +11,7 @@
         <tbody>
             #foreach($task in $tasks)
             <tr>
-                <td>$!{task.id}</td>
-                <td>$!{task.type}</td>
+                <td>$!{task.processInstanceId}</td>
                 <td>$!{task.title}</td>
                 <td><a href="$!{task.link}">审批</a></td>
             </tr>

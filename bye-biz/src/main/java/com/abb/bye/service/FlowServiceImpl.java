@@ -8,11 +8,16 @@ import com.abb.bye.utils.Converter;
 import org.flowable.engine.*;
 import org.flowable.engine.common.impl.identity.Authentication;
 import org.flowable.engine.history.HistoricActivityInstance;
+import org.flowable.engine.history.HistoricProcessInstance;
+import org.flowable.engine.history.HistoricProcessInstanceQuery;
 import org.flowable.engine.impl.cfg.ProcessEngineConfigurationImpl;
 import org.flowable.engine.impl.cfg.StandaloneProcessEngineConfiguration;
 import org.flowable.engine.repository.DeploymentBuilder;
 import org.flowable.engine.runtime.ProcessInstance;
 import org.flowable.task.api.Task;
+import org.flowable.task.api.TaskQuery;
+import org.flowable.task.api.history.HistoricTaskInstance;
+import org.flowable.task.api.history.HistoricTaskInstanceQuery;
 import org.flowable.variable.api.history.HistoricVariableInstance;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -88,6 +93,86 @@ public class FlowServiceImpl implements FlowService, InitializingBean {
             logger.error("Error getTask:" + taskId, e);
             return ResultDTO.buildError(ResultDTO.ERROR_CODE_SYSTEM_ERROR, e.getMessage());
         }
+    }
+
+    @Override
+    public ResultDTO<List<FlowTaskDTO>> query(FlowTaskQuery query) {
+        if (null == query.getType()) {
+            return ResultDTO.buildError(ResultDTO.ERROR_CODE_SYSTEM_ERROR, "miss type");
+        }
+        try {
+            if (query.getType() == FlowTaskQuery.TYPE.WAITING_PROCESS) {
+                return createTaskQuery(query);
+            } else if (query.getType() == FlowTaskQuery.TYPE.INITIATE) {
+                return createHistoricProcessInstanceQuery(query);
+            } else if (query.getType() == FlowTaskQuery.TYPE.PROCESSED) {
+                return createHistoricTaskInstanceQuery(query);
+            }
+            return ResultDTO.buildError(ResultDTO.ERROR_CODE_SYSTEM_ERROR, "miss type");
+        } catch (Throwable e) {
+            logger.error("Error query:" + query, e);
+            return ResultDTO.buildError(ResultDTO.ERROR_CODE_SYSTEM_ERROR, e.getMessage());
+        }
+    }
+
+    public ResultDTO<List<FlowTaskDTO>> createHistoricTaskInstanceQuery(FlowTaskQuery query) {
+        int total = 0;
+        HistoricTaskInstanceQuery q = historyService.createHistoricTaskInstanceQuery().taskAssignee(String.valueOf(query.getUserId()));
+        if (query.isNeedTotal()) {
+            total = (int)q.count();
+        }
+        List<FlowTaskDTO> list = new ArrayList<>();
+        List<HistoricTaskInstance> tasks = q.listPage(query.getStart(), query.getLimit());
+        tasks.forEach(task -> {
+            FlowTaskDTO taskDTO = Converter.convert(task);
+            if (query.isWithVariables()) {
+                List<HistoricVariableInstance> histories = historyService.createHistoricVariableInstanceQuery().processInstanceId(task.getProcessInstanceId()).list();
+                Map<String, Object> variables = new HashMap<>(8);
+                histories.forEach(his -> variables.put(his.getVariableName(), his.getValue()));
+                Converter.setVariables(taskDTO, variables);
+            }
+            list.add(taskDTO);
+        });
+        return ResultDTO.buildSuccess(list, total);
+    }
+
+    public ResultDTO<List<FlowTaskDTO>> createHistoricProcessInstanceQuery(FlowTaskQuery query) {
+        int total = 0;
+        HistoricProcessInstanceQuery q = historyService.createHistoricProcessInstanceQuery().startedBy(query.getUserId());
+        if (query.isNeedTotal()) {
+            total = (int)q.count();
+        }
+        List<HistoricProcessInstance> tasks = q.listPage(query.getStart(), query.getLimit());
+        List<FlowTaskDTO> list = new ArrayList<>();
+        tasks.forEach(task -> {
+            FlowTaskDTO flowTaskDTO = Converter.convert(task);
+            if (query.isWithVariables()) {
+                List<HistoricVariableInstance> histories = historyService.createHistoricVariableInstanceQuery().processInstanceId(task.getId()).list();
+                Map<String, Object> variables = new HashMap<>(8);
+                histories.forEach(his -> variables.put(his.getVariableName(), his.getValue()));
+                Converter.setVariables(flowTaskDTO, variables);
+            }
+            list.add(flowTaskDTO);
+        });
+        return ResultDTO.buildSuccess(list, total);
+    }
+
+    public ResultDTO<List<FlowTaskDTO>> createTaskQuery(FlowTaskQuery query) {
+        int total = 0;
+        TaskQuery q = taskService.createTaskQuery().taskCandidateOrAssigned(query.getUserId());
+        if (query.isNeedTotal()) {
+            total = (int)q.count();
+        }
+        List<Task> tasks = q.listPage(query.getStart(), query.getLimit());
+        List<FlowTaskDTO> list = new ArrayList<>();
+        tasks.forEach(task -> {
+            FlowTaskDTO taskDTO = Converter.convert(task);
+            if (query.isWithVariables()) {
+                Converter.setVariables(taskDTO, taskService.getVariables(task.getId()));
+            }
+            list.add(taskDTO);
+        });
+        return ResultDTO.buildSuccess(list, total);
     }
 
     @Override

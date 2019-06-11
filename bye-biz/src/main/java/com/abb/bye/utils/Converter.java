@@ -3,8 +3,12 @@ package com.abb.bye.utils;
 import com.abb.bye.Constants;
 import com.abb.bye.client.domain.*;
 import org.flowable.engine.history.HistoricActivityInstance;
+import org.flowable.engine.history.HistoricProcessInstance;
 import org.flowable.engine.runtime.ProcessInstance;
 import org.flowable.task.api.Task;
+import org.flowable.task.api.history.HistoricTaskInstance;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -15,6 +19,7 @@ import java.util.Map;
  * @since 2019/5/26
  */
 public class Converter {
+    private static final Logger logger = LoggerFactory.getLogger(Converter.class);
 
     public static List<UserDTO> convert(List<UserDO> list) {
         List<UserDTO> userDTOS = new ArrayList<>(list.size());
@@ -53,22 +58,43 @@ public class Converter {
         return processInstanceDTO;
     }
 
+    public static FlowTaskDTO convert(HistoricProcessInstance task) {
+        FlowTaskDTO flowTaskDTO = new FlowTaskDTO();
+        flowTaskDTO.setProcessInstanceId(task.getId());
+        return flowTaskDTO;
+    }
+
+    public static FlowTaskDTO convert(HistoricTaskInstance task) {
+        FlowTaskDTO flowTaskDTO = new FlowTaskDTO();
+        flowTaskDTO.setAssignee(task.getAssignee());
+        flowTaskDTO.setTaskId(task.getId());
+        flowTaskDTO.setProcessInstanceId(task.getProcessInstanceId());
+        return flowTaskDTO;
+    }
+
     public static FlowTaskDTO convert(Task task) {
         FlowTaskDTO flowTaskDTO = new FlowTaskDTO();
         flowTaskDTO.setAssignee(task.getAssignee());
+        flowTaskDTO.setTaskId(task.getId());
+        flowTaskDTO.setProcessInstanceId(task.getProcessInstanceId());
         return flowTaskDTO;
     }
 
     public static void setVariables(FlowBaseDTO flowBaseDTO, Map<String, Object> variables) {
-        flowBaseDTO.setAssigneeName((String)variables.get(Constants.TASK_ASSIGNEE_NAME));
-        flowBaseDTO.setUserId((Long)variables.get(Constants.TASK_USER_ID));
-        flowBaseDTO.setUserName((String)variables.get(Constants.TASK_USER_NAME));
-        flowBaseDTO.setTitle((String)variables.get(Constants.TASK_TITLE));
-        flowBaseDTO.setDescription((String)variables.get(Constants.TASK_DESCRIPTION));
-        variables.remove(Constants.TASK_USER_ID);
-        variables.remove(Constants.TASK_USER_NAME);
-        variables.remove(Constants.TASK_TITLE);
-        variables.remove(Constants.TASK_DESCRIPTION);
-        flowBaseDTO.setVariables(variables);
+        try {
+            flowBaseDTO.setAssigneeName((String)variables.get(Constants.TASK_ASSIGNEE_NAME));
+            flowBaseDTO.setUserId((Long)variables.get(Constants.TASK_USER_ID));
+            flowBaseDTO.setUserName((String)variables.get(Constants.TASK_USER_NAME));
+            flowBaseDTO.setTitle((String)variables.get(Constants.TASK_TITLE));
+            flowBaseDTO.setDescription((String)variables.get(Constants.TASK_DESCRIPTION));
+            variables.remove(Constants.TASK_USER_ID);
+            variables.remove(Constants.TASK_USER_NAME);
+            variables.remove(Constants.TASK_TITLE);
+            variables.remove(Constants.TASK_DESCRIPTION);
+            flowBaseDTO.setVariables(variables);
+        } catch (Throwable e) {
+            logger.error("Error setVariables:" + flowBaseDTO + " variables:" + variables, e);
+
+        }
     }
 }

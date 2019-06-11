@@ -19,6 +19,14 @@ public interface FlowService {
     ResultDTO<FlowTaskDTO> getTask(String taskId, FlowOptions options);
 
     /**
+     * 查询
+     *
+     * @param query
+     * @return
+     */
+    ResultDTO<List<FlowTaskDTO>> query(FlowTaskQuery query);
+
+    /**
      * 提交流程
      *
      * @param flowSubmitDTO

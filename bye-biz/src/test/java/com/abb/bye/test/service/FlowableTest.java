@@ -65,6 +65,26 @@ public class FlowableTest {
         list.forEach(l -> {
             System.out.println(l);
         });
+    }
 
+    @Test
+    public void clear() {
+        List<HistoricTaskInstance> task = ProcessEngines.getDefaultProcessEngine().getHistoryService().createHistoricTaskInstanceQuery().list();
+        task.forEach(t -> {
+            try {
+                ProcessEngines.getDefaultProcessEngine().getHistoryService().deleteHistoricProcessInstance(t.getProcessInstanceId());
+            } catch (Throwable e) {
+                e.printStackTrace();
+            }
+        });
+
+        List<HistoricProcessInstance> instances = ProcessEngines.getDefaultProcessEngine().getHistoryService().createHistoricProcessInstanceQuery().list();
+        instances.forEach(instance -> {
+            try {
+                ProcessEngines.getDefaultProcessEngine().getHistoryService().deleteHistoricProcessInstance(instance.getId());
+            } catch (Throwable e) {
+                e.printStackTrace();
+            }
+        });
     }
 }
