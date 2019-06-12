@@ -14,6 +14,24 @@ public class FlowTaskDTO extends FlowBaseDTO implements Serializable {
     private String formKey;
     private String taskId;
     private String processInstanceId;
+    private String processDefinitionId;
+    private String taskDefinitionKey;
+
+    public String getProcessDefinitionId() {
+        return processDefinitionId;
+    }
+
+    public void setProcessDefinitionId(String processDefinitionId) {
+        this.processDefinitionId = processDefinitionId;
+    }
+
+    public String getTaskDefinitionKey() {
+        return taskDefinitionKey;
+    }
+
+    public void setTaskDefinitionKey(String taskDefinitionKey) {
+        this.taskDefinitionKey = taskDefinitionKey;
+    }
 
     public String getProcessInstanceId() {
         return processInstanceId;

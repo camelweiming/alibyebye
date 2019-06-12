@@ -84,8 +84,15 @@ public class TaskController extends BaseController {
                       HttpServletRequest request,
                       @RequestParam(required = false) String callback,
                       @RequestParam(required = false) String processKey,
-                      @RequestParam(required = false) String processInstanceId) {
-        String formKey = flowService.getStartFormKey(processKey).getData();
+                      @RequestParam(required = false) String taskId
+    ) {
+        String formKey;
+        if (taskId != null) {
+            FlowTaskDTO task = flowService.getTask(taskId, new FlowOptions()).getData();
+            formKey = task.getFormKey();
+        } else {
+            formKey = flowService.getStartFormKey(processKey).getData();
+        }
         Map<String, Object> data = new HashMap<>();
         data.put("success", true);
         try {
@@ -98,6 +105,7 @@ public class TaskController extends BaseController {
                 data.put("data", res.getData());
             }
         } catch (Throwable e) {
+            data.put("success", false);
             data.put("errorMsg", "系统异常");
             logger.error("Error form", e);
         }
@@ -125,17 +133,17 @@ public class TaskController extends BaseController {
             for (ProcessNodeDTO node : processNodes) {
                 String formKey = node.getFormKey();
                 NodeVO nodeVO = new NodeVO(node);
-                nodeVOS.add(nodeVO);
-                Form form = FormLoader.load(formKey);
-                if (form == null) {
-                    nodeVO.fields = new ArrayList<>();
-                    continue;
-                }
-                form.render(node.getVariables());
-                nodeVO.fields = FormUtils.getFieldsOnlyPersistent(form);
-                if (NumberUtils.toLong(node.getAssignee()) == loginUserId) {
+                boolean toEdit = (NumberUtils.toLong(node.getAssignee()) == loginUserId) && node.getState() == ProcessNodeDTO.STATE_PROCESSING;
+                if (toEdit) {
                     nodeVO.edit = true;
                 }
+                nodeVOS.add(nodeVO);
+                Form form = FormLoader.load(formKey);
+                List<FormField> fields = null;
+                if (form != null) {
+                    fields = toEdit ? mergeField4Edit(form, request, node) : mergeField4Show(form, node);
+                }
+                nodeVO.fields = fields == null ? new ArrayList<>(0) : fields;
             }
             model.addAttribute("nodes", nodeVOS);
         } catch (Throwable e) {
@@ -143,6 +151,19 @@ public class TaskController extends BaseController {
             model.addAttribute("errorMsg", "system error");
         }
         return vm;
+    }
+
+    private List<FormField> mergeField4Edit(Form form, HttpServletRequest request, ProcessNodeDTO node) throws IllegalAccessException {
+        form.render(request);
+        List<FormField> fields = FormUtils.getFields(form);
+        fields.add(new FormField().setType("hidden").setName("taskId").setValue(node.getTaskId()));
+        return fields;
+    }
+
+    private List<FormField> mergeField4Show(Form form, ProcessNodeDTO node) throws IllegalAccessException {
+        form.render(node.getVariables());
+        List<FormField> fields = FormUtils.getFieldsOnlyPersistent(form);
+        return fields;
     }
 
     public static class NodeVO {

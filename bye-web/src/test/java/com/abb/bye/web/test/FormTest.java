@@ -1,10 +1,15 @@
 package com.abb.bye.web.test;
 
+import com.abb.bye.client.flow.FormField;
+import com.abb.bye.client.flow.FormFieldOption;
 import com.abb.bye.utils.FormUtils;
+import com.abb.bye.web.form.HolidayApproveForm;
 import com.abb.bye.web.form.HolidayRequestForm;
 import org.junit.Test;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -21,6 +26,17 @@ public class FormTest {
         FormUtils.setFieldsFromVariables(holidayRequestForm, m);
         System.out.println(holidayRequestForm.getDays());
         System.out.println(holidayRequestForm.getDescription());
+    }
 
+    @Test
+    public void test2() throws IllegalAccessException {
+        HolidayApproveForm form = new HolidayApproveForm();
+        List<FormFieldOption> approve = new ArrayList<>();
+        approve.add(new FormFieldOption("请选择", "-1"));
+        approve.add(new FormFieldOption("通过", "1"));
+        approve.add(new FormFieldOption("驳回", "2"));
+        form.setApprove(approve);
+        List<FormField> formFields = FormUtils.getFieldsOnlyPersistent(form);
+        System.out.println(formFields);
     }
 }

@@ -4,6 +4,7 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
 import java.io.Serializable;
+import java.util.List;
 
 /**
  * @author cenpeng.lwm
@@ -16,6 +17,7 @@ public class FormField implements Serializable {
     private String label;
     private String type;
     private String value;
+    private List<FormFieldOption> options;
 
     public boolean isRequired() {
         return required;
@@ -59,6 +61,15 @@ public class FormField implements Serializable {
 
     public FormField setValue(String value) {
         this.value = value;
+        return this;
+    }
+
+    public List<FormFieldOption> getOptions() {
+        return options;
+    }
+
+    public FormField setOptions(List<FormFieldOption> options) {
+        this.options = options;
         return this;
     }
 

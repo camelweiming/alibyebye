@@ -60,6 +60,11 @@ public class FlowableTest {
     }
 
     @Test
+    public void getGetTask() {
+     flowService.getTask("1127532",new FlowOptions().setWithVariables(true));
+    }
+
+    @Test
     public void testGet() {
         List<ProcessNodeDTO> list = flowService.getByInstanceId("762505", new FlowOptions().setWithVariables(true)).getData();
         list.forEach(l -> {

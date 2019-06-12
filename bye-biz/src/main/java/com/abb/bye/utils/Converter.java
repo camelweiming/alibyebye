@@ -77,6 +77,9 @@ public class Converter {
         flowTaskDTO.setAssignee(task.getAssignee());
         flowTaskDTO.setTaskId(task.getId());
         flowTaskDTO.setProcessInstanceId(task.getProcessInstanceId());
+        flowTaskDTO.setProcessDefinitionId(task.getProcessDefinitionId());
+        flowTaskDTO.setTaskDefinitionKey(task.getTaskDefinitionKey());
+        flowTaskDTO.setFormKey(task.getFormKey());
         return flowTaskDTO;
     }
 

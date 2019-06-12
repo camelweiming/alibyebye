@@ -30,8 +30,6 @@ public class HolidayRequestForm implements Form {
 
     @Override
     public ResultDTO<Object> render(HttpServletRequest request) {
-        days = CommonUtils.toInteger(request.getParameter("days"));
-        description = request.getParameter("description");
         return ResultDTO.buildSuccess(null);
     }
 
@@ -52,12 +50,12 @@ public class HolidayRequestForm implements Form {
         try {
             UserService userService = SpringCtx.getBean(UserService.class);
             FlowService flowService = SpringCtx.getBean(FlowService.class);
-            UserDTO userDTO = userService.getById(CommonUtils.toLong(LoginUtil.getLoginUser(request)), new UserOptions().setWithBoss(true)).getData();
+            UserDTO userDTO = userService.getById(LoginUtil.getLoginUserSilent(request), new UserOptions().setWithBoss(true)).getData();
             FlowSubmitDTO flowSubmitDTO = new FlowSubmitDTO();
             flowSubmitDTO.setUserId(userDTO.getUserId());
             flowSubmitDTO.setUserName(userDTO.getUserName());
             flowSubmitDTO.setTitle(String.format("%s申请休假%s天", userDTO.getUserName(), days));
-            flowSubmitDTO.setDescription(description);
+            flowSubmitDTO.addVariable("description", description);
             flowSubmitDTO.addVariable("days", days);
             /**
              * 没有上级则跳过其余审批节点

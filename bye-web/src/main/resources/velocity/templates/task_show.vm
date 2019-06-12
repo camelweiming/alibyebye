@@ -8,10 +8,17 @@
     <div class="jumbotron jumbotron-fluid">
         <div class="container">
             <h1 class="display-5">$!{node.activityName}</h1>
-            #if($node.edit)
-                #parse("/velocity/layout/form_edit.vm")
+            #if($nodeVO.edit)
+                <form action="task_submit.htm" class="form-horizontal" method="post" target="_form">
+                    <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
+                    <input type="hidden" name="callback" value="window.parent.callback"/>
+                    #parse("/velocity/layout/form_edit.vm")
+                    <button class="btn btn-danger btn-sm" type="submit">保存</button>
+                </form>
             #else
-                #parse("/velocity/layout/form_show.vm")
+                <form action="#" class="form-horizontal">
+                    #parse("/velocity/layout/form_show.vm")
+                </form>
             #end
             <hr class="my-4">
             <p class="lead">处理人：#if(!$node.assignee)待指派#else${node.assigneeName}#end</p>
@@ -21,3 +28,17 @@
         </div>
     </div>
 #end
+
+<iframe name="_form" style="display:none"></iframe>
+
+<script type="text/javascript">
+    function callback(json) {
+        var data=  JSON.parse(json);
+        if(data.success){
+            alert('提交成功')
+            window.location.reload();
+        }else{
+            alert(data.errorMsg);
+        }
+    }
+</script>

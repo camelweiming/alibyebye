@@ -49,6 +49,15 @@ public class LoginUtil {
         return contextPath.length() > 0 ? contextPath : "/";
     }
 
+    public static Long getLoginUserSilent(HttpServletRequest request) {
+        try {
+            return CommonUtils.toLong(getLoginUser(request));
+        } catch (Throwable e) {
+            logger.error("Error getLoginUser", e);
+        }
+        return null;
+    }
+
     public static String getLoginUser(HttpServletRequest request) throws IllegalBlockSizeException, BadPaddingException, InvalidKeyException, UnsupportedEncodingException {
         Cookie[] cookies = request.getCookies();
         if ((cookies == null) || (cookies.length == 0)) {

@@ -2,6 +2,7 @@ package com.abb.bye.utils;
 
 import com.abb.bye.client.flow.Form;
 import com.abb.bye.client.flow.FormField;
+import com.abb.bye.client.flow.FormFieldOption;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
@@ -62,7 +63,11 @@ public class FormUtils {
             formField.setRequired(f.required());
             formField.setType(f.type());
             Object v = field.get(object);
-            formField.setValue(v == null ? null : v.toString());
+            if (f.multiValue()) {
+                formField.setOptions((List<FormFieldOption>)v);
+            } else {
+                formField.setValue(v == null ? null : v.toString());
+            }
             formFields.add(formField);
         }
         return formFields;

@@ -49,7 +49,7 @@ public class HolidayController extends BaseController {
             flowSubmitDTO.setUserId(userDTO.getUserId());
             flowSubmitDTO.setUserName(userDTO.getUserName());
             flowSubmitDTO.setTitle(String.format("%s申请休假%s天", userDTO.getUserName(), days));
-            flowSubmitDTO.setDescription(description);
+            flowSubmitDTO.addVariable("description", description);
             flowSubmitDTO.addVariable("days", days);
             /**
              * 没有上级则跳过其余审批节点

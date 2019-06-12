@@ -4,7 +4,15 @@
     #else
     <div class="form-group">
         <label>$!{field.label}</label>
-        <input class="form-control form-control-sm" name="$!{field.name}" value="$!{field.value}" #if($field.required) required #end #if($field.readOnly) readonly #end>
+        #if($field.type=='radio')
+            <select class="form-control form-control-sm" name="$!{field.name}" #if($field.required) required #end>
+                #foreach($option in $field.options)
+                    <option value="${option.value}">${option.name}</option>
+                #end
+            </select>
+        #else
+            <input class="form-control form-control-sm" name="$!{field.name}" value="$!{field.value}" #if($field.required) required #end #if($field.readOnly) readonly #end>
+        #end
     </div>
     #end
 #end
