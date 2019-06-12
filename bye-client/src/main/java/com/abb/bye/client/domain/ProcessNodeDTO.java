@@ -26,6 +26,7 @@ public class ProcessNodeDTO extends FlowBaseDTO {
     private Date endTime;
     private Long durationInMillis;
     private String deleteReason;
+    private String formKey;
     /**
      * 起始节点
      */
@@ -34,6 +35,14 @@ public class ProcessNodeDTO extends FlowBaseDTO {
      * 发起人
      */
     private String initiator;
+
+    public String getFormKey() {
+        return formKey;
+    }
+
+    public void setFormKey(String formKey) {
+        this.formKey = formKey;
+    }
 
     public String getId() {
         return id;

@@ -10,8 +10,19 @@ import java.io.Serializable;
  * @since 2019/6/7
  */
 public class FlowOptions implements Serializable {
+    private static final long serialVersionUID = 8820090730043661858L;
     private boolean withVariables;
     private boolean replaceLocalVariables = true;
+    private boolean withFormKey;
+
+    public boolean isWithFormKey() {
+        return withFormKey;
+    }
+
+    public FlowOptions setWithFormKey(boolean withFormKey) {
+        this.withFormKey = withFormKey;
+        return this;
+    }
 
     public boolean isReplaceLocalVariables() {
         return replaceLocalVariables;

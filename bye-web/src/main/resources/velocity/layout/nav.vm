@@ -5,19 +5,19 @@
                 <span>任务</span><a class="d-flex align-items-center text-muted" href="#"><span data-feather="plus-circle"></span></a>
             </h6>
             <li class="nav-item">
-                <a class="nav-link" href="add_holiday.htm">
+                <a class="nav-link" href="task_form.htm?processKey=holidayRequest">
                     <span data-feather="file"></span>请假
                 </a>
             </li>
 
             <li class="nav-item">
-                <a class="nav-link" href="task_list.htm">
+                <a class="nav-link" href="task_list.htm?type=0">
                     <span data-feather="file"></span>待办任务
                 </a>
-                <a class="nav-link" href="his_task_list.htm">
+                <a class="nav-link" href="task_list.htm?type=2">
                     <span data-feather="file"></span>已办任务
                 </a>
-                <a class="nav-link" href="my_task_list.htm">
+                <a class="nav-link" href="task_list.htm?type=1">
                     <span data-feather="file"></span>我提交的任务
                 </a>
             </li>

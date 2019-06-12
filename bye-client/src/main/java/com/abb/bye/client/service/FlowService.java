@@ -53,4 +53,21 @@ public interface FlowService {
      */
     ResultDTO<List<ProcessNodeDTO>> getByInstanceId(String processInstanceId, FlowOptions options);
 
+    /**
+     * 查询表单formKey
+     *
+     * @param processKey processDefinitionId：holidayRequest:374:965004 或者流程的ID：holidayRequest
+     * @return
+     */
+    ResultDTO<String> getStartFormKey(String processKey);
+
+    /**
+     * 查询表单formKey
+     *
+     * @param processDefinitionId holidayRequest:374:965004
+     * @param taskDefinitionKey   节点ID：usertask
+     * @return
+     */
+    ResultDTO<String> getFormKey(String processDefinitionId, String taskDefinitionKey);
+
 }

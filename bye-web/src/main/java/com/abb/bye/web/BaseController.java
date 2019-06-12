@@ -1,6 +1,7 @@
 package com.abb.bye.web;
 
 import com.abb.bye.client.exception.AuthException;
+import com.abb.bye.utils.CommonUtils;
 import com.abb.bye.utils.LoginUtil;
 
 import javax.servlet.http.HttpServletRequest;
@@ -13,8 +14,7 @@ public abstract class BaseController {
 
     protected Long getLoginUser(HttpServletRequest request) {
         try {
-            String userId = LoginUtil.getLoginUser(request);
-            return userId == null ? null : Long.valueOf(userId);
+            return CommonUtils.toLong(LoginUtil.getLoginUser(request));
         } catch (Throwable e) {
             throw new AuthException(e);
         }

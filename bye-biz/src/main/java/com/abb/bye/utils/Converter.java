@@ -86,11 +86,7 @@ public class Converter {
             flowBaseDTO.setUserId((Long)variables.get(Constants.TASK_USER_ID));
             flowBaseDTO.setUserName((String)variables.get(Constants.TASK_USER_NAME));
             flowBaseDTO.setTitle((String)variables.get(Constants.TASK_TITLE));
-            flowBaseDTO.setDescription((String)variables.get(Constants.TASK_DESCRIPTION));
-            variables.remove(Constants.TASK_USER_ID);
-            variables.remove(Constants.TASK_USER_NAME);
             variables.remove(Constants.TASK_TITLE);
-            variables.remove(Constants.TASK_DESCRIPTION);
             flowBaseDTO.setVariables(variables);
         } catch (Throwable e) {
             logger.error("Error setVariables:" + flowBaseDTO + " variables:" + variables, e);

@@ -13,7 +13,7 @@ import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
 public class WebSecurityConfiguration extends WebSecurityConfigurerAdapter {
     @Override
     protected void configure(HttpSecurity http) throws Exception {
-        http
-            .csrf().csrfTokenRepository(new CookieCsrfTokenRepository());
+        http.headers().frameOptions().disable();
+        http.csrf().csrfTokenRepository(new CookieCsrfTokenRepository());
     }
 }

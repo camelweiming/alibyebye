@@ -1,0 +1,10 @@
+#foreach($field in $fields)
+    #if($field.type=="hidden")
+    <input type="hidden" name="$!{field.name}" value="$!{field.value}">
+    #else
+    <div class="form-group">
+        <label>$!{field.label}</label>
+        <input class="form-control form-control-sm" name="$!{field.name}" value="$!{field.value}" #if($field.required) required #end #if($field.readOnly) readonly #end>
+    </div>
+    #end
+#end

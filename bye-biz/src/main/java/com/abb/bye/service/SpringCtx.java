@@ -3,11 +3,13 @@ package com.abb.bye.service;
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
+import org.springframework.stereotype.Service;
 
 /**
  * @author cenpeng.lwm
  * @since 2019/6/11
  */
+@Service
 public class SpringCtx implements ApplicationContextAware {
     private static volatile ApplicationContext context;
 

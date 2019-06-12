@@ -1,0 +1,6 @@
+#foreach($field in $fields)
+<div class="form-group">
+    <label>$!{field.label}</label>
+    <input class="form-control form-control-sm" name="$!{field.name}" value="$!{field.value}" readonly>
+</div>
+#end

@@ -5,6 +5,7 @@ import com.abb.bye.client.domain.*;
 import com.abb.bye.client.service.FlowService;
 import com.abb.bye.flowable.form.CustomFormTypes;
 import com.abb.bye.utils.Converter;
+import org.apache.commons.lang3.StringUtils;
 import org.flowable.engine.*;
 import org.flowable.engine.common.impl.identity.Authentication;
 import org.flowable.engine.history.HistoricActivityInstance;
@@ -187,7 +188,6 @@ public class FlowServiceImpl implements FlowService, InitializingBean {
             Map<String, Object> variables = new HashMap<>(8);
             variables.put(Constants.TASK_USER_ID, flowSubmitDTO.getUserId());
             variables.put(Constants.TASK_ASSIGNEE, flowSubmitDTO.getAssignee());
-            variables.put(Constants.TASK_DESCRIPTION, flowSubmitDTO.getDescription());
             variables.put(Constants.TASK_ASSIGNEE_NAME, flowSubmitDTO.getAssigneeName());
             variables.put(Constants.TASK_USER_NAME, flowSubmitDTO.getUserName());
             Authentication.setAuthenticatedUserId("" + flowSubmitDTO.getUserId());
@@ -290,6 +290,10 @@ public class FlowServiceImpl implements FlowService, InitializingBean {
                             variables.putAll(taskVariables);
                         }
                     }
+                    if (options.isWithVariables()) {
+                        String formKey = node.isStartEvent() ? getStartFormKey(node.getProcessDefinitionId()).getData() : getFormKey(node.getProcessDefinitionId(), node.getActivityId()).getData();
+                        node.setFormKey(formKey);
+                    }
                     Converter.setVariables(node, variables);
                 }
                 list.add(node);
@@ -297,6 +301,41 @@ public class FlowServiceImpl implements FlowService, InitializingBean {
             return ResultDTO.buildSuccess(list);
         } catch (Throwable e) {
             logger.error("Error getByInstanceId:" + processInstanceId, e);
+            return ResultDTO.buildError(ResultDTO.ERROR_CODE_SYSTEM_ERROR, e.getMessage());
+        }
+    }
+
+    private String getTaskDefinitionKey(String processDefinitionId) {
+        int flag = processDefinitionId.indexOf(":");
+        if (flag > 0) {
+            processDefinitionId = StringUtils.substring(processDefinitionId, 0, flag);
+        }
+        return processDefinitionId;
+    }
+
+    @Override
+    public ResultDTO<String> getStartFormKey(String processKey) {
+        try {
+            processKey = getTaskDefinitionKey(processKey);
+            String processDefinitionId = repositoryService.createProcessDefinitionQuery().processDefinitionKey(processKey).latestVersion().singleResult().getId();
+            String formKey = processEngineConfiguration.getFormService().getStartFormKey(processDefinitionId);
+            return ResultDTO.buildSuccess(formKey);
+        } catch (Throwable e) {
+            logger.error("Error getFormKey:" + processKey, e);
+            return ResultDTO.buildError(ResultDTO.ERROR_CODE_SYSTEM_ERROR, e.getMessage());
+        }
+    }
+
+    @Override
+    public ResultDTO<String> getFormKey(String processDefinitionId, String taskDefinitionKey) {
+        try {
+            if (taskDefinitionKey == null) {
+                taskDefinitionKey = getTaskDefinitionKey(processDefinitionId);
+            }
+            String formKey = processEngineConfiguration.getFormService().getTaskFormKey(processDefinitionId, taskDefinitionKey);
+            return ResultDTO.buildSuccess(formKey);
+        } catch (Throwable e) {
+            logger.error("Error getFormKey:" + processDefinitionId, e);
             return ResultDTO.buildError(ResultDTO.ERROR_CODE_SYSTEM_ERROR, e.getMessage());
         }
     }

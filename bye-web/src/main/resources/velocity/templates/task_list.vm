@@ -13,7 +13,7 @@
             <tr>
                 <td>$!{task.processInstanceId}</td>
                 <td>$!{task.title}</td>
-                <td><a href="$!{task.link}">审批</a></td>
+                <td><a href="task_show.htm?processInstanceId=$!{task.processInstanceId}">审批</a></td>
             </tr>
             #end
         </tbody>

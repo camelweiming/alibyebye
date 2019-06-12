@@ -68,6 +68,20 @@ public class FlowableTest {
     }
 
     @Test
+    public void testLoadKey() {
+        String key = flowService.getFormKey("holidayRequest:374:965004", "usertask2").getData();
+        System.out.println("startKey:" + key);
+        key = flowService.getStartFormKey("holidayRequest:374:965004").getData();
+        System.out.println("taskKey:" + key);
+    }
+
+    @Test
+    public void testLoadKey2() {
+        String key = flowService.getStartFormKey("holidayRequest:374:965004").getData();
+        System.out.println(key);
+    }
+
+    @Test
     public void clear() {
         List<HistoricTaskInstance> task = ProcessEngines.getDefaultProcessEngine().getHistoryService().createHistoricTaskInstanceQuery().list();
         task.forEach(t -> {

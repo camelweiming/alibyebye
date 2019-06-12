@@ -16,6 +16,26 @@ import java.util.regex.Pattern;
  * @since 2019/3/6
  */
 public class CommonUtils {
+    public static Long toLong(Object value) {
+        if (value == null) {
+            return null;
+        }
+        if (value instanceof Number) {
+            return ((Number)value).longValue();
+        }
+        return Long.valueOf(value.toString());
+    }
+
+    public static Integer toInteger(Object value) {
+        if (value == null) {
+            return null;
+        }
+        if (value instanceof Number) {
+            return ((Number)value).intValue();
+        }
+        return Integer.valueOf(value.toString());
+    }
+
     public static boolean bitSet(long target, long v) {
         return (target & v) == v;
     }
