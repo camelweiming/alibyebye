@@ -25,7 +25,7 @@
             <hr class="my-4">
             #if(!$node.startEvent)
                 <p class="lead">处理人：#if(!$node.assignee)待指派#else${node.assigneeName}#end</p>
-                <p class="lead">状态：#if($node.state==0)未开始#elseif($node.state==1)审批中#{else}已结束#end</p>
+                <p class="lead">状态：#if($node.stateValue==0)未开始#elseif($node.stateValue==1)审批中#{else}已结束#end</p>
             #end
             <p class="lead">开始时间：#if($node.startTime)$common.formatDate($node.startTime)#end</p>
             #if($node.endTime)

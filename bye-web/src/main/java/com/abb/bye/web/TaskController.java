@@ -56,6 +56,7 @@ public class TaskController {
                 queryType = TaskQuery.TYPE.PROCESSED;
                 break;
         }
+        model.addAttribute("queryType", type);
         TaskQuery q = new TaskQuery().setType(queryType).setUserId(String.valueOf(loginUserId)).setLimit(Integer.MAX_VALUE);
         com.abb.flowable.domain.ResultDTO<List<TaskDTO>> list = flowService.query(q);
         model.addAttribute("tasks", list.getData());
@@ -68,7 +69,7 @@ public class TaskController {
         try {
             Form form = flowService.getFrom(formKey);
             FormRequest requestDTO = new DefaultFormRequest(request.getParameterMap());
-            requestDTO.addContext(Constants.REQUEST_CXT_LOGIN_USER_ID, LoginUtil.getLoginUser(request));
+            requestDTO.addContext(Constants.REQUEST_CXT_LOGIN_USER_ID, LoginUtil.getLoginUserSilent(request));
             ComponentForm componentForm = form.render(requestDTO).getData();
             componentForm.addComponent(new HiddenComponent().setValue(processKey).setName("processKey"));
             model.addAttribute("fields", componentForm.getComponents());
@@ -93,7 +94,7 @@ public class TaskController {
         data.put("success", true);
         try {
             FormRequest requestDTO = new DefaultFormRequest(request.getParameterMap());
-            requestDTO.addContext(Constants.REQUEST_CXT_LOGIN_USER_ID, LoginUtil.getLoginUser(request));
+            requestDTO.addContext(Constants.REQUEST_CXT_LOGIN_USER_ID, LoginUtil.getLoginUserSilent(request));
             String formKey;
             if (taskId != null) {
                 TaskDTO task = flowService.getTask(taskId, new Options()).getData();
@@ -140,11 +141,11 @@ public class TaskController {
                 String formKey = node.getFormKey();
                 NodeVO nodeVO = new NodeVO();
                 nodeVO.setNode(node);
-                boolean toEdit = (NumberUtils.toLong(node.getAssignee()) == loginUserId) && node.getState() == ProcessNodeDTO.STATE_PROCESSING;
+                boolean toEdit = (NumberUtils.toLong(node.getAssignee()) == loginUserId) && node.getState() == TaskState.PROCESSING;
                 if (toEdit) {
                     nodeVO.setEdit(true);
                 }
-                if (node.getState() != ProcessNodeDTO.STATE_END) {
+                if (node.getState() != TaskState.END) {
                     finished = false;
                 }
                 nodeVO.setFields(new ArrayList<>(0));
