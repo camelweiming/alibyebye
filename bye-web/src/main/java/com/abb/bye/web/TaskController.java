@@ -176,7 +176,7 @@ public class TaskController {
 
     private ComponentForm mergeField4Edit(Form form, HttpServletRequest request, ProcessNodeDTO node) {
         FormRequest requestDTO = new DefaultFormRequest(request.getParameterMap());
-        requestDTO.addContext(FormRequestDTO.CXT_LOGIN_USER_ID, LoginUtil.getLoginUserSilent(request));
+        requestDTO.addContext(Constants.REQUEST_CXT_LOGIN_USER_ID, LoginUtil.getLoginUserSilent(request));
         com.abb.flowable.domain.ResultDTO<ComponentForm> res = form.render(requestDTO);
         if (!res.isSuccess()) {
             throw new RuntimeException(res.getErrMsg());

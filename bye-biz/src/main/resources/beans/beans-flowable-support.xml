@@ -5,7 +5,7 @@
        default-autowire="byName">
 
     <bean id="flowServiceImpl" class="com.abb.flowable.service.impl.FlowServiceImpl">
-        <property name="resource" value="/flowable/*.xml"/>
+        <property name="resources" value="classpath:/flowable/*.xml"/>
     </bean>
 
 </beans>
