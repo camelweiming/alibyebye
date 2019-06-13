@@ -1,5 +1,6 @@
-package com.abb.bye.web.form;
+package com.abb.bye.flowable.holiday;
 
+import com.abb.bye.Constants;
 import com.abb.bye.client.domain.UserDTO;
 import com.abb.bye.client.domain.UserOptions;
 import com.abb.bye.client.service.UserService;
@@ -53,7 +54,7 @@ public class HolidayRequestForm implements Form {
         try {
             UserService userService = SpringCtx.getBean(UserService.class);
             FlowService flowService = SpringCtx.getBean(FlowService.class);
-            Long loginUserId = (Long)request.getContextValue(FormRequestDTO.CXT_LOGIN_USER_ID);
+            Long loginUserId = (Long)request.getContextValue(Constants.REQUEST_CXT_LOGIN_USER_ID);
             if (loginUserId == null) {
                 return ResultDTO.buildError(ResultDTO.ERROR_CODE_USER_NOT_LOGIN, "user not login");
             }

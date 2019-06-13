@@ -1,11 +1,15 @@
-package com.abb.bye.web.form;
+package com.abb.bye.flowable.holiday;
 
+import com.abb.bye.Constants;
 import com.abb.bye.client.domain.UserDTO;
 import com.abb.bye.client.domain.UserOptions;
 import com.abb.bye.client.service.UserService;
 import com.abb.bye.service.SpringCtx;
 import com.abb.bye.utils.CommonUtils;
-import com.abb.flowable.domain.*;
+import com.abb.flowable.domain.CompleteDTO;
+import com.abb.flowable.domain.ComponentForm;
+import com.abb.flowable.domain.FormRequest;
+import com.abb.flowable.domain.ResultDTO;
 import com.abb.flowable.domain.component.ComponentOption;
 import com.abb.flowable.domain.component.RadioComponent;
 import com.abb.flowable.domain.component.TextComponent;
@@ -34,7 +38,7 @@ public class HolidayApproveForm implements Form {
         /**
          * 加签用户列表
          */
-        Long loginUserId = (Long)request.getContextValue(FormRequestDTO.CXT_LOGIN_USER_ID);
+        Long loginUserId = (Long)request.getContextValue(Constants.REQUEST_CXT_LOGIN_USER_ID);
         if (loginUserId == null) {
             return ResultDTO.buildError(ResultDTO.ERROR_CODE_USER_NOT_LOGIN, "user not login");
         }
@@ -77,7 +81,7 @@ public class HolidayApproveForm implements Form {
         CompleteDTO submitDTO = new CompleteDTO();
         UserService userService = SpringCtx.getBean(UserService.class);
         FlowService flowService = SpringCtx.getBean(FlowService.class);
-        Long loginUserId = (Long)request.getContextValue(FormRequestDTO.CXT_LOGIN_USER_ID);
+        Long loginUserId = (Long)request.getContextValue(Constants.REQUEST_CXT_LOGIN_USER_ID);
         if (loginUserId == null) {
             return ResultDTO.buildError(ResultDTO.ERROR_CODE_USER_NOT_LOGIN, "user not login");
         }

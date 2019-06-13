@@ -1,16 +1,14 @@
 package com.abb.bye.web;
 
 import com.abb.bye.Constants;
+import com.abb.bye.client.vo.NodeVO;
 import com.abb.bye.utils.LoginUtil;
 import com.abb.flowable.domain.*;
-import com.abb.flowable.domain.component.Component;
 import com.abb.flowable.domain.component.HiddenComponent;
 import com.abb.flowable.service.FlowService;
 import com.abb.flowable.service.Form;
 import com.alibaba.fastjson.JSON;
 import com.google.common.collect.Iterators;
-import org.apache.commons.lang3.builder.ToStringBuilder;
-import org.apache.commons.lang3.builder.ToStringStyle;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -140,15 +138,17 @@ public class TaskController {
             boolean finished = true;
             for (ProcessNodeDTO node : processNodes) {
                 String formKey = node.getFormKey();
-                NodeVO nodeVO = new NodeVO(node);
+                NodeVO nodeVO = new NodeVO();
+                nodeVO.setNode(node);
                 boolean toEdit = (NumberUtils.toLong(node.getAssignee()) == loginUserId) && node.getState() == ProcessNodeDTO.STATE_PROCESSING;
                 if (toEdit) {
-                    nodeVO.edit = true;
+                    nodeVO.setEdit(true);
                 }
                 if (node.getState() != ProcessNodeDTO.STATE_END) {
                     finished = false;
                 }
-                nodeVO.fields = new ArrayList<>(0);
+                nodeVO.setFields(new ArrayList<>(0));
+                nodeVO.setDurationMin(node.getDurationInMillis() == null ? null : node.getDurationInMillis() / 1000 / 60);
                 nodeVOS.add(nodeVO);
                 if (formKey == null) {
                     continue;
@@ -158,7 +158,7 @@ public class TaskController {
                     continue;
                 }
                 ComponentForm componentForm = toEdit ? mergeField4Edit(form, request, node) : mergeField4Show(form, node);
-                nodeVO.fields = (componentForm == null || componentForm.getComponents() == null) ? new ArrayList<>(0) : componentForm.getComponents();
+                nodeVO.setFields((componentForm == null || componentForm.getComponents() == null) ? new ArrayList<>(0) : componentForm.getComponents());
             }
             filter4show(nodeVOS);
             model.addAttribute("nodes", nodeVOS);
@@ -202,38 +202,5 @@ public class TaskController {
      */
     private void filter4show(List<NodeVO> nodes) {
         Iterators.removeIf(nodes.iterator(), input -> !input.getNode().getActivityType().equals("userTask") && !input.getNode().getActivityType().equals("startEvent"));
-    }
-
-    public static class NodeVO {
-        private ProcessNodeDTO node;
-        private List<Component> fields;
-        private boolean edit;
-        private Long durationMin;
-
-        public boolean isEdit() {
-            return edit;
-        }
-
-        public NodeVO(ProcessNodeDTO node) {
-            this.node = node;
-            this.durationMin = node.getDurationInMillis() == null ? null : node.getDurationInMillis() / 1000 / 60;
-        }
-
-        public ProcessNodeDTO getNode() {
-            return node;
-        }
-
-        public List<Component> getFields() {
-            return fields;
-        }
-
-        public Long getDurationMin() {
-            return durationMin;
-        }
-
-        @Override
-        public String toString() {
-            return ToStringBuilder.reflectionToString(this, ToStringStyle.SHORT_PREFIX_STYLE);
-        }
     }
 }

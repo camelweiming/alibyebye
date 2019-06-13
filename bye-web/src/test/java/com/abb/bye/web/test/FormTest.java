@@ -1,7 +1,7 @@
 package com.abb.bye.web.test;
 
-import com.abb.bye.web.form.HolidayApproveForm;
-import com.abb.bye.web.form.HolidayRequestForm;
+import com.abb.bye.flowable.holiday.HolidayApproveForm;
+import com.abb.bye.flowable.holiday.HolidayRequestForm;
 import org.junit.Test;
 
 import java.util.HashMap;
