@@ -2,6 +2,7 @@ package com.abb.bye.service;
 
 import com.abb.bye.Constants;
 import com.abb.bye.client.domain.*;
+import com.abb.bye.client.flow.FlowForm;
 import com.abb.bye.client.service.FlowService;
 import com.abb.bye.flowable.form.CustomFormTypes;
 import com.abb.bye.utils.Converter;
@@ -75,6 +76,16 @@ public class FlowServiceImpl implements FlowService, InitializingBean {
     private static org.springframework.core.io.Resource[] findAllClassPathResources(String location) throws IOException {
         PathMatchingResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();
         return resolver.getResources(location);
+    }
+
+    @Override
+    public FlowForm getFrom(String formKey) {
+        try {
+            return (FlowForm)SpringCtx.getBean(formKey);
+        } catch (Throwable e) {
+            logger.error("Error load fromKey:" + formKey, e);
+            return null;
+        }
     }
 
     @Override
@@ -219,7 +230,7 @@ public class FlowServiceImpl implements FlowService, InitializingBean {
             return ResultDTO.buildError(ResultDTO.ERROR_CODE_SYSTEM_ERROR, "miss assignee");
         }
         try {
-            Map<String, Object> variables = flowCompleteDTO.getTaskVariables() == null ? new HashMap<>(8) : flowCompleteDTO.getVariables();
+            Map<String, Object> variables = flowCompleteDTO.getVariables() == null ? new HashMap<>(8) : flowCompleteDTO.getVariables();
             Map<String, Object> taskVariables = flowCompleteDTO.getTaskVariables() == null ? new HashMap<>(8) : flowCompleteDTO.getTaskVariables();
             if (flowCompleteDTO.getAssignee() != null) {
                 variables.put(Constants.TASK_ASSIGNEE, flowCompleteDTO.getAssignee());

@@ -24,6 +24,9 @@ public abstract class FlowRequestDTO implements Serializable {
      * 通过
      */
     private Boolean pass;
+    /**
+     * 全局变量
+     */
     private Map<String, Object> variables;
 
     public FlowRequestDTO addVariable(String k, Object v) {

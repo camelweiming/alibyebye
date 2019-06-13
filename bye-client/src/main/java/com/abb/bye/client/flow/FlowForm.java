@@ -7,24 +7,24 @@ import java.util.Map;
 
 /**
  * @author cenpeng.lwm
- * @since 2019/6/12
+ * @since 2019/6/13
  */
-public interface Form {
+public interface FlowForm {
     /**
-     * 通过页面参数渲染
+     * 准备表单元素，在准备提交表单时使用
      *
      * @param request
      * @return
      */
-    ResultDTO<Object> render(HttpServletRequest request);
+    ResultDTO<FormObject> render(HttpServletRequest request);
 
     /**
-     * 通过变量渲染
+     * 在处理之后预览时使用
      *
      * @param variables
      * @return
      */
-    ResultDTO<Object> render(Map<String, Object> variables);
+    ResultDTO<FormObject> render(Map<String, Object> variables);
 
     /**
      * 处理表单请求
@@ -33,4 +33,5 @@ public interface Form {
      * @return
      */
     ResultDTO<Object> post(HttpServletRequest request);
+
 }

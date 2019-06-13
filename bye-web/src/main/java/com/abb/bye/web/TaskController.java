@@ -1,12 +1,13 @@
 package com.abb.bye.web;
 
 import com.abb.bye.client.domain.*;
-import com.abb.bye.client.flow.Form;
-import com.abb.bye.client.flow.FormField;
+import com.abb.bye.client.flow.FlowForm;
+import com.abb.bye.client.flow.FormObject;
+import com.abb.bye.client.flow.component.Component;
+import com.abb.bye.client.flow.component.HiddenComponent;
 import com.abb.bye.client.service.FlowService;
-import com.abb.bye.utils.FormUtils;
-import com.abb.bye.web.form.FormLoader;
 import com.alibaba.fastjson.JSON;
+import com.google.common.collect.Iterators;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import org.apache.commons.lang3.math.NumberUtils;
@@ -66,10 +67,10 @@ public class TaskController extends BaseController {
     String taskForm(HttpServletRequest request, Model model, @RequestParam(required = false) String processKey) {
         String formKey = flowService.getStartFormKey(processKey).getData();
         try {
-            Form form = FormLoader.load(formKey);
-            List<FormField> formFields = FormUtils.getFields(form);
-            formFields.add(new FormField().setType("hidden").setName("processKey").setValue(processKey));
-            model.addAttribute("fields", formFields);
+            FlowForm form = flowService.getFrom(formKey);
+            FormObject formObject = form.render(request).getData();
+            formObject.addComponent(new HiddenComponent().setValue(processKey).setName("processKey"));
+            model.addAttribute("fields", formObject.getComponents());
         } catch (Throwable e) {
             model.addAttribute("errorMsg", "系统异常");
             logger.error("Error form", e);
@@ -96,7 +97,7 @@ public class TaskController extends BaseController {
         Map<String, Object> data = new HashMap<>();
         data.put("success", true);
         try {
-            Form form = FormLoader.load(formKey);
+            FlowForm form = flowService.getFrom(formKey);
             ResultDTO<Object> res = form.post(request);
             if (!res.isSuccess()) {
                 data.put("success", false);
@@ -130,6 +131,7 @@ public class TaskController extends BaseController {
             Long loginUserId = getLoginUser(request);
             List<ProcessNodeDTO> processNodes = flowService.getByInstanceId(processInstanceId, new FlowOptions().setWithVariables(true).setWithFormKey(true)).getData();
             List<NodeVO> nodeVOS = new ArrayList<>(processNodes.size());
+            boolean finished = true;
             for (ProcessNodeDTO node : processNodes) {
                 String formKey = node.getFormKey();
                 NodeVO nodeVO = new NodeVO(node);
@@ -137,15 +139,25 @@ public class TaskController extends BaseController {
                 if (toEdit) {
                     nodeVO.edit = true;
                 }
-                nodeVOS.add(nodeVO);
-                Form form = FormLoader.load(formKey);
-                List<FormField> fields = null;
-                if (form != null) {
-                    fields = toEdit ? mergeField4Edit(form, request, node) : mergeField4Show(form, node);
+                if (node.getState() != ProcessNodeDTO.STATE_END) {
+                    finished = false;
                 }
-                nodeVO.fields = fields == null ? new ArrayList<>(0) : fields;
+                nodeVOS.add(nodeVO);
+                FlowForm form = flowService.getFrom(formKey);
+                if (form == null) {
+                    nodeVO.fields = new ArrayList<>(0);
+                    continue;
+                }
+                FormObject formObject = toEdit ? mergeField4Edit(form, request, node) : mergeField4Show(form, node);
+                nodeVO.fields = (formObject == null || formObject.getComponents() == null) ? new ArrayList<>(0) : formObject.getComponents();
             }
+            filter4show(nodeVOS);
             model.addAttribute("nodes", nodeVOS);
+            long cost = finished
+                ? (processNodes.get(processNodes.size() - 1).getEndTime().getTime() - processNodes.get(0).getStartTime().getTime())
+                : (System.currentTimeMillis() - processNodes.get(0).getStartTime().getTime());
+            model.addAttribute("finished", finished);
+            model.addAttribute("cost", (cost / 1000 / 60));
         } catch (Throwable e) {
             logger.error("Error addHoliday", e);
             model.addAttribute("errorMsg", "system error");
@@ -153,23 +165,39 @@ public class TaskController extends BaseController {
         return vm;
     }
 
-    private List<FormField> mergeField4Edit(Form form, HttpServletRequest request, ProcessNodeDTO node) throws IllegalAccessException {
-        form.render(request);
-        List<FormField> fields = FormUtils.getFields(form);
-        fields.add(new FormField().setType("hidden").setName("taskId").setValue(node.getTaskId()));
-        return fields;
+    private FormObject mergeField4Edit(FlowForm form, HttpServletRequest request, ProcessNodeDTO node) throws IllegalAccessException {
+        ResultDTO<FormObject> res = form.render(request);
+        if (!res.isSuccess()) {
+            throw new RuntimeException(res.getErrMsg());
+        }
+        FormObject formObject = res.getData();
+        formObject.addComponent(new HiddenComponent().setValue(node.getTaskId()).setName("taskId"));
+        return formObject;
     }
 
-    private List<FormField> mergeField4Show(Form form, ProcessNodeDTO node) throws IllegalAccessException {
-        form.render(node.getVariables());
-        List<FormField> fields = FormUtils.getFieldsOnlyPersistent(form);
-        return fields;
+    private FormObject mergeField4Show(FlowForm form, ProcessNodeDTO node) throws IllegalAccessException {
+        ResultDTO<FormObject> res = form.render(node.getVariables());
+        if (!res.isSuccess()) {
+            throw new RuntimeException(res.getErrMsg());
+        }
+        FormObject formObject = res.getData();
+        return formObject;
+    }
+
+    /**
+     * 显示过滤
+     *
+     * @param nodes
+     */
+    private void filter4show(List<NodeVO> nodes) {
+        Iterators.removeIf(nodes.iterator(), input -> !input.getNode().getActivityType().equals("userTask") && !input.getNode().getActivityType().equals("startEvent"));
     }
 
     public static class NodeVO {
         private ProcessNodeDTO node;
-        private List<FormField> fields;
+        private List<Component> fields;
         private boolean edit;
+        private Long durationMin;
 
         public boolean isEdit() {
             return edit;
@@ -177,14 +205,19 @@ public class TaskController extends BaseController {
 
         public NodeVO(ProcessNodeDTO node) {
             this.node = node;
+            this.durationMin = node.getDurationInMillis() == null ? null : node.getDurationInMillis() / 1000 / 60;
         }
 
         public ProcessNodeDTO getNode() {
             return node;
         }
 
-        public List<FormField> getFields() {
+        public List<Component> getFields() {
             return fields;
+        }
+
+        public Long getDurationMin() {
+            return durationMin;
         }
 
         @Override

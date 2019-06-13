@@ -1,4 +1,4 @@
-package com.abb.bye.client.flow;
+package com.abb.bye.client.flow.component;
 
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
@@ -9,14 +9,14 @@ import java.io.Serializable;
  * @author cenpeng.lwm
  * @since 2019/6/12
  */
-public class FormFieldOption implements Serializable {
+public class ComponentOption implements Serializable {
     private static final long serialVersionUID = 8898083263981396769L;
     private String name;
     private String value;
 
-    public FormFieldOption() {}
+    public ComponentOption() {}
 
-    public FormFieldOption(String name, String value) {
+    public ComponentOption(String name, String value) {
         this.name = name;
         this.value = value;
     }

@@ -1,6 +1,7 @@
 package com.abb.bye.client.service;
 
 import com.abb.bye.client.domain.*;
+import com.abb.bye.client.flow.FlowForm;
 
 import java.util.List;
 
@@ -9,6 +10,14 @@ import java.util.List;
  * @since 2019/6/7
  */
 public interface FlowService {
+    /**
+     * 获取form
+     *
+     * @param formKey
+     * @return
+     */
+    FlowForm getFrom(String formKey);
+
     /**
      * 查询任务
      *

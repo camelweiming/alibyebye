@@ -14,12 +14,12 @@
     <sequenceFlow id="sequenceFlow-0e11f887-06a9-44bc-bf79-8b063843a8da" sourceRef="decision" targetRef="holidayApproveTask">
       <conditionExpression xsi:type="tFormalExpression"><![CDATA[${pass}]]></conditionExpression>
     </sequenceFlow>
-    <serviceTask id="holidayRejectTask" name="HolidayRejectTask" activiti:class="com.abb.bye.flowable.holiday.HolidayRejectTask"></serviceTask>
-    <serviceTask id="holidayApproveTask" name="HolidayApproveTask" activiti:class="com.abb.bye.flowable.holiday.HolidayApproveTask"></serviceTask>
+    <serviceTask id="holidayRejectTask" name="发送拒绝邮件" activiti:class="com.abb.bye.flowable.holiday.HolidayRejectTask"></serviceTask>
+    <serviceTask id="holidayApproveTask" name="假期系统执行" activiti:class="com.abb.bye.flowable.holiday.HolidayApproveTask"></serviceTask>
     <endEvent id="approveEnd"></endEvent>
     <endEvent id="rejectEnd"></endEvent>
     <sequenceFlow id="flow1" sourceRef="holidayRejectTask" targetRef="approveEnd"></sequenceFlow>
-    <userTask id="usertask1" name="加签" activiti:assignee="${assignee}" activiti:formKey="approve_holiday.htm" activiti:skipExpression="${skip}"></userTask>
+    <userTask id="usertask1" name="加签" activiti:assignee="${assignee}" activiti:formKey="HolidayApproveForm" activiti:skipExpression="${skip}"></userTask>
     <sequenceFlow id="flow2" sourceRef="holidayApproveTask" targetRef="rejectEnd"></sequenceFlow>
     <userTask id="usertask2" name="主管审批" activiti:assignee="${assignee}" activiti:formKey="HolidayApproveForm" activiti:skipExpression="${skip}"></userTask>
     <sequenceFlow id="flow3" sourceRef="startEvent" targetRef="usertask2"></sequenceFlow>

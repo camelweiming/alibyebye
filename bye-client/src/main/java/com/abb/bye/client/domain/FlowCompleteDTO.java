@@ -3,6 +3,7 @@ package com.abb.bye.client.domain;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -11,6 +12,9 @@ import java.util.Map;
  */
 public class FlowCompleteDTO extends FlowRequestDTO {
     private static final long serialVersionUID = 4196449326985418273L;
+    /**
+     * 当前task变量
+     */
     private Map<String, Object> taskVariables;
 
     public Map<String, Object> getTaskVariables() {
@@ -19,6 +23,13 @@ public class FlowCompleteDTO extends FlowRequestDTO {
 
     public void setTaskVariables(Map<String, Object> taskVariables) {
         this.taskVariables = taskVariables;
+    }
+
+    public void addTaskVariables(String name, Object value) {
+        if (this.taskVariables == null) {
+            this.taskVariables = new HashMap<>(8);
+        }
+        this.taskVariables.put(name, value);
     }
 
     @Override

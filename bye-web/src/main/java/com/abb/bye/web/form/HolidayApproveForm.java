@@ -4,55 +4,63 @@ import com.abb.bye.client.domain.FlowCompleteDTO;
 import com.abb.bye.client.domain.ResultDTO;
 import com.abb.bye.client.domain.UserDTO;
 import com.abb.bye.client.domain.UserOptions;
-import com.abb.bye.client.flow.Field;
-import com.abb.bye.client.flow.Form;
-import com.abb.bye.client.flow.FormFieldOption;
+import com.abb.bye.client.flow.FlowForm;
+import com.abb.bye.client.flow.FormObject;
+import com.abb.bye.client.flow.component.ComponentOption;
+import com.abb.bye.client.flow.component.RadioComponent;
+import com.abb.bye.client.flow.component.TextComponent;
 import com.abb.bye.client.service.FlowService;
 import com.abb.bye.client.service.UserService;
 import com.abb.bye.service.SpringCtx;
 import com.abb.bye.utils.CommonUtils;
 import com.abb.bye.utils.LoginUtil;
+import org.springframework.stereotype.Component;
 
 import javax.servlet.http.HttpServletRequest;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 
 /**
  * @author cenpeng.lwm
  * @since 2019/6/12
  */
-public class HolidayApproveForm implements Form {
-    @Field(name = "approve", label = "审批", type = "radio", multiValue = true, required = true, persistence = true)
-    private List<FormFieldOption> approve;
-    @Field(name = "description", label = "理由", persistence = true)
-    private String description;
-    @Field(name = "confirmUser", label = "加签", type = "radio", multiValue = true)
-    private List<FormFieldOption> leaders;
+@Component("HolidayApproveForm")
+public class HolidayApproveForm implements FlowForm {
 
     @Override
-    public ResultDTO<Object> render(HttpServletRequest request) {
-        approve = new ArrayList<>();
-        approve.add(new FormFieldOption("请选择", "-1"));
-        approve.add(new FormFieldOption("通过", "1"));
-        approve.add(new FormFieldOption("驳回", "2"));
-        Long loginUserId = LoginUtil.getLoginUserSilent(request);
-        UserService userService = SpringCtx.getBean(UserService.class);
+    public ResultDTO<FormObject> render(HttpServletRequest request) {
+        FormObject formObject = new FormObject();
+        RadioComponent approve = (RadioComponent)new RadioComponent().setName("approve").setLabel("审批").setRequired(true);
+        approve.addOption(new ComponentOption("请选择", "-1"));
+        approve.addOption(new ComponentOption("通过", "1"));
+        approve.addOption(new ComponentOption("驳回", "2"));
+        formObject.addComponent(approve);
+        formObject.addComponent(new TextComponent().setName("description").setLabel("理由"));
         /**
          * 加签用户列表
          */
+        Long loginUserId = LoginUtil.getLoginUserSilent(request);
+        UserService userService = SpringCtx.getBean(UserService.class);
         UserDTO userDTO = userService.getById(loginUserId, new UserOptions().setWithBoss(true)).getData();
         if (userDTO.getBosses() != null) {
-            leaders = new ArrayList<>();
-            leaders.add(new FormFieldOption("请选择", "-1"));
-            userDTO.getBosses().forEach(boss -> leaders.add(new FormFieldOption(boss.getUserName(), "" + boss.getUserId())));
+            RadioComponent leaders = (RadioComponent)new RadioComponent().setName("confirmUser").setLabel("加签");
+            userDTO.getBosses().forEach(boss -> leaders.addOption(new ComponentOption(boss.getUserName(), "" + boss.getUserId())));
+            formObject.addComponent(leaders);
         }
-        return ResultDTO.buildSuccess(null);
+        return ResultDTO.buildSuccess(formObject);
     }
 
     @Override
-    public ResultDTO<Object> render(Map<String, Object> variables) {
-        return null;
+    public ResultDTO<FormObject> render(Map<String, Object> variables) {
+        FormObject formObject = new FormObject();
+        String confirmUserName = (String)variables.get("confirmUserName");
+        String description = (String)variables.get("description");
+        if (confirmUserName != null) {
+            formObject.addComponent(new TextComponent().setValue(confirmUserName).setLabel("加签"));
+        }
+        if (description != null) {
+            formObject.addComponent(new TextComponent().setValue(description).setLabel("理由"));
+        }
+        return ResultDTO.buildSuccess(formObject);
     }
 
     @Override
@@ -86,39 +94,17 @@ public class HolidayApproveForm implements Form {
         }
         submitDTO.setPass(true);
         if (description != null) {
-            submitDTO.addVariable("description", description);
+            submitDTO.addTaskVariables("description", description);
         }
         if (confirmUser != null) {
-            submitDTO.addVariable("confirmUser", confirmUser);
+            UserDTO confirmUserDTO = userService.getById(loginUserId, new UserOptions()).getData();
+            submitDTO.addTaskVariables("confirmUser", confirmUser);
+            submitDTO.addTaskVariables("confirmUserName", confirmUserDTO.getUserName());
         }
         ResultDTO<Void> result = flowService.complete(taskId, submitDTO);
         if (!result.isSuccess()) {
             return ResultDTO.buildError(result.getErrCode(), result.getErrMsg());
         }
         return ResultDTO.buildSuccess(true);
-    }
-
-    public List<FormFieldOption> getApprove() {
-        return approve;
-    }
-
-    public void setApprove(List<FormFieldOption> approve) {
-        this.approve = approve;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
-    }
-
-    public List<FormFieldOption> getLeaders() {
-        return leaders;
-    }
-
-    public void setLeaders(List<FormFieldOption> leaders) {
-        this.leaders = leaders;
     }
 }

@@ -1,8 +1,9 @@
 package com.abb.bye.web.form;
 
 import com.abb.bye.client.domain.*;
-import com.abb.bye.client.flow.Field;
-import com.abb.bye.client.flow.Form;
+import com.abb.bye.client.flow.FlowForm;
+import com.abb.bye.client.flow.FormObject;
+import com.abb.bye.client.flow.component.TextComponent;
 import com.abb.bye.client.service.FlowService;
 import com.abb.bye.client.service.UserService;
 import com.abb.bye.service.SpringCtx;
@@ -11,6 +12,7 @@ import com.abb.bye.utils.LoginUtil;
 import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.Map;
@@ -19,31 +21,33 @@ import java.util.Map;
  * @author cenpeng.lwm
  * @since 2019/6/11
  */
-public class HolidayRequestForm implements Form {
+@Component("HolidayRequestForm")
+public class HolidayRequestForm implements FlowForm {
     private static final Logger logger = LoggerFactory.getLogger(HolidayRequestForm.class);
     private static final String PROCESS_DEFINITION_KEY = "holidayRequest";
 
-    @Field(name = "days", label = "请假天数", persistence = true)
-    private Integer days;
-    @Field(name = "description", label = "请假理由", persistence = true)
-    private String description;
-
     @Override
-    public ResultDTO<Object> render(HttpServletRequest request) {
-        return ResultDTO.buildSuccess(null);
+    public ResultDTO<FormObject> render(HttpServletRequest request) {
+        FormObject formObject = new FormObject();
+        formObject.addComponent(new TextComponent().setName("days").setLabel("请假天数").setRequired(true));
+        formObject.addComponent(new TextComponent().setName("description").setLabel("请假理由").setRequired(true));
+        return ResultDTO.buildSuccess(formObject);
     }
 
     @Override
-    public ResultDTO<Object> render(Map<String, Object> variables) {
-        days = (Integer)variables.get("days");
-        description = (String)variables.get("description");
-        return ResultDTO.buildSuccess(null);
+    public ResultDTO<FormObject> render(Map<String, Object> variables) {
+        Integer days = (Integer)variables.get("days");
+        String description = (String)variables.get("description");
+        FormObject formObject = new FormObject();
+        formObject.addComponent(new TextComponent().setValue("" + days).setName("days").setLabel("请假天数"));
+        formObject.addComponent(new TextComponent().setValue(description).setName("description").setLabel("请假理由").setRequired(true));
+        return ResultDTO.buildSuccess(formObject);
     }
 
     @Override
     public ResultDTO<Object> post(HttpServletRequest request) {
-        days = CommonUtils.toInteger(request.getParameter("days"));
-        description = request.getParameter("description");
+        Integer days = CommonUtils.toInteger(request.getParameter("days"));
+        String description = request.getParameter("description");
         if (days == null || days <= 0) {
             return ResultDTO.buildError("天数不能小于0");
         }
@@ -80,13 +84,5 @@ public class HolidayRequestForm implements Form {
             logger.error("Error post", e);
             return ResultDTO.buildError("系统错误");
         }
-    }
-
-    public Integer getDays() {
-        return days;
-    }
-
-    public String getDescription() {
-        return description;
     }
 }
