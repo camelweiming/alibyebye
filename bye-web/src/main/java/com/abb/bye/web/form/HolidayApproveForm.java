@@ -97,7 +97,7 @@ public class HolidayApproveForm implements FlowForm {
             submitDTO.addTaskVariables("description", description);
         }
         if (confirmUser != null) {
-            UserDTO confirmUserDTO = userService.getById(loginUserId, new UserOptions()).getData();
+            UserDTO confirmUserDTO = userService.getById(confirmUser, new UserOptions()).getData();
             submitDTO.addTaskVariables("confirmUser", confirmUser);
             submitDTO.addTaskVariables("confirmUserName", confirmUserDTO.getUserName());
         }
