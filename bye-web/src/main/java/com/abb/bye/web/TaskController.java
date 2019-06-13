@@ -1,11 +1,11 @@
 package com.abb.bye.web;
 
-import com.abb.bye.client.domain.*;
-import com.abb.bye.client.flow.FlowForm;
-import com.abb.bye.client.flow.FormObject;
-import com.abb.bye.client.flow.component.Component;
-import com.abb.bye.client.flow.component.HiddenComponent;
-import com.abb.bye.client.service.FlowService;
+import com.abb.bye.client.domain.ResultDTO;
+import com.abb.flowable.domain.*;
+import com.abb.flowable.domain.component.Component;
+import com.abb.flowable.domain.component.HiddenComponent;
+import com.abb.flowable.service.Form;
+import com.abb.flowable.service.FlowService;
 import com.alibaba.fastjson.JSON;
 import com.google.common.collect.Iterators;
 import org.apache.commons.lang3.builder.ToStringBuilder;
@@ -45,20 +45,20 @@ public class TaskController extends BaseController {
         if (type == null) {
             type = 0;
         }
-        FlowTaskQuery.TYPE queryType = null;
+        TaskQuery.TYPE queryType = null;
         switch (type) {
             case 0:
-                queryType = FlowTaskQuery.TYPE.WAITING_PROCESS;
+                queryType = TaskQuery.TYPE.WAITING_PROCESS;
                 break;
             case 1:
-                queryType = FlowTaskQuery.TYPE.INITIATE;
+                queryType = TaskQuery.TYPE.INITIATE;
                 break;
             case 2:
-                queryType = FlowTaskQuery.TYPE.PROCESSED;
+                queryType = TaskQuery.TYPE.PROCESSED;
                 break;
         }
-        FlowTaskQuery q = new FlowTaskQuery().setType(queryType).setUserId(String.valueOf(loginUserId)).setLimit(Integer.MAX_VALUE);
-        ResultDTO<List<FlowTaskDTO>> list = flowService.query(q);
+        TaskQuery q = new TaskQuery().setType(queryType).setUserId(String.valueOf(loginUserId)).setLimit(Integer.MAX_VALUE);
+        ResultDTO<List<TaskDTO>> list = flowService.query(q);
         model.addAttribute("tasks", list.getData());
         return vm;
     }
@@ -67,10 +67,10 @@ public class TaskController extends BaseController {
     String taskForm(HttpServletRequest request, Model model, @RequestParam(required = false) String processKey) {
         String formKey = flowService.getStartFormKey(processKey).getData();
         try {
-            FlowForm form = flowService.getFrom(formKey);
-            FormObject formObject = form.render(request).getData();
-            formObject.addComponent(new HiddenComponent().setValue(processKey).setName("processKey"));
-            model.addAttribute("fields", formObject.getComponents());
+            Form form = flowService.getFrom(formKey);
+            ComponentForm componentForm = form.render(request).getData();
+            componentForm.addComponent(new HiddenComponent().setValue(processKey).setName("processKey"));
+            model.addAttribute("fields", componentForm.getComponents());
         } catch (Throwable e) {
             model.addAttribute("errorMsg", "系统异常");
             logger.error("Error form", e);
@@ -89,7 +89,7 @@ public class TaskController extends BaseController {
     ) {
         String formKey;
         if (taskId != null) {
-            FlowTaskDTO task = flowService.getTask(taskId, new FlowOptions()).getData();
+            TaskDTO task = flowService.getTask(taskId, new Options()).getData();
             formKey = task.getFormKey();
         } else {
             formKey = flowService.getStartFormKey(processKey).getData();
@@ -97,7 +97,7 @@ public class TaskController extends BaseController {
         Map<String, Object> data = new HashMap<>();
         data.put("success", true);
         try {
-            FlowForm form = flowService.getFrom(formKey);
+            Form form = flowService.getFrom(formKey);
             ResultDTO<Object> res = form.post(request);
             if (!res.isSuccess()) {
                 data.put("success", false);
@@ -129,7 +129,7 @@ public class TaskController extends BaseController {
         String vm = "task_show";
         try {
             Long loginUserId = getLoginUser(request);
-            List<ProcessNodeDTO> processNodes = flowService.getByInstanceId(processInstanceId, new FlowOptions().setWithVariables(true).setWithFormKey(true)).getData();
+            List<ProcessNodeDTO> processNodes = flowService.getByInstanceId(processInstanceId, new Options().setWithVariables(true).setWithFormKey(true)).getData();
             List<NodeVO> nodeVOS = new ArrayList<>(processNodes.size());
             boolean finished = true;
             for (ProcessNodeDTO node : processNodes) {
@@ -142,14 +142,17 @@ public class TaskController extends BaseController {
                 if (node.getState() != ProcessNodeDTO.STATE_END) {
                     finished = false;
                 }
+                nodeVO.fields = new ArrayList<>(0);
                 nodeVOS.add(nodeVO);
-                FlowForm form = flowService.getFrom(formKey);
-                if (form == null) {
-                    nodeVO.fields = new ArrayList<>(0);
+                if (formKey == null) {
                     continue;
                 }
-                FormObject formObject = toEdit ? mergeField4Edit(form, request, node) : mergeField4Show(form, node);
-                nodeVO.fields = (formObject == null || formObject.getComponents() == null) ? new ArrayList<>(0) : formObject.getComponents();
+                Form form = flowService.getFrom(formKey);
+                if (form == null) {
+                    continue;
+                }
+                ComponentForm componentForm = toEdit ? mergeField4Edit(form, request, node) : mergeField4Show(form, node);
+                nodeVO.fields = (componentForm == null || componentForm.getComponents() == null) ? new ArrayList<>(0) : componentForm.getComponents();
             }
             filter4show(nodeVOS);
             model.addAttribute("nodes", nodeVOS);
@@ -165,23 +168,23 @@ public class TaskController extends BaseController {
         return vm;
     }
 
-    private FormObject mergeField4Edit(FlowForm form, HttpServletRequest request, ProcessNodeDTO node) throws IllegalAccessException {
-        ResultDTO<FormObject> res = form.render(request);
+    private ComponentForm mergeField4Edit(Form form, HttpServletRequest request, ProcessNodeDTO node) throws IllegalAccessException {
+        ResultDTO<ComponentForm> res = form.render(request);
         if (!res.isSuccess()) {
             throw new RuntimeException(res.getErrMsg());
         }
-        FormObject formObject = res.getData();
-        formObject.addComponent(new HiddenComponent().setValue(node.getTaskId()).setName("taskId"));
-        return formObject;
+        ComponentForm componentForm = res.getData();
+        componentForm.addComponent(new HiddenComponent().setValue(node.getTaskId()).setName("taskId"));
+        return componentForm;
     }
 
-    private FormObject mergeField4Show(FlowForm form, ProcessNodeDTO node) throws IllegalAccessException {
-        ResultDTO<FormObject> res = form.render(node.getVariables());
+    private ComponentForm mergeField4Show(Form form, ProcessNodeDTO node) throws IllegalAccessException {
+        ResultDTO<ComponentForm> res = form.render(node.getVariables());
         if (!res.isSuccess()) {
             throw new RuntimeException(res.getErrMsg());
         }
-        FormObject formObject = res.getData();
-        return formObject;
+        ComponentForm componentForm = res.getData();
+        return componentForm;
     }
 
     /**

@@ -1,19 +1,19 @@
 package com.abb.bye.web.form;
 
-import com.abb.bye.client.domain.FlowCompleteDTO;
 import com.abb.bye.client.domain.ResultDTO;
 import com.abb.bye.client.domain.UserDTO;
 import com.abb.bye.client.domain.UserOptions;
-import com.abb.bye.client.flow.FlowForm;
-import com.abb.bye.client.flow.FormObject;
-import com.abb.bye.client.flow.component.ComponentOption;
-import com.abb.bye.client.flow.component.RadioComponent;
-import com.abb.bye.client.flow.component.TextComponent;
-import com.abb.bye.client.service.FlowService;
 import com.abb.bye.client.service.UserService;
 import com.abb.bye.service.SpringCtx;
 import com.abb.bye.utils.CommonUtils;
 import com.abb.bye.utils.LoginUtil;
+import com.abb.flowable.domain.CompleteDTO;
+import com.abb.flowable.domain.ComponentForm;
+import com.abb.flowable.domain.component.ComponentOption;
+import com.abb.flowable.domain.component.RadioComponent;
+import com.abb.flowable.domain.component.TextComponent;
+import com.abb.flowable.service.Form;
+import com.abb.flowable.service.FlowService;
 import org.springframework.stereotype.Component;
 
 import javax.servlet.http.HttpServletRequest;
@@ -24,17 +24,17 @@ import java.util.Map;
  * @since 2019/6/12
  */
 @Component("HolidayApproveForm")
-public class HolidayApproveForm implements FlowForm {
+public class HolidayApproveForm implements Form {
 
     @Override
-    public ResultDTO<FormObject> render(HttpServletRequest request) {
-        FormObject formObject = new FormObject();
+    public ResultDTO<ComponentForm> render(HttpServletRequest request) {
+        ComponentForm componentForm = new ComponentForm();
         RadioComponent approve = (RadioComponent)new RadioComponent().setName("approve").setLabel("审批").setRequired(true);
         approve.addOption(new ComponentOption("请选择", "-1"));
         approve.addOption(new ComponentOption("通过", "1"));
         approve.addOption(new ComponentOption("驳回", "2"));
-        formObject.addComponent(approve);
-        formObject.addComponent(new TextComponent().setName("description").setLabel("理由"));
+        componentForm.addComponent(approve);
+        componentForm.addComponent(new TextComponent().setName("description").setLabel("理由"));
         /**
          * 加签用户列表
          */
@@ -44,23 +44,23 @@ public class HolidayApproveForm implements FlowForm {
         if (userDTO.getBosses() != null) {
             RadioComponent leaders = (RadioComponent)new RadioComponent().setName("confirmUser").setLabel("加签");
             userDTO.getBosses().forEach(boss -> leaders.addOption(new ComponentOption(boss.getUserName(), "" + boss.getUserId())));
-            formObject.addComponent(leaders);
+            componentForm.addComponent(leaders);
         }
-        return ResultDTO.buildSuccess(formObject);
+        return ResultDTO.buildSuccess(componentForm);
     }
 
     @Override
-    public ResultDTO<FormObject> render(Map<String, Object> variables) {
-        FormObject formObject = new FormObject();
+    public ResultDTO<ComponentForm> render(Map<String, Object> variables) {
+        ComponentForm componentForm = new ComponentForm();
         String confirmUserName = (String)variables.get("confirmUserName");
         String description = (String)variables.get("description");
         if (confirmUserName != null) {
-            formObject.addComponent(new TextComponent().setValue(confirmUserName).setLabel("加签"));
+            componentForm.addComponent(new TextComponent().setValue(confirmUserName).setLabel("加签"));
         }
         if (description != null) {
-            formObject.addComponent(new TextComponent().setValue(description).setLabel("理由"));
+            componentForm.addComponent(new TextComponent().setValue(description).setLabel("理由"));
         }
-        return ResultDTO.buildSuccess(formObject);
+        return ResultDTO.buildSuccess(componentForm);
     }
 
     @Override
@@ -75,7 +75,7 @@ public class HolidayApproveForm implements FlowForm {
         if (approve == null || taskId == null) {
             return ResultDTO.buildError("参数错误");
         }
-        FlowCompleteDTO submitDTO = new FlowCompleteDTO();
+        CompleteDTO submitDTO = new CompleteDTO();
         UserService userService = SpringCtx.getBean(UserService.class);
         FlowService flowService = SpringCtx.getBean(FlowService.class);
         Long loginUserId = LoginUtil.getLoginUserSilent(request);
