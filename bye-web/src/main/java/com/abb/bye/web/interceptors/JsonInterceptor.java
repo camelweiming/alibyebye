@@ -13,12 +13,14 @@ import javax.servlet.http.HttpServletResponse;
 import java.util.Map;
 
 /**
+ * 线上不要用这个东西，无用属性太多
+ *
  * @author cenpeng.lwm
  * @since 2019/5/26
  */
 
 @Component
-public class DataInterceptor extends HandlerInterceptorAdapter {
+public class JsonInterceptor extends HandlerInterceptorAdapter {
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
         return true;
