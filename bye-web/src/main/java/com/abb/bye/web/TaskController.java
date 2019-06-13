@@ -1,11 +1,12 @@
 package com.abb.bye.web;
 
-import com.abb.bye.client.domain.ResultDTO;
+import com.abb.bye.Constants;
+import com.abb.bye.utils.LoginUtil;
 import com.abb.flowable.domain.*;
 import com.abb.flowable.domain.component.Component;
 import com.abb.flowable.domain.component.HiddenComponent;
-import com.abb.flowable.service.Form;
 import com.abb.flowable.service.FlowService;
+import com.abb.flowable.service.Form;
 import com.alibaba.fastjson.JSON;
 import com.google.common.collect.Iterators;
 import org.apache.commons.lang3.builder.ToStringBuilder;
@@ -33,7 +34,7 @@ import java.util.Map;
  * @since 2019/5/27
  */
 @Controller
-public class TaskController extends BaseController {
+public class TaskController {
     private static Logger logger = LoggerFactory.getLogger(TaskController.class);
     @Resource
     private FlowService flowService;
@@ -41,7 +42,7 @@ public class TaskController extends BaseController {
     @RequestMapping(value = "task_list.htm", method = RequestMethod.GET)
     String taskList(HttpServletRequest request, Model model, @RequestParam(required = false) Integer type) {
         String vm = "task_list";
-        Long loginUserId = getLoginUser(request);
+        Long loginUserId = LoginUtil.getLoginUserSilent(request);
         if (type == null) {
             type = 0;
         }
@@ -58,7 +59,7 @@ public class TaskController extends BaseController {
                 break;
         }
         TaskQuery q = new TaskQuery().setType(queryType).setUserId(String.valueOf(loginUserId)).setLimit(Integer.MAX_VALUE);
-        ResultDTO<List<TaskDTO>> list = flowService.query(q);
+        com.abb.flowable.domain.ResultDTO<List<TaskDTO>> list = flowService.query(q);
         model.addAttribute("tasks", list.getData());
         return vm;
     }
@@ -68,7 +69,9 @@ public class TaskController extends BaseController {
         String formKey = flowService.getStartFormKey(processKey).getData();
         try {
             Form form = flowService.getFrom(formKey);
-            ComponentForm componentForm = form.render(request).getData();
+            FormRequest requestDTO = new DefaultFormRequest(request.getParameterMap());
+            requestDTO.addContext(Constants.REQUEST_CXT_LOGIN_USER_ID, LoginUtil.getLoginUser(request));
+            ComponentForm componentForm = form.render(requestDTO).getData();
             componentForm.addComponent(new HiddenComponent().setValue(processKey).setName("processKey"));
             model.addAttribute("fields", componentForm.getComponents());
         } catch (Throwable e) {
@@ -87,18 +90,21 @@ public class TaskController extends BaseController {
                       @RequestParam(required = false) String processKey,
                       @RequestParam(required = false) String taskId
     ) {
-        String formKey;
-        if (taskId != null) {
-            TaskDTO task = flowService.getTask(taskId, new Options()).getData();
-            formKey = task.getFormKey();
-        } else {
-            formKey = flowService.getStartFormKey(processKey).getData();
-        }
+
         Map<String, Object> data = new HashMap<>();
         data.put("success", true);
         try {
+            FormRequest requestDTO = new DefaultFormRequest(request.getParameterMap());
+            requestDTO.addContext(Constants.REQUEST_CXT_LOGIN_USER_ID, LoginUtil.getLoginUser(request));
+            String formKey;
+            if (taskId != null) {
+                TaskDTO task = flowService.getTask(taskId, new Options()).getData();
+                formKey = task.getFormKey();
+            } else {
+                formKey = flowService.getStartFormKey(processKey).getData();
+            }
             Form form = flowService.getFrom(formKey);
-            ResultDTO<Object> res = form.post(request);
+            com.abb.flowable.domain.ResultDTO<Object> res = form.post(requestDTO);
             if (!res.isSuccess()) {
                 data.put("success", false);
                 data.put("errorMsg", res.getErrMsg());
@@ -128,7 +134,7 @@ public class TaskController extends BaseController {
     String taskShow(Model model, HttpServletRequest request, @RequestParam(required = false) String processInstanceId) {
         String vm = "task_show";
         try {
-            Long loginUserId = getLoginUser(request);
+            Long loginUserId = LoginUtil.getLoginUserSilent(request);
             List<ProcessNodeDTO> processNodes = flowService.getByInstanceId(processInstanceId, new Options().setWithVariables(true).setWithFormKey(true)).getData();
             List<NodeVO> nodeVOS = new ArrayList<>(processNodes.size());
             boolean finished = true;
@@ -168,8 +174,10 @@ public class TaskController extends BaseController {
         return vm;
     }
 
-    private ComponentForm mergeField4Edit(Form form, HttpServletRequest request, ProcessNodeDTO node) throws IllegalAccessException {
-        ResultDTO<ComponentForm> res = form.render(request);
+    private ComponentForm mergeField4Edit(Form form, HttpServletRequest request, ProcessNodeDTO node) {
+        FormRequest requestDTO = new DefaultFormRequest(request.getParameterMap());
+        requestDTO.addContext(FormRequestDTO.CXT_LOGIN_USER_ID, LoginUtil.getLoginUserSilent(request));
+        com.abb.flowable.domain.ResultDTO<ComponentForm> res = form.render(requestDTO);
         if (!res.isSuccess()) {
             throw new RuntimeException(res.getErrMsg());
         }
@@ -179,7 +187,7 @@ public class TaskController extends BaseController {
     }
 
     private ComponentForm mergeField4Show(Form form, ProcessNodeDTO node) throws IllegalAccessException {
-        ResultDTO<ComponentForm> res = form.render(node.getVariables());
+        com.abb.flowable.domain.ResultDTO<ComponentForm> res = form.render(node.getVariables());
         if (!res.isSuccess()) {
             throw new RuntimeException(res.getErrMsg());
         }

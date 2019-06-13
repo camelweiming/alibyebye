@@ -13,6 +13,10 @@
 
     <dependencies>
         <dependency>
+            <groupId>com.abb.flowable</groupId>
+            <artifactId>flowable-support-api</artifactId>
+        </dependency>
+        <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-lang3</artifactId>
         </dependency>

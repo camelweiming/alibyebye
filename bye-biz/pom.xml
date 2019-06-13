@@ -16,8 +16,8 @@
             <artifactId>bye-client</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.abb</groupId>
-            <artifactId>bye-flowable</artifactId>
+            <groupId>com.abb.flowable</groupId>
+            <artifactId>flowable-support-core</artifactId>
         </dependency>
         <dependency>
             <groupId>org.mybatis.spring.boot</groupId>

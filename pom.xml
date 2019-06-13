@@ -12,7 +12,6 @@
         <module>bye-client</module>
         <module>bye-biz</module>
         <module>bye-web</module>
-        <module>bye-flowable</module>
     </modules>
 
     <properties>
@@ -99,9 +98,14 @@
                 <version>${client.version}</version>
             </dependency>
             <dependency>
-                <groupId>com.abb</groupId>
-                <artifactId>bye-flowable</artifactId>
-                <version>${flowable.version}</version>
+                <groupId>com.abb.flowable</groupId>
+                <artifactId>flowable-support-core</artifactId>
+                <version>1.0.1</version>
+            </dependency>
+            <dependency>
+                <groupId>com.abb.flowable</groupId>
+                <artifactId>flowable-support-api</artifactId>
+                <version>1.0.1</version>
             </dependency>
             <dependency>
                 <groupId>org.springframework.boot</groupId>

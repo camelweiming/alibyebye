@@ -1,4 +1,4 @@
-package com.abb.bye.web;
+package com.abb.bye.web.config;
 
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;

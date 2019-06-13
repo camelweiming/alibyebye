@@ -1,23 +1,19 @@
 package com.abb.bye.web.form;
 
-import com.abb.bye.client.domain.*;
-
+import com.abb.bye.client.domain.UserDTO;
+import com.abb.bye.client.domain.UserOptions;
 import com.abb.bye.client.service.UserService;
 import com.abb.bye.service.SpringCtx;
 import com.abb.bye.utils.CommonUtils;
-import com.abb.bye.utils.LoginUtil;
-import com.abb.flowable.domain.SubmitDTO;
-import com.abb.flowable.domain.ComponentForm;
-import com.abb.flowable.domain.ProcessInstanceDTO;
+import com.abb.flowable.domain.*;
 import com.abb.flowable.domain.component.TextComponent;
-import com.abb.flowable.service.Form;
 import com.abb.flowable.service.FlowService;
+import com.abb.flowable.service.Form;
 import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import javax.servlet.http.HttpServletRequest;
 import java.util.Map;
 
 /**
@@ -30,7 +26,7 @@ public class HolidayRequestForm implements Form {
     private static final String PROCESS_DEFINITION_KEY = "holidayRequest";
 
     @Override
-    public ResultDTO<ComponentForm> render(HttpServletRequest request) {
+    public ResultDTO<ComponentForm> render(FormRequest request) {
         ComponentForm componentForm = new ComponentForm();
         componentForm.addComponent(new TextComponent().setName("days").setLabel("请假天数").setRequired(true));
         componentForm.addComponent(new TextComponent().setName("description").setLabel("请假理由").setRequired(true));
@@ -48,7 +44,7 @@ public class HolidayRequestForm implements Form {
     }
 
     @Override
-    public ResultDTO<Object> post(HttpServletRequest request) {
+    public ResultDTO<Object> post(FormRequest request) {
         Integer days = CommonUtils.toInteger(request.getParameter("days"));
         String description = request.getParameter("description");
         if (days == null || days <= 0) {
@@ -57,7 +53,11 @@ public class HolidayRequestForm implements Form {
         try {
             UserService userService = SpringCtx.getBean(UserService.class);
             FlowService flowService = SpringCtx.getBean(FlowService.class);
-            UserDTO userDTO = userService.getById(LoginUtil.getLoginUserSilent(request), new UserOptions().setWithBoss(true)).getData();
+            Long loginUserId = (Long)request.getContextValue(FormRequestDTO.CXT_LOGIN_USER_ID);
+            if (loginUserId == null) {
+                return ResultDTO.buildError(ResultDTO.ERROR_CODE_USER_NOT_LOGIN, "user not login");
+            }
+            UserDTO userDTO = userService.getById(loginUserId, new UserOptions().setWithBoss(true)).getData();
             SubmitDTO flowSubmitDTO = new SubmitDTO();
             flowSubmitDTO.setUserId(userDTO.getUserId());
             flowSubmitDTO.setUserName(userDTO.getUserName());

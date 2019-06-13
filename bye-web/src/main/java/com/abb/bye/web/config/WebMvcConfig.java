@@ -1,4 +1,4 @@
-package com.abb.bye.web;
+package com.abb.bye.web.config;
 
 import com.abb.bye.web.interceptors.LoginInterceptor;
 import com.abb.bye.web.interceptors.ToolsInterceptor;

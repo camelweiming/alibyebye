@@ -1,22 +1,18 @@
 package com.abb.bye.web.form;
 
-import com.abb.bye.client.domain.ResultDTO;
 import com.abb.bye.client.domain.UserDTO;
 import com.abb.bye.client.domain.UserOptions;
 import com.abb.bye.client.service.UserService;
 import com.abb.bye.service.SpringCtx;
 import com.abb.bye.utils.CommonUtils;
-import com.abb.bye.utils.LoginUtil;
-import com.abb.flowable.domain.CompleteDTO;
-import com.abb.flowable.domain.ComponentForm;
+import com.abb.flowable.domain.*;
 import com.abb.flowable.domain.component.ComponentOption;
 import com.abb.flowable.domain.component.RadioComponent;
 import com.abb.flowable.domain.component.TextComponent;
-import com.abb.flowable.service.Form;
 import com.abb.flowable.service.FlowService;
+import com.abb.flowable.service.Form;
 import org.springframework.stereotype.Component;
 
-import javax.servlet.http.HttpServletRequest;
 import java.util.Map;
 
 /**
@@ -27,7 +23,7 @@ import java.util.Map;
 public class HolidayApproveForm implements Form {
 
     @Override
-    public ResultDTO<ComponentForm> render(HttpServletRequest request) {
+    public ResultDTO<ComponentForm> render(FormRequest request) {
         ComponentForm componentForm = new ComponentForm();
         RadioComponent approve = (RadioComponent)new RadioComponent().setName("approve").setLabel("审批").setRequired(true);
         approve.addOption(new ComponentOption("请选择", "-1"));
@@ -38,7 +34,10 @@ public class HolidayApproveForm implements Form {
         /**
          * 加签用户列表
          */
-        Long loginUserId = LoginUtil.getLoginUserSilent(request);
+        Long loginUserId = (Long)request.getContextValue(FormRequestDTO.CXT_LOGIN_USER_ID);
+        if (loginUserId == null) {
+            return ResultDTO.buildError(ResultDTO.ERROR_CODE_USER_NOT_LOGIN, "user not login");
+        }
         UserService userService = SpringCtx.getBean(UserService.class);
         UserDTO userDTO = userService.getById(loginUserId, new UserOptions().setWithBoss(true)).getData();
         if (userDTO.getBosses() != null) {
@@ -64,7 +63,7 @@ public class HolidayApproveForm implements Form {
     }
 
     @Override
-    public ResultDTO<Object> post(HttpServletRequest request) {
+    public ResultDTO<Object> post(FormRequest request) {
         Integer approve = CommonUtils.toInteger(request.getParameter("approve"));
         Long confirmUser = CommonUtils.toLong(request.getParameter("confirmUser"));
         String description = request.getParameter("description");
@@ -78,7 +77,10 @@ public class HolidayApproveForm implements Form {
         CompleteDTO submitDTO = new CompleteDTO();
         UserService userService = SpringCtx.getBean(UserService.class);
         FlowService flowService = SpringCtx.getBean(FlowService.class);
-        Long loginUserId = LoginUtil.getLoginUserSilent(request);
+        Long loginUserId = (Long)request.getContextValue(FormRequestDTO.CXT_LOGIN_USER_ID);
+        if (loginUserId == null) {
+            return ResultDTO.buildError(ResultDTO.ERROR_CODE_USER_NOT_LOGIN, "user not login");
+        }
         UserDTO userDTO = userService.getById(loginUserId, new UserOptions()).getData();
         submitDTO.setUserId(userDTO.getUserId());
         submitDTO.setUserName(userDTO.getUserName());
