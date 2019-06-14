@@ -47,6 +47,7 @@ public class TaskController {
     String taskList(HttpServletRequest request,
                     Model model,
                     @RequestParam(required = false) Integer type,
+                    @RequestParam(required = false) Integer state,
                     @RequestParam(required = false) String initiator,
                     @RequestParam(required = false) String processDefinitionKey,
                     @RequestParam(required = false) String title
@@ -56,6 +57,9 @@ public class TaskController {
         Long loginUserId = LoginUtil.getLoginUserSilent(request);
         if (type == null) {
             type = 0;
+        }
+        if (state == null) {
+            state = 0;
         }
         model.addAttribute("initiator", initiator);
         model.addAttribute("processDefinitionKey", processDefinitionKey);
@@ -72,8 +76,21 @@ public class TaskController {
                 queryType = TaskQuery.TYPE.PROCESSED;
                 break;
         }
+        TaskQuery.STATE queryState = null;
+        switch (state) {
+            case 0:
+                queryState = TaskQuery.STATE.ALL;
+                break;
+            case 1:
+                queryState = TaskQuery.STATE.UNFINISHED;
+                break;
+            case 2:
+                queryState = TaskQuery.STATE.FINISHED;
+                break;
+        }
         model.addAttribute("type", type);
-        TaskQuery q = new TaskQuery().setType(queryType).setUserId(String.valueOf(loginUserId)).setLimit(Integer.MAX_VALUE);
+        model.addAttribute("state", state);
+        TaskQuery q = new TaskQuery().setType(queryType).setState(queryState).setUserId(String.valueOf(loginUserId)).setLimit(Integer.MAX_VALUE);
         if (StringUtils.isNotBlank(processDefinitionKey)) {
             q.setProcessDefinitionKey(processDefinitionKey);
         }
