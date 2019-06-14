@@ -4,7 +4,17 @@
        xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd"
        default-autowire="byName">
 
+    <bean id="processEngineConfiguration" class="org.flowable.engine.impl.cfg.StandaloneProcessEngineConfiguration">
+        <property name="databaseSchemaUpdate" value="false"/>
+        <property name="asyncExecutorActivate" value="true"/>
+        <property name="dataSource" ref="ds"/>
+        <property name="sqlSessionFactory">
+            <null/>
+        </property>
+    </bean>
+
     <bean id="flowServiceImpl" class="com.abb.flowable.service.impl.FlowServiceImpl">
+        <property name="processEngineConfiguration" ref="processEngineConfiguration"/>
         <property name="resources" value="classpath:/flowable/*.xml"/>
     </bean>
 
