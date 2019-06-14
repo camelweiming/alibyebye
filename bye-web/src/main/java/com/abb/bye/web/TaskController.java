@@ -11,7 +11,7 @@ import com.abb.flowable.domain.component.HiddenComponent;
 import com.abb.flowable.service.FlowService;
 import com.abb.flowable.service.Form;
 import com.alibaba.fastjson.JSON;
-import com.google.common.collect.Iterators;
+import com.google.common.collect.Sets;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.slf4j.Logger;
@@ -28,6 +28,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 /**
  * @author cenpeng.lwm
@@ -40,6 +41,7 @@ public class TaskController {
     private FlowService flowService;
     @Resource
     private UserService userService;
+    private Set<String> SHOW_TASK_TYPES = Sets.newHashSet("userTask", "startEvent");
 
     @RequestMapping(value = "task_list.htm", method = {RequestMethod.GET, RequestMethod.POST})
     String taskList(HttpServletRequest request,
@@ -153,21 +155,24 @@ public class TaskController {
             Long loginUserId = LoginUtil.getLoginUserSilent(request);
             List<ProcessNodeDTO> processNodes = flowService.getByInstanceId(processInstanceId, new Options().setWithVariables(true).setWithFormKey(true)).getData();
             List<NodeVO> nodeVOS = new ArrayList<>(processNodes.size());
-            boolean finished = true;
+            ProcessNodeDTO firstNode = processNodes.get(0);
+            ProcessNodeDTO lastNode = processNodes.get(processNodes.size() - 1);
+            boolean finished = lastNode.getState() == TaskState.END;
             for (ProcessNodeDTO node : processNodes) {
-                String formKey = node.getFormKey();
+                if (!SHOW_TASK_TYPES.contains(node.getActivityType()) || node.isSkipped()) {
+                    continue;
+                }
                 NodeVO nodeVO = new NodeVO();
                 nodeVO.setNode(node);
                 boolean toEdit = (NumberUtils.toLong(node.getAssignee()) == loginUserId) && node.getState() == TaskState.PROCESSING;
                 if (toEdit) {
                     nodeVO.setEdit(true);
                 }
-                if (node.getState() != TaskState.END) {
-                    finished = false;
-                }
                 nodeVO.setFields(new ArrayList<>(0));
                 nodeVO.setDurationMin(node.getDurationInMillis() == null ? null : node.getDurationInMillis() / 1000 / 60);
                 nodeVOS.add(nodeVO);
+
+                String formKey = node.getFormKey();
                 if (formKey == null) {
                     continue;
                 }
@@ -178,13 +183,10 @@ public class TaskController {
                 ComponentForm componentForm = toEdit ? mergeField4Edit(form, request, node) : mergeField4Show(form, node);
                 nodeVO.setFields((componentForm == null || componentForm.getComponents() == null) ? new ArrayList<>(0) : componentForm.getComponents());
             }
-            filter4show(nodeVOS);
-            model.addAttribute("nodes", nodeVOS);
-            long cost = finished
-                ? (processNodes.get(processNodes.size() - 1).getEndTime().getTime() - processNodes.get(0).getStartTime().getTime())
-                : (System.currentTimeMillis() - processNodes.get(0).getStartTime().getTime());
+            long cost = finished ? (lastNode.getEndTime().getTime() - firstNode.getStartTime().getTime()) : (System.currentTimeMillis() - firstNode.getStartTime().getTime());
             model.addAttribute("finished", finished);
             model.addAttribute("cost", (cost / 1000 / 60));
+            model.addAttribute("nodes", nodeVOS);
         } catch (Throwable e) {
             logger.error("Error addHoliday", e);
             model.addAttribute("errorMsg", "system error");
@@ -213,12 +215,4 @@ public class TaskController {
         return componentForm;
     }
 
-    /**
-     * 显示过滤
-     *
-     * @param nodes
-     */
-    private void filter4show(List<NodeVO> nodes) {
-        Iterators.removeIf(nodes.iterator(), input -> !input.getNode().getActivityType().equals("userTask") && !input.getNode().getActivityType().equals("startEvent"));
-    }
 }

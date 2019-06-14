@@ -34,7 +34,8 @@
             <th>ID</th>
             <th>标题</th>
             <th>时间</th>
-            <th>审批</th>
+            <th>状态</th>
+            <th>操作</th>
         </tr>
         </thead>
         <tbody>
@@ -43,7 +44,8 @@
                 <td>$!{task.processInstanceId}</td>
                 <td>$!{task.title}</td>
                 <td>$!common.formatDate($task.startTime)</td>
-                <td><a href="task_show.htm?processInstanceId=$!{task.processInstanceId}">审批</a></td>
+                <td>#if($task.stateValue==0)待处理#elseif($task.stateValue==1)处理中#{else}已结束#end</td>
+                <td><a href="task_show.htm?processInstanceId=$!{task.processInstanceId}">查看</a></td>
             </tr>
             #end
         </tbody>

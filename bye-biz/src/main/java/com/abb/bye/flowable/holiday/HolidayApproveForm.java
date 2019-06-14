@@ -46,6 +46,7 @@ public class HolidayApproveForm implements Form {
         UserDTO userDTO = userService.getById(loginUserId, new UserOptions().setWithBoss(true)).getData();
         if (userDTO.getBosses() != null) {
             RadioComponent leaders = (RadioComponent)new RadioComponent().setName("confirmUser").setLabel("加签");
+            leaders.addOption(new ComponentOption("请选择", "-1"));
             userDTO.getBosses().forEach(boss -> leaders.addOption(new ComponentOption(boss.getUserName(), "" + boss.getUserId())));
             componentForm.addComponent(leaders);
         }
