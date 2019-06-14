@@ -1,7 +1,11 @@
 package com.abb.bye.test.service;
 
+import com.abb.flowable.domain.TaskDTO;
 import com.abb.flowable.domain.TaskQuery;
 import com.abb.flowable.service.FlowService;
+import org.flowable.engine.ProcessEngines;
+import org.flowable.task.api.history.HistoricTaskInstance;
+import org.flowable.task.api.history.HistoricTaskInstanceQuery;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -9,6 +13,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import javax.annotation.Resource;
+import java.util.List;
 
 /**
  * @author cenpeng.lwm
@@ -16,13 +21,29 @@ import javax.annotation.Resource;
  */
 @RunWith(SpringRunner.class)
 @SpringBootTest
-@ContextConfiguration(locations = {"classpath:/beans/beans-flowable-support.xml", "classpath:/beans/beans-persistence.xml"})
+@ContextConfiguration(locations = {"classpath:/application-context-flowable.xml"})
 public class FlowTest {
     @Resource
     private FlowService flowService;
 
     @Test
     public void test() {
-        //flowService.query(new TaskQuery().setUserId())
+        List<TaskDTO> flows = flowService.query(new TaskQuery().setWithVariables(false).setInitiatorId(75001l).setType(TaskQuery.TYPE.WAITING_PROCESS).setLimit(10).setUserId("270001"))
+            .getData();
+        flows.forEach(f -> {
+            System.out.println(f);
+        });
+    }
+
+    @Test
+    public void test2() {
+        HistoricTaskInstanceQuery q = ProcessEngines.getDefaultProcessEngine()
+            .getHistoryService()
+            .createHistoricTaskInstanceQuery().processVariableValueEqualsIgnoreCase("user_name","camel").taskAssignee("39001").orderByTaskCreateTime().desc();
+        List<HistoricTaskInstance> tasks = q.list();
+        tasks.forEach(t -> {
+            System.out.println(t);
+        });
+
     }
 }

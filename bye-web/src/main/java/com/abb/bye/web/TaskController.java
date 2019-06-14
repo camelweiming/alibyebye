@@ -1,6 +1,9 @@
 package com.abb.bye.web;
 
 import com.abb.bye.Constants;
+import com.abb.bye.client.domain.UserDTO;
+import com.abb.bye.client.domain.UserOptions;
+import com.abb.bye.client.service.UserService;
 import com.abb.bye.client.vo.NodeVO;
 import com.abb.bye.utils.LoginUtil;
 import com.abb.flowable.domain.*;
@@ -9,6 +12,7 @@ import com.abb.flowable.service.FlowService;
 import com.abb.flowable.service.Form;
 import com.alibaba.fastjson.JSON;
 import com.google.common.collect.Iterators;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,9 +27,7 @@ import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 /**
  * @author cenpeng.lwm
@@ -36,14 +38,26 @@ public class TaskController {
     private static Logger logger = LoggerFactory.getLogger(TaskController.class);
     @Resource
     private FlowService flowService;
+    @Resource
+    private UserService userService;
 
-    @RequestMapping(value = "task_list.htm", method = RequestMethod.GET)
-    String taskList(HttpServletRequest request, Model model, @RequestParam(required = false) Integer type) {
+    @RequestMapping(value = "task_list.htm", method = {RequestMethod.GET, RequestMethod.POST})
+    String taskList(HttpServletRequest request,
+                    Model model,
+                    @RequestParam(required = false) Integer type,
+                    @RequestParam(required = false) String initiator,
+                    @RequestParam(required = false) String processDefinitionKey,
+                    @RequestParam(required = false) String title
+
+    ) {
         String vm = "task_list";
         Long loginUserId = LoginUtil.getLoginUserSilent(request);
         if (type == null) {
             type = 0;
         }
+        model.addAttribute("initiator", initiator);
+        model.addAttribute("processDefinitionKey", processDefinitionKey);
+        model.addAttribute("title", title);
         TaskQuery.TYPE queryType = null;
         switch (type) {
             case 0:
@@ -56,8 +70,20 @@ public class TaskController {
                 queryType = TaskQuery.TYPE.PROCESSED;
                 break;
         }
-        model.addAttribute("queryType", type);
+        model.addAttribute("type", type);
         TaskQuery q = new TaskQuery().setType(queryType).setUserId(String.valueOf(loginUserId)).setLimit(Integer.MAX_VALUE);
+        if (StringUtils.isNotBlank(processDefinitionKey)) {
+            q.setProcessDefinitionKey(processDefinitionKey);
+        }
+        if (StringUtils.isNotBlank(title)) {
+            q.setTitle("%" + title + "%");
+        }
+        if (initiator != null) {
+            UserDTO userDTO = userService.getByName(initiator, new UserOptions()).getData();
+            if (userDTO != null) {
+                q.setInitiatorId(userDTO.getUserId());
+            }
+        }
         com.abb.flowable.domain.ResultDTO<List<TaskDTO>> list = flowService.query(q);
         model.addAttribute("tasks", list.getData());
         return vm;
@@ -89,9 +115,7 @@ public class TaskController {
                       @RequestParam(required = false) String processKey,
                       @RequestParam(required = false) String taskId
     ) {
-
-        Map<String, Object> data = new HashMap<>();
-        data.put("success", true);
+        ResultDTO<Object> res;
         try {
             FormRequest requestDTO = new DefaultFormRequest(request.getParameterMap());
             requestDTO.addContext(Constants.REQUEST_CXT_LOGIN_USER_ID, LoginUtil.getLoginUserSilent(request));
@@ -103,16 +127,9 @@ public class TaskController {
                 formKey = flowService.getStartFormKey(processKey).getData();
             }
             Form form = flowService.getFrom(formKey);
-            com.abb.flowable.domain.ResultDTO<Object> res = form.post(requestDTO);
-            if (!res.isSuccess()) {
-                data.put("success", false);
-                data.put("errorMsg", res.getErrMsg());
-            } else {
-                data.put("data", res.getData());
-            }
+            res = form.post(requestDTO);
         } catch (Throwable e) {
-            data.put("success", false);
-            data.put("errorMsg", "系统异常");
+            res = ResultDTO.buildError("System error");
             logger.error("Error form", e);
         }
         StringBuilder content = new StringBuilder();
@@ -122,7 +139,7 @@ public class TaskController {
         } else {
             response.setHeader("Content-Type", "application/json");
         }
-        content.append("'").append(JSON.toJSONString(data)).append("'");
+        content.append("'").append(JSON.toJSONString(res)).append("'");
         if (callback != null) {
             content.append(");</script>");
         }

@@ -14,8 +14,7 @@
     <tx:annotation-driven/>
     <context:annotation-config/>
     <import resource="classpath:beans/beans-persistence.xml"/>
-    <bean class="com.abb.bye.service.FlowServiceImpl"/>
-    <bean name="userService" class="com.abb.bye.service.UserServiceImpl"/>
+    <import resource="classpath:beans/beans-flowable-support.xml"/>
     <aop:aspectj-autoproxy/>
 
 </beans>

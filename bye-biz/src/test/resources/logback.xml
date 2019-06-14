@@ -10,8 +10,15 @@
     <logger level="DEBUG" name="org.apache.ibatis" additivity="false">
         <appender-ref ref="STDOUT"/>
     </logger>
+    <logger level="DEBUG" name="com.mysql.jdbc" additivity="false">
+        <appender-ref ref="STDOUT"/>
+    </logger>
+    <logger level="DEBUG" name="org.flowable.task.service" additivity="false">
+        <appender-ref ref="STDOUT"/>
+    </logger>
+
     <root>
-        <level value="INFO"/>
+        <level value="DEBUG"/>
         <appender-ref ref="STDOUT"/>
     </root>
 </configuration>

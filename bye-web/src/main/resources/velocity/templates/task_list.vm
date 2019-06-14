@@ -1,12 +1,32 @@
 <h3>
-    #if($queryType==0)
+    #if($type==0)
         待处理的任务
-        #elseif($queryType==1)
+        #elseif($type==1)
         我提交的任务
-        #elseif($queryType==2)
+        #elseif($type==2)
         我处理过的任务
     #end
 </h3>
+<form action="task_list.htm" class="form-horizontal" method="post">
+    <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
+    <input type="hidden" name="type" value="$!{type}"/>
+    <div class="form-group">
+        <label>发起人</label><input name="initiator" value="$!{initiator}" class="form-control form-control-sm">
+    </div>
+    <div class="form-group">
+        <label>标题</label><input name="title" value="$!{title}" class="form-control form-control-sm">
+    </div>
+    <div class="form-group">
+        <label>类型</label>
+        <select class="form-control form-control-sm" name="processDefinitionKey">
+                <option value="">请选择</option>
+                <option value="holidayRequest" #if("holidayRequest"==$processDefinitionKey)selected#end>请假单</option>
+                <option value="processDefinitionKey2">测试</option>
+        </select>
+    </div>
+    <button class="btn btn-danger btn-sm" type="submit">查询</button>
+</form>
+
 <div class="table-responsive">
     <table class="table table-striped table-sm">
         <thead>
