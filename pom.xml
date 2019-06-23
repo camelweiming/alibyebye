@@ -162,7 +162,7 @@
             <dependency>
                 <groupId>mysql</groupId>
                 <artifactId>mysql-connector-java</artifactId>
-                <version>5.1.6</version>
+                <version>5.1.44</version>
             </dependency>
             <dependency>
                 <groupId>us.codecraft</groupId>
@@ -193,22 +193,29 @@
                 <groupId>commons-beanutils</groupId>
                 <artifactId>commons-beanutils</artifactId>
                 <version>1.9.3</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>commons-logging</groupId>
+                        <artifactId>commons-logging</artifactId>
+                    </exclusion>
+                </exclusions>
             </dependency>
             <dependency>
                 <groupId>org.apache.httpcomponents</groupId>
                 <artifactId>httpasyncclient</artifactId>
                 <version>4.1.4</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>commons-logging</groupId>
+                        <artifactId>commons-logging</artifactId>
+                    </exclusion>
+                </exclusions>
             </dependency>
             <!--<dependency>-->
             <!--<groupId>org.springframework.security.oauth</groupId>-->
             <!--<artifactId>spring-security-oauth2</artifactId>-->
             <!--<version>2.3.5.RELEASE</version>-->
             <!--</dependency>-->
-            <dependency>
-                <groupId>commons-logging</groupId>
-                <artifactId>commons-logging</artifactId>
-                <version>999-not-exist-v3</version>
-            </dependency>
             <dependency>
                 <groupId>com.github.scribejava</groupId>
                 <artifactId>scribejava-apis</artifactId>
@@ -218,6 +225,12 @@
                 <groupId>org.flowable</groupId>
                 <artifactId>flowable-engine</artifactId>
                 <version>6.3.0</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>commons-logging</groupId>
+                        <artifactId>commons-logging</artifactId>
+                    </exclusion>
+                </exclusions>
             </dependency>
             <dependency>
                 <groupId>org.flowable</groupId>

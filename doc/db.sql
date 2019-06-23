@@ -1,44 +1,24 @@
 CREATE TABLE `task_queue` (
-  `id`                       BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT
-  COMMENT '主键',
-  `gmt_create`               DATETIME            NOT NULL
-  COMMENT '创建时间',
-  `gmt_modified`             DATETIME            NOT NULL
-  COMMENT '修改时间',
-  `status`                   INT(4)              NOT NULL
-  COMMENT '0:waiting,1:running,2:failed,3:success',
-  `attributes`               VARCHAR(512)                 DEFAULT NULL
-  COMMENT '扩展属性',
-  `type`                     INT(11)             NOT NULL
-  COMMENT '类型',
-  `version`                  INT(11)             NOT NULL DEFAULT '0'
-  COMMENT '版本',
-  `unique_key`               VARCHAR(64)         NOT NULL
-  COMMENT '唯一key',
-  `start_time`               DATETIME                     DEFAULT NULL
-  COMMENT '开始时间',
-  `timeout`                  DATETIME                     DEFAULT NULL
-  COMMENT '超时时间',
-  `execute_timeout`          DATETIME            NOT NULL
-  COMMENT '单次执行超时时间，超过会被重置状态',
-  `msg`                      VARCHAR(128)                 DEFAULT NULL
-  COMMENT '执行信息',
-  `ip`                       VARCHAR(128)                 DEFAULT NULL
-  COMMENT '执行机器',
-  `remain_retry_count`       INT(11)             NOT NULL
-  COMMENT '剩余重试次数',
-  `orig_retry_count`         INT(11)             NOT NULL
-  COMMENT '最多重试次数',
-  `execute_interval_seconds` INT(8)                       DEFAULT NULL
-  COMMENT '执行间隔',
-  `alarm_threshold`          INT(8)              NOT NULL DEFAULT '0'
-  COMMENT '报警阈值',
-  `env`                      VARCHAR(8)                   DEFAULT NULL
-  COMMENT '环境',
-  `parent_id`                BIGINT(20)                   DEFAULT NULL
-  COMMENT '父ID',
-  `children_count`           INT(8)              NOT NULL DEFAULT '0'
-  COMMENT '父节点数量',
+  `id`                       BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT COMMENT '主键',
+  `gmt_create`               DATETIME            NOT NULL COMMENT '创建时间',
+  `gmt_modified`             DATETIME            NOT NULL COMMENT '修改时间',
+  `status`                   INT(4)              NOT NULL COMMENT '0:waiting,1:running,2:failed,3:success',
+  `attributes`               VARCHAR(512)                 DEFAULT NULL COMMENT '扩展属性',
+  `type`                     INT(11)             NOT NULL COMMENT '类型',
+  `version`                  INT(11)             NOT NULL DEFAULT '0' COMMENT '版本',
+  `unique_key`               VARCHAR(64)         NOT NULL COMMENT '唯一key',
+  `start_time`               DATETIME                     DEFAULT NULL COMMENT '开始时间',
+  `timeout`                  DATETIME                     DEFAULT NULL COMMENT '超时时间',
+  `execute_timeout`          DATETIME            NOT NULL COMMENT '单次执行超时时间，超过会被重置状态',
+  `msg`                      VARCHAR(128)                 DEFAULT NULL COMMENT '执行信息',
+  `ip`                       VARCHAR(128)                 DEFAULT NULL COMMENT '执行机器',
+  `remain_retry_count`       INT(11)             NOT NULL COMMENT '剩余重试次数',
+  `orig_retry_count`         INT(11)             NOT NULL COMMENT '最多重试次数',
+  `execute_interval_seconds` INT(8)                       DEFAULT NULL COMMENT '执行间隔',
+  `alarm_threshold`          INT(8)              NOT NULL DEFAULT '0' COMMENT '报警阈值',
+  `env`                      VARCHAR(8)                   DEFAULT NULL COMMENT '环境',
+  `parent_id`                BIGINT(20)                   DEFAULT NULL COMMENT '父ID',
+  `children_count`           INT(8)              NOT NULL DEFAULT '0' COMMENT '父节点数量',
 
   PRIMARY KEY (`id`),
   UNIQUE KEY `uk_uk` (`type`, `unique_key`),
