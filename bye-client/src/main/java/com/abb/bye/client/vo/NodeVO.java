@@ -1,7 +1,7 @@
 package com.abb.bye.client.vo;
 
-import com.abb.flowable.domain.ProcessNodeDTO;
-import com.abb.flowable.domain.component.Component;
+import com.abb.flowable.api.domain.ProcessNodeDTO;
+import com.abb.flowable.api.domain.component.Component;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 

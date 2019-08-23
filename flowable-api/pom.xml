@@ -8,17 +8,12 @@
         <version>1.0-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
-    <artifactId>bye-client</artifactId>
+    <artifactId>flowable-api</artifactId>
     <version>${client.version}</version>
-
     <dependencies>
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-lang3</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.abb</groupId>
-            <artifactId>flowable-api</artifactId>
         </dependency>
     </dependencies>
 

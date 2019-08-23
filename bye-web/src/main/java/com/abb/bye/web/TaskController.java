@@ -6,10 +6,10 @@ import com.abb.bye.client.domain.UserOptions;
 import com.abb.bye.client.service.UserService;
 import com.abb.bye.client.vo.NodeVO;
 import com.abb.bye.utils.LoginUtil;
-import com.abb.flowable.domain.*;
-import com.abb.flowable.domain.component.HiddenComponent;
-import com.abb.flowable.service.FlowService;
-import com.abb.flowable.service.Form;
+import com.abb.flowable.api.domain.*;
+import com.abb.flowable.api.domain.component.HiddenComponent;
+import com.abb.flowable.api.service.FlowService;
+import com.abb.flowable.api.service.Form;
 import com.alibaba.fastjson.JSON;
 import com.google.common.collect.Sets;
 import org.apache.commons.lang3.StringUtils;
@@ -103,7 +103,7 @@ public class TaskController {
                 q.setInitiatorId(userDTO.getUserId());
             }
         }
-        com.abb.flowable.domain.ResultDTO<List<TaskDTO>> list = flowService.query(q);
+        com.abb.flowable.api.domain.ResultDTO<List<TaskDTO>> list = flowService.query(q);
         model.addAttribute("tasks", list.getData());
         return vm;
     }
@@ -214,7 +214,7 @@ public class TaskController {
     private ComponentForm mergeField4Edit(Form form, HttpServletRequest request, ProcessNodeDTO node) {
         FormRequest requestDTO = new DefaultFormRequest(request.getParameterMap());
         requestDTO.addContext(Constants.REQUEST_CXT_LOGIN_USER_ID, LoginUtil.getLoginUserSilent(request));
-        com.abb.flowable.domain.ResultDTO<ComponentForm> res = form.render(requestDTO);
+        com.abb.flowable.api.domain.ResultDTO<ComponentForm> res = form.render(requestDTO);
         if (!res.isSuccess()) {
             throw new RuntimeException(res.getErrMsg());
         }
@@ -224,7 +224,7 @@ public class TaskController {
     }
 
     private ComponentForm mergeField4Show(Form form, ProcessNodeDTO node) throws IllegalAccessException {
-        com.abb.flowable.domain.ResultDTO<ComponentForm> res = form.render(node.getVariables());
+        com.abb.flowable.api.domain.ResultDTO<ComponentForm> res = form.render(node.getVariables());
         if (!res.isSuccess()) {
             throw new RuntimeException(res.getErrMsg());
         }

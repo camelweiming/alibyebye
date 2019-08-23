@@ -1,4 +1,3 @@
---common
 create table ACT_GE_PROPERTY (
     NAME_ varchar(64),
     VALUE_ varchar(300),
@@ -17,7 +16,6 @@ create table ACT_GE_BYTEARRAY (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE utf8_bin;
 
 
---variables
 create table ACT_RU_VARIABLE (
     ID_ varchar(64) not null,
     REV_ integer,
@@ -72,7 +70,6 @@ create index ACT_IDX_HI_VAR_SCOPE_ID_TYPE on ACT_HI_VARINST(SCOPE_ID_, SCOPE_TYP
 create index ACT_IDX_HI_VAR_SUB_ID_TYPE on ACT_HI_VARINST(SUB_SCOPE_ID_, SCOPE_TYPE_);
 
 
---task
 
 create table ACT_RU_TASK (
     ID_ varchar(64),
@@ -147,7 +144,6 @@ create index ACT_IDX_HI_TASK_SCOPE on ACT_HI_TASKINST(SCOPE_ID_, SCOPE_TYPE_);
 create index ACT_IDX_HI_TASK_SUB_SCOPE on ACT_HI_TASKINST(SUB_SCOPE_ID_, SCOPE_TYPE_);
 create index ACT_IDX_HI_TASK_SCOPE_DEF on ACT_HI_TASKINST(SCOPE_DEFINITION_ID_, SCOPE_TYPE_);
 
---job
 create table ACT_RU_JOB (
     ID_ varchar(64) NOT NULL,
     REV_ integer,
@@ -336,7 +332,6 @@ create index ACT_IDX_DJOB_SCOPE on ACT_RU_DEADLETTER_JOB(SCOPE_ID_, SCOPE_TYPE_)
 create index ACT_IDX_DJOB_SUB_SCOPE on ACT_RU_DEADLETTER_JOB(SUB_SCOPE_ID_, SCOPE_TYPE_);
 create index ACT_IDX_DJOB_SCOPE_DEF on ACT_RU_DEADLETTER_JOB(SCOPE_DEFINITION_ID_, SCOPE_TYPE_);
 
---identitylink
 create table ACT_RU_IDENTITYLINK (
     ID_ varchar(64),
     REV_ integer,
@@ -375,7 +370,6 @@ create index ACT_IDX_HI_IDENT_LNK_USER on ACT_HI_IDENTITYLINK(USER_ID_);
 create index ACT_IDX_HI_IDENT_LNK_SCOPE on ACT_HI_IDENTITYLINK(SCOPE_ID_, SCOPE_TYPE_);
 create index ACT_IDX_HI_IDENT_LNK_SCOPE_DEF on ACT_HI_IDENTITYLINK(SCOPE_DEFINITION_ID_, SCOPE_TYPE_);
 
---identity
 
 create table ACT_ID_PROPERTY (
     NAME_ varchar(64),
@@ -479,7 +473,6 @@ alter table ACT_ID_PRIV
     add constraint ACT_UNIQ_PRIV_NAME
     unique (NAME_);
 
---history
 create table ACT_HI_PROCINST (
     ID_ varchar(64) not null,
     REV_ integer default 1,
@@ -588,7 +581,6 @@ create index ACT_IDX_HI_IDENT_LNK_TASK on ACT_HI_IDENTITYLINK(TASK_ID_);
 create index ACT_IDX_HI_IDENT_LNK_PROCINST on ACT_HI_IDENTITYLINK(PROC_INST_ID_);
 create index ACT_IDX_HI_TASK_INST_PROCINST on ACT_HI_TASKINST(PROC_INST_ID_);
 
---engine
 create table ACT_RE_DEPLOYMENT (
     ID_ varchar(64),
     NAME_ varchar(255),

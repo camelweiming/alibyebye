@@ -1,8 +1,8 @@
 package com.abb.bye.test.service;
 
-import com.abb.flowable.domain.TaskDTO;
-import com.abb.flowable.domain.TaskQuery;
-import com.abb.flowable.service.FlowService;
+import com.abb.flowable.api.domain.TaskDTO;
+import com.abb.flowable.api.domain.TaskQuery;
+import com.abb.flowable.api.service.FlowService;
 import org.flowable.engine.ProcessEngines;
 import org.flowable.task.api.history.HistoricTaskInstance;
 import org.flowable.task.api.history.HistoricTaskInstanceQuery;
